@@ -29,7 +29,6 @@ export const formatError = (reqType: string, err: ErrorResponse | AxiosError<Err
             console.error(`\t [${key}]: ${params[key]}`);
         }
     }
-
     console.log('________________________________________________________________');
 
     const nodeRpcError = err as ErrorResponse;
