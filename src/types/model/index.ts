@@ -1,0 +1,4 @@
+/* Types used internally in the API */
+export * from './BasicRepDetails';
+export * from './Supply';
+export * from './Quorum';
