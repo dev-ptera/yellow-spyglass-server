@@ -10,13 +10,16 @@ export const logError = (err: ErrorResponse | AxiosError<ErrorResponse>) => {
     if (nodeRpcError.error) {
         // Nano Node RPC error ('bad address', etc);
         console.error(`[ERROR]: ${nodeRpcError.error}`);
-    } else {
+    } else if (axiosError.isAxiosError) {
         // Nano Proxy Server or Connectivity Error
         console.error(`[ERROR]: Proxy Server Error.`);
         console.error(`\t [url]: ${axiosError.config.url}`);
         console.error(`\t [status]: ${axiosError.response?.status || axiosError.code}`);
         console.error(`\t [response]: ${axiosError.response?.data?.error || axiosError.message}`);
         console.error(`\t [auth token]: ${axiosError.config.headers.Authorization}`);
+    } else {
+        // Unknown, internal to server.
+        console.error(`[ERROR]: ${err}`);
     }
 };
 
@@ -38,6 +41,6 @@ export const formatError = (reqType: string, err: ErrorResponse | AxiosError<Err
     } else if (axiosError.response && axiosError.response.data) {
         return { error: axiosError.response.data.error };
     } else {
-        return { error: 'Unable to connect to RPC node.' };
+        return { error: 'Internal server error' };
     }
 };

@@ -1,8 +1,7 @@
 import * as express from 'express';
 import * as cors from 'cors';
-import {IS_PRODUCTION, URL_WHITE_LIST, AppCache, NETWORK_STATS_REFRESH_INTERVAL, PATH_ROOT} from './config';
-import { getAccount } from './services/api/account';
-import { reloadNetworkStats } from './services/api/get-network-stats';
+import { IS_PRODUCTION, URL_WHITE_LIST, AppCache, NETWORK_STATS_REFRESH_INTERVAL, PATH_ROOT } from './config';
+import { getAccount, reloadNetworkStats, getAccountOverview } from './services';
 
 const http = require('http');
 const app = express();
@@ -25,14 +24,14 @@ const sendCached = (res, noCacheMethod: () => Promise<any>, cache): void => {
 };
 
 app.use(cors(corsOptions));
+app.get(`/${PATH_ROOT}/account-overview`, (req, res) => getAccountOverview(req, res));
 app.get(`/${PATH_ROOT}/account`, (req, res) => getAccount(req, res));
 app.get(`/${PATH_ROOT}/stats`, (req, res) => sendCached(res, reloadNetworkStats, AppCache.networkStats));
 
-const port: number = Number( process.env.PORT || 3000);
-const hostname = 'localhost';
+const port: number = Number(process.env.PORT || 3000);
 const server = http.createServer(app);
 
-server.listen(port,  hostname, () => {
+server.listen(port, () => {
     console.log(`Running yellow-spyglass server on port ${port}.`);
     console.log(`Production mode enabled? : ${IS_PRODUCTION}`);
 
