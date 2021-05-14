@@ -1,5 +1,5 @@
 import { formatError } from '../error.service';
-import {getAccountInfo, getDelegatorsCount, getAccountsPending, getAccountBalance} from '../../rpc';
+import { getAccountInfo, getDelegatorsCount, getAccountsPending, getAccountBalance } from '../../rpc';
 import {
     AccountBalanceResponse,
     AccountInfoResponse,
