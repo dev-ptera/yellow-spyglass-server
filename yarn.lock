@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@dev-ptera/nano-node-rpc@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@dev-ptera/nano-node-rpc/-/nano-node-rpc-1.0.2.tgz#8c5715f9c8014e44c6912201c3012cbbcc991099"
-  integrity sha512-uZhl8LNk8IgUBy1rwFN30kM7kpvZ4BVnL7v+ynl9o85sV/9eAJOalcIdTZDnE0gAHEaEeLda4D+oAAsD281fgQ==
+"@dev-ptera/nano-node-rpc@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@dev-ptera/nano-node-rpc/-/nano-node-rpc-1.0.3.tgz#3ffb86431d93d5672374fd9c6abe0beaaddbe4a2"
+  integrity sha512-MCd+Ty1mhEgg844vSZftWNPTLy4yTTGgSoQVYtCB9zFStT5ZWRVQMM3ULuXhsVf/iXDSFzCuRKswHuamJyy0uw==
   dependencies:
     axios "^0.21.1"
 

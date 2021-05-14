@@ -58,11 +58,11 @@ export const getAccountOverview = async (req, res): Promise<void> => {
                 balanceRaw: accountBalance.balance,
                 pendingRaw: accountBalance.pending,
                 representative: accountInfo.representative,
-                completedTxCount: accountInfo.block_count,
-                pendingTxCount: pendingCount,
-                delegatorsCount: delegators.count,
+                completedTxCount: Number(accountInfo.block_count),
+                pendingTxCount: Number(pendingCount),
+                delegatorsCount: Number(delegators.count),
             };
-            res.send({ accountOverview });
+            res.send({ ...accountOverview });
         })
         .catch((err) => {
             res.status(500).send(formatError('getAccountOverview', err));
