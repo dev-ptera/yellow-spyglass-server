@@ -1,14 +1,16 @@
 import { formatError } from '../error.service';
-import { getAccountInfo, getDelegatorsCount, getAccountsPending, getAccountBalance } from '../../rpc';
+import { getAccountBalance, getAccountInfo, getAccountsPending } from '../../rpc';
 import {
     AccountBalanceResponse,
     AccountInfoResponse,
     AccountsPendingResponse,
-    DelegatorsCountResponse,
+    DelegatorsResponse,
     ErrorResponse,
 } from '@dev-ptera/nano-node-rpc';
-import { AccountOverview } from '../../types';
+import { AccountOverview, Delegator, PendingTransaction} from '../../types';
 import { getUnopenedAccount } from '../account-utils';
+import { getDelegatorsRpc } from '../../rpc/calls/delegators';
+import { confirmedTransactionsPromise } from './confirmed-transactions';
 
 export const getAccountOverview = async (req, res): Promise<void> => {
     const address = req.query.address;
@@ -33,25 +35,49 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             }
         });
 
-    const accountPendingPromise: Promise<number> = getAccountsPending([address], false)
-        .then((accountsPendingResponse: AccountsPendingResponse) => {
-            const pendingHashes = accountsPendingResponse.blocks[address] as string[];
-            return Promise.resolve(pendingHashes.length);
+    const delegatorsPromise: Promise<Delegator[]> = getDelegatorsRpc(address)
+        .then((delegatorsResponse: DelegatorsResponse) => {
+            const delegatorsDto: Delegator[] = [];
+            for (const key in delegatorsResponse.delegators) {
+                if (delegatorsResponse.delegators[key] !== "0") {
+                    delegatorsDto.push({
+                        address: key,
+                        weightRaw: delegatorsResponse.delegators[key],
+                    });
+                }
+            }
+            return Promise.resolve(delegatorsDto);
         })
         .catch((err) => {
-            return Promise.reject(formatError('getAccountsPending', err, { address, source: false }));
+            return Promise.reject(formatError('getDelegators', err, { address }));
         });
 
-    const delegatorsCountPromise: Promise<DelegatorsCountResponse> = getDelegatorsCount(address)
-        .then((delegatorsCountResponse: DelegatorsCountResponse) => {
-            return Promise.resolve(delegatorsCountResponse);
-        })
-        .catch((err) => {
-            return Promise.reject(formatError('getDelegatorsCount', err, { address }));
-        });
+    const pendingTransactionsPromise = (address: string) =>
+        getAccountsPending([address], false)
+            .then((accountsPendingResponse: AccountsPendingResponse) => {
+                const pendingDto: PendingTransaction[] = [];
+                const pendingTxs = accountsPendingResponse.blocks[address];
+                for (const hash in pendingTxs) {
+                    pendingDto.push({
+                        hash,
+                        address,
+                        balanceRaw: pendingTxs[hash].amount,
+                    });
+                }
+                return Promise.resolve(pendingDto);
+            })
+            .catch((err) => {
+                return Promise.reject(formatError('getAccountsPending', err, { address, source: false }));
+            });
 
-    Promise.all([accountBalancePromise, accountInfoPromise, accountPendingPromise, delegatorsCountPromise])
-        .then(([accountBalance, accountInfo, pendingCount, delegators]) => {
+    Promise.all([
+        accountBalancePromise,
+        accountInfoPromise,
+        delegatorsPromise,
+        confirmedTransactionsPromise(address, 0),
+        pendingTransactionsPromise(address),
+    ])
+        .then(([accountBalance, accountInfo, delegators, confirmedTransactions, pendingTransactions]) => {
             const accountOverview: AccountOverview = {
                 address,
                 opened: Boolean(accountInfo.open_block),
@@ -59,8 +85,11 @@ export const getAccountOverview = async (req, res): Promise<void> => {
                 pendingRaw: accountBalance.pending,
                 representative: accountInfo.representative,
                 completedTxCount: Number(accountInfo.block_count),
-                pendingTxCount: Number(pendingCount),
-                delegatorsCount: Number(delegators.count),
+                pendingTxCount: Number(pendingTransactions.length),
+                delegatorsCount: Number(delegators.length),
+                confirmedTransactions,
+                pendingTransactions,
+                delegators,
             };
             res.send({ ...accountOverview });
         })
