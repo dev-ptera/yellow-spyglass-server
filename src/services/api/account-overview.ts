@@ -7,7 +7,7 @@ import {
     DelegatorsResponse,
     ErrorResponse,
 } from '@dev-ptera/nano-node-rpc';
-import { AccountOverview, Delegator, PendingTransaction} from '../../types';
+import { AccountOverviewDto, DelegatorDto, PendingTransactionDto} from '../../types';
 import { getUnopenedAccount } from '../account-utils';
 import { getDelegatorsRpc } from '../../rpc/calls/delegators';
 import { confirmedTransactionsPromise } from './confirmed-transactions';
@@ -35,9 +35,9 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             }
         });
 
-    const delegatorsPromise: Promise<Delegator[]> = getDelegatorsRpc(address)
+    const delegatorsPromise: Promise<DelegatorDto[]> = getDelegatorsRpc(address)
         .then((delegatorsResponse: DelegatorsResponse) => {
-            const delegatorsDto: Delegator[] = [];
+            const delegatorsDto: DelegatorDto[] = [];
             for (const key in delegatorsResponse.delegators) {
                 if (delegatorsResponse.delegators[key] !== "0") {
                     delegatorsDto.push({
@@ -53,14 +53,14 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         });
 
     const pendingTransactionsPromise = (address: string) =>
-        getAccountsPending([address], false)
+        getAccountsPending([address])
             .then((accountsPendingResponse: AccountsPendingResponse) => {
-                const pendingDto: PendingTransaction[] = [];
+                const pendingDto: PendingTransactionDto[] = [];
                 const pendingTxs = accountsPendingResponse.blocks[address];
                 for (const hash in pendingTxs) {
                     pendingDto.push({
                         hash,
-                        address,
+                        address: pendingTxs[hash].source,
                         balanceRaw: pendingTxs[hash].amount,
                     });
                 }
@@ -78,7 +78,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         pendingTransactionsPromise(address),
     ])
         .then(([accountBalance, accountInfo, delegators, confirmedTransactions, pendingTransactions]) => {
-            const accountOverview: AccountOverview = {
+            const accountOverview: AccountOverviewDto = {
                 address,
                 opened: Boolean(accountInfo.open_block),
                 balanceRaw: accountBalance.balance,
@@ -88,7 +88,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
                 pendingTxCount: Number(pendingTransactions.length),
                 delegatorsCount: Number(delegators.length),
                 confirmedTransactions,
-                pendingTransactions,
+                pendingTransactions: pendingTransactions.splice(0, 50),
                 delegators,
             };
             res.send({ ...accountOverview });

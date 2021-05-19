@@ -1,0 +1,2 @@
+export type RepresentativesOnlineDto = string[];
+
