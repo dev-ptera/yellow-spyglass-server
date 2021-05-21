@@ -38,6 +38,6 @@ export const getConfirmedTransactions = async (req, res): Promise<void> => {
             res.send(JSON.stringify(confirmedTx));
         })
         .catch((err) => {
-            res.status(500).send(err)
+            res.status(500).send(err);
         });
 };

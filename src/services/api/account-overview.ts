@@ -7,13 +7,14 @@ import {
     DelegatorsResponse,
     ErrorResponse,
 } from '@dev-ptera/nano-node-rpc';
-import { AccountOverviewDto, DelegatorDto, PendingTransactionDto} from '../../types';
+import { AccountOverviewDto, DelegatorDto, PendingTransactionDto } from '../../types';
 import { getUnopenedAccount } from '../account-utils';
 import { getDelegatorsRpc } from '../../rpc/calls/delegators';
 import { confirmedTransactionsPromise } from './confirmed-transactions';
 
 export const getAccountOverview = async (req, res): Promise<void> => {
-    const address = req.query.address;
+    const parts = req.url.split('/');
+    const address = parts[parts.length-1];
 
     const accountBalancePromise: Promise<AccountBalanceResponse> = getAccountBalance(address)
         .then((accountInfo: AccountBalanceResponse) => {
@@ -39,7 +40,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         .then((delegatorsResponse: DelegatorsResponse) => {
             const delegatorsDto: DelegatorDto[] = [];
             for (const key in delegatorsResponse.delegators) {
-                if (delegatorsResponse.delegators[key] !== "0") {
+                if (delegatorsResponse.delegators[key] !== '0') {
                     delegatorsDto.push({
                         address: key,
                         weightRaw: delegatorsResponse.delegators[key],
