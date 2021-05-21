@@ -1,5 +1,5 @@
 import { formatError } from '../error.service';
-import { getAccountBalance, getAccountInfo, getAccountsPending } from '../../rpc';
+import { getAccountBalanceRpc, getAccountInfoRpc, getAccountsPendingRpc } from '../../rpc';
 import {
     AccountBalanceResponse,
     AccountInfoResponse,
@@ -16,7 +16,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
     const address = parts[parts.length-1];
 
-    const accountBalancePromise: Promise<AccountBalanceResponse> = getAccountBalance(address)
+    const accountBalancePromise: Promise<AccountBalanceResponse> = getAccountBalanceRpc(address)
         .then((accountInfo: AccountBalanceResponse) => {
             return Promise.resolve(accountInfo);
         })
@@ -24,7 +24,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             return Promise.reject(formatError('getAccountBalance', err, { address }));
         });
 
-    const accountInfoPromise: Promise<AccountInfoResponse> = getAccountInfo(address)
+    const accountInfoPromise: Promise<AccountInfoResponse> = getAccountInfoRpc(address)
         .then((accountInfo: AccountInfoResponse) => {
             return Promise.resolve(accountInfo);
         })
@@ -54,7 +54,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         });
 
     const pendingTransactionsPromise = (address: string) =>
-        getAccountsPending([address])
+        getAccountsPendingRpc([address])
             .then((accountsPendingResponse: AccountsPendingResponse) => {
                 const pendingDto: PendingTransactionDto[] = [];
                 const pendingTxs = accountsPendingResponse.blocks[address];

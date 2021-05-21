@@ -1,6 +1,8 @@
 import {getBlocksInfoRpc} from '../../rpc/calls/blocks-info';
-import {BlocksInfoResponse} from '../../../../nano-node-rpc';
+import {BlocksInfoResponse, BlocksInfoResponseContents} from '../../../../nano-node-rpc';
 import {formatError} from '../error.service';
+import {Block} from "../../types/model/Block";
+import {Subtype} from "@dev-ptera/nano-node-rpc";
 
 export const blocksInfoPromise = (blocks: string[]): Promise<BlocksInfoResponse> =>
      getBlocksInfoRpc(blocks)
@@ -13,11 +15,32 @@ export const blocksInfoPromise = (blocks: string[]): Promise<BlocksInfoResponse>
 
 export const getBlockInfo = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
-    const block = parts[parts.length-1];
+    const hash = parts[parts.length-1];
 
-    blocksInfoPromise([block])
+    blocksInfoPromise([hash])
         .then((blockInfo: BlocksInfoResponse) => {
-            res.send(JSON.stringify(blockInfo));
+            const block = blockInfo.blocks[hash];
+            const contents = block.contents as BlocksInfoResponseContents;
+            res.send(JSON.stringify({
+                blockAccount: block.block_account,
+                amount: block.amount,
+                balance: block.balance,
+                height: block.height,
+                timestamp: block.local_timestamp,
+                confirmed: block.confirmed,
+                subtype: block.subtype,
+                contents: {
+                    type: contents.type,
+                    account: contents.account,
+                    previous: contents.previous,
+                    representative: contents.representative,
+                    balance: contents.balance,
+                    link: contents.link,
+                    linkAsAccount: contents.link_as_account,
+                    signature: contents.signature,
+                    work: contents.work
+                }
+            } as Block));
         })
         .catch((err) => {
             res.status(500).send(err);
