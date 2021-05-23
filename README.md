@@ -1,1 +1,3 @@
-# is-banano-decentralized-server
+# yellow spyglass server
+
+Work in progress 
