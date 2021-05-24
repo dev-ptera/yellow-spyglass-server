@@ -19,7 +19,7 @@ export const getQuorum = async (): Promise<Quorum> => {
     ])
         .then((conversions: UnitConversionResponse[]) => {
             return Promise.resolve({
-                onlineWeightQuorumPercent: rawQuorum.online_weight_quorum_percent,
+                onlineWeightQuorumPercent: Number(rawQuorum.online_weight_quorum_percent),
                 quorumDelta: Number(conversions[0].amount),
                 onlineWeightMinimum: Number(conversions[1].amount),
                 onlineStakeTotal: Number(conversions[2].amount),

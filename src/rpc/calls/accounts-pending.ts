@@ -3,8 +3,9 @@ import { NANO_CLIENT } from '../../config';
 
 export const getAccountsPendingRpc = async (addresses: string[]): Promise<AccountsPendingResponse> =>
     NANO_CLIENT.accounts_pending(addresses, -1, {
-        source: true,
+        source: false,
         include_only_confirmed: true,
+        sorting: true,
     })
-        .then((accountInfo: AccountsPendingResponse) => Promise.resolve(accountInfo))
+        .then((pending: AccountsPendingResponse) => Promise.resolve(pending))
         .catch((err) => Promise.reject(err));

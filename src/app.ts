@@ -3,7 +3,8 @@ import * as cors from 'cors';
 import { IS_PRODUCTION, URL_WHITE_LIST, AppCache, NETWORK_STATS_REFRESH_INTERVAL, PATH_ROOT } from './config';
 import { reloadNetworkStats, getAccountOverview, getConfirmedTransactions } from './services';
 import { getRepresentativesOnlineApi } from './services/api/get-representatives-online';
-import {getBlockInfo} from "./services/api/get-block-info";
+import { getBlockInfo } from './services/api/get-block-info';
+import { getPendingTransactions } from './services/api/get-pending-transactions';
 
 const http = require('http');
 const app = express();
@@ -29,6 +30,7 @@ app.use(cors(corsOptions));
 app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res)); // TODO: rename these to [get-name-service], and rpc [action-rpc]
 app.get(`/${PATH_ROOT}/representatives-online`, (req, res) => getRepresentativesOnlineApi(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
+app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
 app.get(`/${PATH_ROOT}/stats`, (req, res) => sendCached(res, reloadNetworkStats, AppCache.networkStats));
 

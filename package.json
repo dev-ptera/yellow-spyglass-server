@@ -11,7 +11,7 @@
         "prettier": "prettier \"src/**/**.{ts,js}\" --write"
     },
     "dependencies": {
-        "@dev-ptera/nano-node-rpc": "^1.1.1",
+        "@dev-ptera/nano-node-rpc": "^2.0.0",
         "cors": "^2.8.5",
         "esm": "^3.2.25",
         "express": "^4.16.4"

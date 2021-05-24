@@ -1,10 +1,10 @@
-import {Subtype} from "@dev-ptera/nano-node-rpc";
+import { Subtype } from '@dev-ptera/nano-node-rpc';
 
 export type Block = {
     blockAccount: string;
     amount: string;
     balance: string;
-    height: number,
+    height: number;
     timestamp: number;
     confirmed: boolean;
     subtype: Subtype;
@@ -18,5 +18,5 @@ export type Block = {
         linkAsAccount: string;
         signature: string;
         work: string;
-    }
-}
+    };
+};
