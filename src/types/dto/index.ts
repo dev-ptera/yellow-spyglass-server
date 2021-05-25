@@ -6,4 +6,6 @@ export * from './AccountOverviewDto';
 export * from './DelegatorDto';
 export * from './ConfirmedTransactionDto';
 export * from './PendingTransactionDto';
-export * from './RepresentativesOnlineDto';
+export * from './RepresentativesResponseDto';
+export * from './RepresentativeDto';
+export * from './MonitoredRepDto';
