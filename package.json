@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "@dev-ptera/nano-node-rpc": "^2.0.0",
+        "banano-unit-converter": "^0.1.0",
         "cors": "^2.8.5",
         "esm": "^3.2.25",
         "express": "^4.16.4"

@@ -2,6 +2,7 @@ import { RepresentativeDto } from '../../types/dto/RepresentativeDto';
 import { NANO_CLIENT } from '../../config';
 import { formatError } from '../error.service';
 import * as RPC from '@dev-ptera/nano-node-rpc';
+import {rawToBan} from "banano-unit-converter";
 
 const MIN_WEIGHT_TO_BE_COUNTED = 10000;
 
@@ -15,11 +16,7 @@ const getAllRepresentatives = async (data: RPC.RepresentativesResponse): Promise
     // Add all reps with high-enough delegated weight to a map.
     for (const address in data.representatives) {
         const raw = data.representatives[address];
-
-        const weight = await NANO_CLIENT.mrai_from_raw(raw)
-            .then((data: RPC.UnitConversionResponse) => Promise.resolve(Number(data.amount)))
-            .catch((err) => Promise.reject(formatError('getRepresentativesApi.mrai_from_raw', err, { raw })));
-
+        const weight = Math.round(Number(rawToBan(raw)));
         if (weight >= MIN_WEIGHT_TO_BE_COUNTED) {
             weightedReps.set(address, { weight });
         } else {
