@@ -4,11 +4,11 @@ import { IS_PRODUCTION, URL_WHITE_LIST, PATH_ROOT } from './config';
 import {
     getAccountOverview,
     getConfirmedTransactions,
-    getRepresentativesApi,
+    getRepresentativesService,
     getBlockInfo,
     getPendingTransactions,
 } from './services';
-import {getPeersService} from "./services/api/get-monitored-reps";
+import { getPeersService } from './services/api/get-monitored-reps';
 
 const http = require('http');
 const app = express();
@@ -32,7 +32,7 @@ const sendCached = (res, noCacheMethod: () => Promise<any>, cache): void => {
 
 app.use(cors(corsOptions));
 app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res)); // TODO: rename these to [get-name-service], and rpc [action-rpc]
-app.get(`/${PATH_ROOT}/representatives`, (req, res) => getRepresentativesApi(req, res));
+app.get(`/${PATH_ROOT}/representatives`, (req, res) => getRepresentativesService(req, res));
 app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeersService(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));

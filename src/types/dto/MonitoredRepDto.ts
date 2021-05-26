@@ -1,4 +1,4 @@
-import {RepresentativeDto} from "./RepresentativeDto";
+import { RepresentativeDto } from './RepresentativeDto';
 
 export type MonitoredRepDto = RepresentativeDto & {
     /* Optional (populated from node-monitor) */
@@ -21,4 +21,4 @@ export type MonitoredRepDto = RepresentativeDto & {
     nodeUptimeStartup?: number;
     location?: string;
     ip?: string;
-}
+};

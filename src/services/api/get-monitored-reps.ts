@@ -1,7 +1,8 @@
 import axios, { AxiosResponse } from 'axios';
-import {MonitoredRepDto, PeerMonitorStats} from "../../types";
-import {getPeersRpc, Peers} from "../../rpc/calls/peers";
-
+import { MonitoredRepDto, PeerMonitorStats } from '../../types';
+import { getPeersRpc, Peers } from '../../rpc/calls/peers';
+import { formatError } from '../error.service';
+import { populateDelegatorsCount } from './get-representatives';
 
 // Given peer IP, queries banano node monitor stats.
 const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
@@ -15,15 +16,17 @@ const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
         .catch(() => Promise.resolve(undefined));
 
 // Prunes/Grooms data that is returned to client.
-const groomDto = (allPeerStats: PeerMonitorStats[]): MonitoredRepDto[] => {
+const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepDto[]> => {
     const groomedDetails: MonitoredRepDto[] = [];
+    const delegatorsCountMap = new Map<string, { delegatorsCount: number }>();
     for (const peerStats of allPeerStats) {
-        if (peerStats) {
+        if (peerStats && peerStats.nanoNodeAccount) {
+            delegatorsCountMap.set(peerStats.nanoNodeAccount, { delegatorsCount: 0 });
             groomedDetails.push({
                 address: peerStats.nanoNodeAccount,
                 representative: peerStats.repAccount,
-                weight: 0,
-                delegators: 0,
+                weight: peerStats.votingWeight,
+                delegatorsCount: 0,
                 name: peerStats.nanoNodeName,
                 peers: peerStats.numPeers,
                 online: true,
@@ -42,7 +45,10 @@ const groomDto = (allPeerStats: PeerMonitorStats[]): MonitoredRepDto[] => {
             });
         }
     }
-    return groomedDetails;
+
+    await populateDelegatorsCount(delegatorsCountMap).catch((err) => Promise.reject(err));
+    groomedDetails.map((dto) => (dto.delegatorsCount = delegatorsCountMap.get(dto.address).delegatorsCount));
+    return Promise.resolve(groomedDetails);
 };
 
 // Sample: [::ffff:178.128.46.252]:7071
@@ -59,8 +65,12 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
         }
     }
     return Promise.all(PeerMonitorStatsPromises)
-        .then((data) => Promise.resolve(groomDto(data)))
-        .catch((err) => Promise.reject(err));
+        .then((data) =>
+            groomDto(data)
+                .then((groomed) => Promise.resolve(groomed))
+                .catch((err) => Promise.reject(formatError('getMonitoredRepsService.groomDto', err)))
+        )
+        .catch((err) => Promise.reject(formatError('getMonitoredRepsService.getRepDetails', err)));
 };
 
 // banano creeper does not have a api.php.
@@ -68,10 +78,31 @@ export const getPeersService = async (req, res): Promise<void> =>
     new Promise((resolve, reject) => {
         getPeersRpc()
             .then((peers: Peers) => {
-                getRepDetails(peers).then((details: MonitoredRepDto[]) => {
-                    res.send(JSON.stringify(details));
-                    return Promise.resolve();
-                }).catch(reject);
+                getRepDetails(peers)
+                    .then((details: MonitoredRepDto[]) => {
+                        res.send(JSON.stringify(details));
+                        return Promise.resolve();
+                    })
+                    .catch((err) => {
+                        res.status(500).send(formatError('getPeersService', err));
+                        return Promise.resolve();
+                    });
             })
-            .catch(reject);
+            .catch((err) => {
+                res.status(500).send(formatError('getPeersService', err));
+                return Promise.resolve();
+            });
+    });
+
+export const getMonitoredRepsService = async (): Promise<MonitoredRepDto[]> =>
+    new Promise((resolve, reject) => {
+        getPeersRpc()
+            .then((peers: Peers) => {
+                getRepDetails(peers)
+                    .then((details: MonitoredRepDto[]) => {
+                        resolve(details);
+                    })
+                    .catch((err) => reject(formatError('getMonitoredRepsService', err)));
+            })
+            .catch((err) => reject(formatError('getMonitoredRepsService', err)));
     });
