@@ -12,7 +12,10 @@ const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
             timeout: 4000,
             url: `http://${ip}/api.php`,
         })
-        .then((response: AxiosResponse<PeerMonitorStats>) => Promise.resolve(response.data))
+        .then((response: AxiosResponse<PeerMonitorStats>) => {
+            response.data.ip = ip;
+            return Promise.resolve(response.data);
+        })
         .catch(() => Promise.resolve(undefined));
 
 // Prunes/Grooms data that is returned to client.
@@ -28,7 +31,7 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
                 weight: peerStats.votingWeight,
                 delegatorsCount: 0,
                 name: peerStats.nanoNodeName,
-                peers: peerStats.numPeers,
+                peers: Number(peerStats.numPeers),
                 online: true,
                 cementedBlocks: peerStats.cementedBlocks,
                 confirmationInfo: peerStats.confirmationInfo,
@@ -36,9 +39,9 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
                 version: peerStats.version,
                 location: peerStats.nodeLocation,
                 nodeUptimeStartup: peerStats.nodeUptimeStartup,
-                confirmedBlocks: peerStats.confirmedBlocks,
-                uncheckedBlocks: peerStats.uncheckedBlocks,
-                currentBlock: peerStats.currentBlock,
+                confirmedBlocks: Number(peerStats.confirmedBlocks),
+                uncheckedBlocks: Number(peerStats.uncheckedBlocks),
+                currentBlock: Number(peerStats.currentBlock),
                 systemLoad: peerStats.systemLoad,
                 totalMem: peerStats.totalMem,
                 usedMem: peerStats.usedMem,
@@ -56,15 +59,19 @@ const extractIpAddress = (dirtyIp: string): string => dirtyIp.replace('::ffff:',
 
 // Fetches banano peer details, then sends groomed response.
 const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
-    const PeerMonitorStatsPromises: Array<Promise<PeerMonitorStats>> = [];
+    const peerMonitorStatsPromises: Array<Promise<PeerMonitorStats>> = [];
+
+    // Include my own node too
+    peerMonitorStatsPromises.push(getPeerMonitorStats('108.39.249.5'));
+    // Add all peer ips to the list of ips to fetch
     for (const dirtyIp in rpcData.peers) {
         const ip = extractIpAddress(dirtyIp);
         const rpcDetails = rpcData.peers[dirtyIp];
         if (ip && rpcDetails) {
-            PeerMonitorStatsPromises.push(getPeerMonitorStats(ip));
+            peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
         }
     }
-    return Promise.all(PeerMonitorStatsPromises)
+    return Promise.all(peerMonitorStatsPromises)
         .then((data) =>
             groomDto(data)
                 .then((groomed) => Promise.resolve(groomed))

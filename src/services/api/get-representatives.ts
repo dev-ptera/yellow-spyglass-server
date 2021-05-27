@@ -5,8 +5,9 @@ import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { RepresentativesResponseDto } from '../../types';
 import { getMonitoredRepsService } from './get-monitored-reps';
+import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
 
-const MIN_WEIGHT_TO_BE_COUNTED = 10000;
+const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 
 // Iterate through weighted reps to populate delegators count
 export const populateDelegatorsCount = async (reps: Map<string, Partial<{ delegatorsCount: number }>>) => {
@@ -77,12 +78,20 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     return reps;
 };
 
+export const getOnlineWeight = (): Promise<number> =>
+    NANO_CLIENT.confirmation_quorum()
+        .then((quorumResponse: ConfirmationQuorumResponse) =>
+            Promise.resolve(Number(rawToBan(quorumResponse.online_stake_total)))
+        )
+        .catch((err) => Promise.reject(formatError('getRepresentativesService.getOnlineWeight', err)));
+
 export const getRepresentativesService = async (req, res): Promise<RepresentativesResponseDto> =>
-    Promise.all([getAllRepresentatives(), getMonitoredRepsService()])
-        .then((allReps) => {
+    Promise.all([getAllRepresentatives(), getMonitoredRepsService(), getOnlineWeight()])
+        .then((data) => {
             const response: RepresentativesResponseDto = {
-                representatives: allReps[0],
-                monitoredReps: allReps[1],
+                representatives: data[0],
+                monitoredReps: data[1],
+                onlineWeight: data[2],
             };
             res.send(JSON.stringify(response));
             return Promise.resolve(response);
