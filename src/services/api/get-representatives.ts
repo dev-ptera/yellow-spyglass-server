@@ -1,5 +1,5 @@
 import { RepresentativeDto } from '../../types/dto/RepresentativeDto';
-import { NANO_CLIENT } from '../../config';
+import { AppCache, NANO_CLIENT } from '../../config';
 import { formatError } from '../error.service';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
@@ -85,7 +85,7 @@ export const getOnlineWeight = (): Promise<number> =>
         )
         .catch((err) => Promise.reject(formatError('getRepresentativesService.getOnlineWeight', err)));
 
-export const getRepresentativesService = async (req, res): Promise<RepresentativesResponseDto> =>
+const getRepresentativesDto = () =>
     Promise.all([getAllRepresentatives(), getMonitoredRepsService(), getOnlineWeight()])
         .then((data) => {
             const response: RepresentativesResponseDto = {
@@ -93,7 +93,26 @@ export const getRepresentativesService = async (req, res): Promise<Representativ
                 monitoredReps: data[1],
                 onlineWeight: data[2],
             };
-            res.send(JSON.stringify(response));
             return Promise.resolve(response);
         })
         .catch((err) => Promise.reject(formatError('getRepresentativesService', err)));
+
+export const getRepresentativesService = (req, res): void => {
+    getRepresentativesDto().then((data: RepresentativesResponseDto) => {
+        res.send(JSON.stringify(data));
+    });
+};
+
+export const cacheRepresentatives = async (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        getRepresentativesDto()
+            .then((data) => {
+                AppCache.representatives = data;
+                resolve();
+            })
+            .catch((err) => {
+                console.error('Could not reload representatives');
+                reject(err);
+            });
+    });
+};

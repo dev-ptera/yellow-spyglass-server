@@ -1,12 +1,13 @@
 import * as express from 'express';
 import * as cors from 'cors';
-import { IS_PRODUCTION, URL_WHITE_LIST, PATH_ROOT } from './config';
+import { IS_PRODUCTION, URL_WHITE_LIST, PATH_ROOT, AppCache } from './config';
 import {
     getAccountOverview,
     getConfirmedTransactions,
     getRepresentativesService,
     getBlockInfo,
     getPendingTransactions,
+    cacheRepresentatives,
 } from './services';
 import { getPeersService } from './services/api/get-monitored-reps';
 
@@ -32,7 +33,7 @@ const sendCached = (res, noCacheMethod: () => Promise<any>, cache): void => {
 
 app.use(cors(corsOptions));
 app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res)); // TODO: rename these to [get-name-service], and rpc [action-rpc]
-app.get(`/${PATH_ROOT}/representatives`, (req, res) => getRepresentativesService(req, res));
+app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.representatives));
 app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeersService(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
@@ -44,4 +45,10 @@ const server = http.createServer(app);
 server.listen(port, () => {
     console.log(`Running yellow-spyglass server on port ${port}.`);
     console.log(`Production mode enabled? : ${IS_PRODUCTION}`);
+    /* Reload network stats every 5 minutes. */
+    const interval = 60000 * 5;
+    void cacheRepresentatives();
+    setInterval(() => {
+        void cacheRepresentatives();
+    }, interval);
 });

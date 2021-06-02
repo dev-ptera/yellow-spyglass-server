@@ -1,9 +1,9 @@
-import { NetworkStats } from '../types';
+import { RepresentativesResponseDto } from '../types';
 
 export type AppCache = {
-    networkStats: NetworkStats;
+    representatives: RepresentativesResponseDto;
 };
 
 export const AppCache: AppCache = {
-    networkStats: undefined,
+    representatives: undefined,
 };

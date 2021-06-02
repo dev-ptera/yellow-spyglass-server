@@ -107,6 +107,11 @@ export const getMonitoredRepsService = async (): Promise<MonitoredRepDto[]> =>
             .then((peers: Peers) => {
                 getRepDetails(peers)
                     .then((details: MonitoredRepDto[]) => {
+                        details.sort(function (a, b) {
+                            const textA = a.name.toUpperCase();
+                            const textB = b.name.toUpperCase();
+                            return textA < textB ? -1 : textA > textB ? 1 : 0;
+                        });
                         resolve(details);
                     })
                     .catch((err) => reject(formatError('getMonitoredRepsService', err)));
