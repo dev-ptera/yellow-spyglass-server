@@ -11,7 +11,7 @@ import {
 } from './services';
 import { getPeersService } from './services/api/get-monitored-reps';
 import { getNodeStats } from './services/api/get-node-stats';
-import {getAccountDistribution} from "./services/api/get-account-distribution";
+import { getAccountDistribution } from './services/api/get-account-distribution';
 
 const http = require('http');
 const app = express();

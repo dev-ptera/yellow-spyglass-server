@@ -1,7 +1,7 @@
-import {getFrontiers, getFrontierCount, getAccountBalanceRpc} from "../../rpc";
-import {formatError} from "../error.service";
-import {FrontierCountResponse} from "@dev-ptera/nano-node-rpc";
-import {rawToBan} from "banano-unit-converter";
+import { getFrontiers, getFrontierCount, getAccountBalanceRpc } from '../../rpc';
+import { formatError } from '../error.service';
+import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
+import { rawToBan } from 'banano-unit-converter';
 
 export const getFrontiersData = async (): Promise<any> => {
     const frontiersCountResponse: FrontierCountResponse = await getFrontierCount().catch((err) => {
@@ -14,11 +14,11 @@ export const getFrontiersData = async (): Promise<any> => {
     const addrBalances = [];
     let i = 0;
     for (const addr in frontiersResponse.frontiers) {
-        const balanceResponse = await(getAccountBalanceRpc(addr));
-        if (balanceResponse.balance !== "0") {
+        const balanceResponse = await getAccountBalanceRpc(addr);
+        if (balanceResponse.balance !== '0') {
             const ban = Number(rawToBan(balanceResponse.balance));
             if (ban > 100000.000001) {
-                addrBalances.push({ addr: addr, bal: ban })
+                addrBalances.push({ addr: addr, bal: ban });
             }
         }
         if (++i % 1000 === 0) {
@@ -30,9 +30,11 @@ export const getFrontiersData = async (): Promise<any> => {
 };
 
 export const getAccountDistribution = async (req, res): Promise<void> => {
-    getFrontiersData().then((data) => {
-        res.send(data);
-    }).catch((err) => {
-        res.status(500).send(err);
-    })
-}
+    getFrontiersData()
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send(err);
+        });
+};
