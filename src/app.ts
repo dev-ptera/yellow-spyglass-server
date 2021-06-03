@@ -10,6 +10,8 @@ import {
     cacheRepresentatives,
 } from './services';
 import { getPeersService } from './services/api/get-monitored-reps';
+import { getNodeStats } from './services/api/get-node-stats';
+import {getAccountDistribution} from "./services/api/get-account-distribution";
 
 const http = require('http');
 const app = express();
@@ -37,7 +39,9 @@ app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepr
 app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeersService(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
+app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
+app.get(`/${PATH_ROOT}/accounts`, (req, res) => getAccountDistribution(req, res));
 
 const port: number = Number(process.env.PORT || 3000);
 const server = http.createServer(app);
