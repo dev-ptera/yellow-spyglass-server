@@ -4,9 +4,7 @@ import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { AppCache } from '../../config';
 import { AccountDistributionStats } from '../../types';
-const {
-    performance
-} = require('perf_hooks');
+const { performance } = require('perf_hooks');
 
 export const getFrontiersData = async (): Promise<{
     distributionStats: AccountDistributionStats;
@@ -85,14 +83,14 @@ export const getFrontiersData = async (): Promise<{
 
 export const cacheAccountDistribution = async (): Promise<void> => {
     return new Promise((resolve, reject) => {
-        const t0 = performance.now()
+        const t0 = performance.now();
         console.log('[INFO]: Refreshing Rich List');
         getFrontiersData()
             .then((data) => {
                 AppCache.accountDistributionStats = data.distributionStats;
                 AppCache.richList = data.richList;
-                const t1 = performance.now()
-                console.log(`[INFO]: Rich List Updated, took ${Math.round(t1-t0) / 1000} seconds`);
+                const t1 = performance.now();
+                console.log(`[INFO]: Rich List Updated, took ${Math.round(t1 - t0) / 1000} seconds`);
                 resolve();
             })
             .catch((err) => {

@@ -6,9 +6,7 @@ import { rawToBan } from 'banano-unit-converter';
 import { RepresentativesResponseDto } from '../../types';
 import { getMonitoredRepsService } from './get-monitored-reps';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
-const {
-    performance
-} = require('perf_hooks');
+const { performance } = require('perf_hooks');
 
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 
@@ -108,12 +106,12 @@ export const getRepresentativesService = (req, res): void => {
 
 export const cacheRepresentatives = async (): Promise<void> => {
     return new Promise((resolve, reject) => {
-        const t0 = performance.now()
+        const t0 = performance.now();
         console.log('[INFO]: Refreshing Representatives');
         getRepresentativesDto()
             .then((data) => {
-                const t1 = performance.now()
-                console.log(`[INFO]: Representatives Updated, took ${Math.round(t1-t0)}ms`);
+                const t1 = performance.now();
+                console.log(`[INFO]: Representatives Updated, took ${Math.round(t1 - t0)}ms`);
                 AppCache.representatives = data;
                 resolve();
             })
