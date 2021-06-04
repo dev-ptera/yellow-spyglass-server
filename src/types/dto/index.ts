@@ -1,11 +1,11 @@
-/* Types send to the client. */
-export * from './ConsensusStats';
-export * from './DistributionStats';
-export * from './NetworkStats';
+/* Types sent to the client. */
+export * from './AccountDistributionStats';
 export * from './AccountOverviewDto';
+export * from './ConfirmedTransactionDto';
+export * from './Block';
 export * from './DelegatorDto';
 export * from './ConfirmedTransactionDto';
-export * from './PendingTransactionDto';
-export * from './RepresentativesResponseDto';
-export * from './RepresentativeDto';
 export * from './MonitoredRepDto';
+export * from './PendingTransactionDto';
+export * from './RepresentativeDto';
+export * from './RepresentativesResponseDto';

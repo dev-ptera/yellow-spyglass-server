@@ -1,7 +1,7 @@
 import { getBlocksInfoRpc } from '../../rpc/calls/blocks-info';
-import { BlocksInfoResponse, BlocksInfoResponseContents } from '../../../../nano-node-rpc';
+import { BlocksInfoResponse, BlocksInfoResponseContents } from '@dev-ptera/nano-node-rpc';
 import { formatError } from '../error.service';
-import { Block } from '../../types/model/Block';
+import {Block} from "../../types";
 
 export const blocksInfoPromise = (blocks: string[]): Promise<BlocksInfoResponse> =>
     getBlocksInfoRpc(blocks)
