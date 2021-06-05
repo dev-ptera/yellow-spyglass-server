@@ -1,10 +1,10 @@
-import { RepresentativesResponseDto } from '../types';
+import { AccountBalance, RepresentativesResponseDto } from '../types';
 import { AccountDistributionStats } from '../types/dto/AccountDistributionStats';
 
 export type AppCache = {
     representatives: RepresentativesResponseDto;
     accountDistributionStats: AccountDistributionStats;
-    richList: string[];
+    richList: AccountBalance[];
 };
 
 export const AppCache: AppCache = {

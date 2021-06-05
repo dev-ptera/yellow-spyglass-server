@@ -11,6 +11,7 @@ import {
     getNodeStats,
     cacheAccountDistribution,
 } from './services';
+import { getAccountsBalance } from './services/api/get-accounts-balance';
 const http = require('http');
 const app = express();
 const corsOptions = {
@@ -39,8 +40,13 @@ app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransa
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
 app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
-app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) =>
-    sendCached(res, cacheAccountDistribution, AppCache.accountDistributionStats)
+app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getAccountsBalance(req, res));
+app.get(
+    `/${PATH_ROOT}/accounts-distribution`,
+    (
+        req,
+        res // TODO: getAccountsDistribution to handle error when client is still loading
+    ) => sendCached(res, cacheAccountDistribution, AppCache.accountDistributionStats || [])
 );
 
 const port: number = Number(process.env.PORT || 3000);

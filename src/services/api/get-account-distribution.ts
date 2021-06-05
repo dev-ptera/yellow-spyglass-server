@@ -1,14 +1,15 @@
-import { getFrontiers, getFrontierCount, getAccountBalanceRpc } from '../../rpc';
+import { getFrontiers, getFrontierCount, getAccountBalanceRpc, getRepresentativesOnlineRpc } from '../../rpc';
 import { formatError } from '../error.service';
 import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { AppCache } from '../../config';
-import { AccountDistributionStats } from '../../types';
+import { AccountBalance, AccountDistributionStats } from '../../types';
+import { getAccountRepresentativeRpc } from '../../rpc/calls/account-representative';
 const { performance } = require('perf_hooks');
 
 export const getFrontiersData = async (): Promise<{
     distributionStats: AccountDistributionStats;
-    richList: string[];
+    richList: AccountBalance[];
 }> => {
     const frontiersCountResponse: FrontierCountResponse = await getFrontierCount().catch((err) => {
         return Promise.reject(formatError('getAccountDistribution.getFrontiersCount', err));
@@ -17,7 +18,7 @@ export const getFrontiersData = async (): Promise<{
         return Promise.reject(formatError('getAccountDistribution.getFrontiers', err));
     });
 
-    const richList = [];
+    const richList: AccountBalance[] = [];
     const distributionStats: AccountDistributionStats = {
         number0_001: 0,
         number0_01: 0,
@@ -31,17 +32,28 @@ export const getFrontiersData = async (): Promise<{
         number1_000_000: 0,
         number10_000_000: 0,
         number100_000_000: 0,
+        totalAccounts: 0,
     };
+    const onlineRepSet = new Set<string>();
+    const repsOnline = await getRepresentativesOnlineRpc();
+    for (const addr in repsOnline.representatives) {
+        onlineRepSet.add(addr);
+    }
     for (const addr in frontiersResponse.frontiers) {
         const balanceResponse = await getAccountBalanceRpc(addr);
+        const accountRep = await getAccountRepresentativeRpc(addr);
         if (balanceResponse.balance !== '0') {
-            const ban = Number(rawToBan(balanceResponse.balance));
+            const ban = Number(Number(rawToBan(balanceResponse.balance)).toFixed(3));
+            const repOnline = onlineRepSet.has(accountRep.representative);
             // Add to address list
             if (ban > 0.001) {
-                richList.push({ addr: addr, bal: ban });
+                richList.push({ addr, ban, repOnline });
+            } else {
+                continue;
             }
 
             // Bucket balances
+            distributionStats.totalAccounts++;
             if (ban > 100_000_000) {
                 distributionStats.number100_000_000++;
             } else if (ban > 10_000_000) {
@@ -70,9 +82,9 @@ export const getFrontiersData = async (): Promise<{
         }
     }
 
-    const sortedAccounts = richList.sort((a, b) => {
-        if (a[0] > b[0]) return -1;
-        if (a[0] < b[0]) return 1;
+    const sortedAccounts = richList.sort((a: AccountBalance, b: AccountBalance) => {
+        if (a.ban > b.ban) return -1;
+        if (a.ban < b.ban) return 1;
         return 0;
     });
     return Promise.resolve({
@@ -91,6 +103,10 @@ export const cacheAccountDistribution = async (): Promise<void> => {
                 AppCache.richList = data.richList;
                 const t1 = performance.now();
                 console.log(`[INFO]: Rich List Updated, took ${Math.round(t1 - t0) / 1000} seconds`);
+                const used = process.memoryUsage();
+                for (let key in used) {
+                    console.log(`${key} ${Math.round((used[key] / 1024 / 1024) * 100) / 100} MB`);
+                }
                 resolve();
             })
             .catch((err) => {
