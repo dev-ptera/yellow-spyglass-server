@@ -7,6 +7,7 @@ export * from './Block';
 export * from './DelegatorDto';
 export * from './ConfirmedTransactionDto';
 export * from './MonitoredRepDto';
+export * from './PriceData';
 export * from './PendingTransactionDto';
 export * from './RepresentativeDto';
 export * from './RepresentativesResponseDto';

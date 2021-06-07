@@ -10,6 +10,7 @@ import {
     getPeersService,
     getNodeStats,
     cacheAccountDistribution,
+    getPrice,
 } from './services';
 import { getAccountsBalance } from './services/api/get-accounts-balance';
 const http = require('http');
@@ -39,6 +40,7 @@ app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeersService(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
 app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
+app.get(`/${PATH_ROOT}/price`, (req, res) => getPrice(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getAccountsBalance(req, res));
 app.get(

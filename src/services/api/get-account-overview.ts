@@ -11,6 +11,7 @@ import { getUnopenedAccount } from '../account-utils';
 import { getDelegatorsRpc } from '../../rpc/calls/delegators';
 import { confirmedTransactionsPromise } from './get-confirmed-transactions';
 import { pendingTransactionsPromise } from './get-pending-transactions';
+import {AppCache} from "../../config";
 
 export const getAccountOverview = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
@@ -53,6 +54,16 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             return Promise.reject(formatError('getDelegators', err, { address }));
         });
 
+    const isRepOnline = (accountRep: string): boolean => {
+        const repCache = AppCache.representatives?.representatives || [];
+        for (const rep of repCache) {
+            if (rep.address === accountRep) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     Promise.all([
         accountBalancePromise,
         accountInfoPromise,
@@ -67,6 +78,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
                 balanceRaw: accountBalance.balance,
                 pendingRaw: accountBalance.pending,
                 representative: accountInfo.representative,
+                isRepOnline: isRepOnline(accountInfo.representative),
                 completedTxCount: Number(accountInfo.block_count),
                 pendingTxCount: Number(pendingTransactions.length),
                 delegatorsCount: Number(delegators.length),

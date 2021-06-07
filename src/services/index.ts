@@ -6,4 +6,5 @@ export * from './api/get-monitored-reps';
 export * from './api/get-node-stats';
 export * from './api/get-pending-transactions';
 export * from './api/get-representatives';
+export * from './api/get-price';
 export * from './error.service';
