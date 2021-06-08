@@ -58,7 +58,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         const repCache = AppCache.representatives?.representatives || [];
         for (const rep of repCache) {
             if (rep.address === accountRep) {
-                return true;
+                return rep.online;
             }
         }
         return false;
