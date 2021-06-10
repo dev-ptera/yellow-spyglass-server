@@ -1,15 +1,10 @@
-import { getAccountHistoryRpc } from '../../rpc';
 import { formatError } from '../error.service';
+import { getAccountHistoryRpc } from '../../rpc';
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
-import { SUBTYPE } from '../../types/model/Subtype';
-import { ConfirmedTransactionDto } from '../../types';
+import { ConfirmedTransactionDto, SUBTYPE } from '../../types';
 
-export const confirmedTransactionsPromise = (
-    address: string,
-    offset: number,
-    size: number
-): Promise<ConfirmedTransactionDto[]> =>
-    getAccountHistoryRpc(address, offset, size)
+const confirmedTransactionsPromise = (address: string, offset: number): Promise<ConfirmedTransactionDto[]> =>
+    getAccountHistoryRpc(address, offset, -1)
         .then((accountHistory: AccountHistoryResponse) => {
             const dtoTransactions: ConfirmedTransactionDto[] = [];
             for (const transaction of accountHistory.history) {
@@ -33,12 +28,11 @@ export const confirmedTransactionsPromise = (
             return Promise.reject(formatError('getConfirmedTransactions', err, { address }));
         });
 
-export const getConfirmedTransactions = async (req, res): Promise<void> => {
-    const address = req.query.address;
-    const size = Math.min(req.query.size || 50, 50);
-    const offset = req.query.offset;
+export const getAccountInsights = async (req, res): Promise<void> => {
+    const parts = req.url.split('/');
+    const address = parts[parts.length - 1];
 
-    confirmedTransactionsPromise(address, offset, size)
+    confirmedTransactionsPromise(address, -1)
         .then((confirmedTx: ConfirmedTransactionDto[]) => {
             res.send(JSON.stringify(confirmedTx));
         })

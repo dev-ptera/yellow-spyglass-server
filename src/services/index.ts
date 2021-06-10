@@ -1,5 +1,7 @@
 export * from './api/get-account-distribution';
+export * from './api/get-account-insights';
 export * from './api/get-account-overview';
+export * from './api/get-accounts-balance';
 export * from './api/get-block-info';
 export * from './api/get-confirmed-transactions';
 export * from './api/get-monitored-reps';

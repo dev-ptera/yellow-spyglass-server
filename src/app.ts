@@ -10,9 +10,10 @@ import {
     getPeersService,
     getNodeStats,
     cacheAccountDistribution,
-    getPrice,
+    getAccountInsights,
+    getAccountsBalance,
+    cachePriceData,
 } from './services';
-import { getAccountsBalance } from './services/api/get-accounts-balance';
 const http = require('http');
 const app = express();
 const corsOptions = {
@@ -35,14 +36,17 @@ const sendCached = (res, noCacheMethod: () => Promise<any>, cache): void => {
 
 app.use(cors(corsOptions));
 app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res)); // TODO: rename these to [get-name-service], and rpc [action-rpc]
-app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.representatives));
 app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeersService(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
 app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
-app.get(`/${PATH_ROOT}/price`, (req, res) => getPrice(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
+app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getAccountsBalance(req, res));
+
+/* Cached Results */
+app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
+app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.representatives));
 app.get(
     `/${PATH_ROOT}/accounts-distribution`,
     (
@@ -64,9 +68,15 @@ server.listen(port, () => {
         void cacheRepresentatives();
     }, 60000 * 5);
 
-    /* Reload rich list every 15 minutes. */
+    /* Reload rich list every 20 minutes. */
     void cacheAccountDistribution();
     setInterval(() => {
         void cacheAccountDistribution();
-    }, 60000 * 155);
+    }, 60000 * 15);
+
+    /* Reload price data every 15 minutes. */
+    void cachePriceData();
+    setInterval(() => {
+        void cachePriceData();
+    }, 60000 * 15);
 });

@@ -4,7 +4,7 @@ import { AccountsPendingResponse, BlocksInfoResponse } from '@dev-ptera/nano-nod
 import { PendingTransactionDto } from '../../types';
 import { blocksInfoPromise } from './get-block-info';
 
-export const pendingTransactionsPromise = async (address: string, offset: number) =>
+export const pendingTransactionsPromise = async (address: string, offset: number, size: number) =>
     getAccountsPendingRpc([address])
         .then(async (accountsPendingResponse: AccountsPendingResponse) => {
             const hashes: string[] = [];
@@ -14,7 +14,7 @@ export const pendingTransactionsPromise = async (address: string, offset: number
                 if (i >= offset) {
                     hashes.push(hash);
                 }
-                if (i++ > offset + 50) {
+                if (i++ > offset + Math.min(50, size)) {
                     break;
                 }
             }
@@ -44,7 +44,8 @@ export const pendingTransactionsPromise = async (address: string, offset: number
 export const getPendingTransactions = async (req, res): Promise<void> => {
     const address = req.query.address;
     const offset = req.query.offset || 0;
-    pendingTransactionsPromise(address, offset)
+    const size = Math.min(req.query.size || 50, 50);
+    pendingTransactionsPromise(address, offset, size)
         .then((confirmedTx: PendingTransactionDto[]) => {
             res.send(JSON.stringify(confirmedTx));
         })

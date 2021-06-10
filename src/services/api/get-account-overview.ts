@@ -11,10 +11,11 @@ import { getUnopenedAccount } from '../account-utils';
 import { getDelegatorsRpc } from '../../rpc/calls/delegators';
 import { confirmedTransactionsPromise } from './get-confirmed-transactions';
 import { pendingTransactionsPromise } from './get-pending-transactions';
-import {AppCache} from "../../config";
+import { AppCache } from '../../config';
 
 export const getAccountOverview = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
+    const size = Math.min(req.query.size || 50, 50);
     const address = parts[parts.length - 1];
 
     const accountBalancePromise: Promise<AccountBalanceResponse> = getAccountBalanceRpc(address)
@@ -68,8 +69,8 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         accountBalancePromise,
         accountInfoPromise,
         delegatorsPromise,
-        confirmedTransactionsPromise(address, 0),
-        pendingTransactionsPromise(address, 0),
+        confirmedTransactionsPromise(address, 0, size),
+        pendingTransactionsPromise(address, 0, size),
     ])
         .then(([accountBalance, accountInfo, delegators, confirmedTransactions, pendingTransactions]) => {
             const accountOverview: AccountOverviewDto = {
