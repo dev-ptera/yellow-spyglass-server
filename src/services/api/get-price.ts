@@ -2,7 +2,7 @@ import { cmcApiKey } from '../../config/cmc-api-key';
 import { formatError } from '../error.service';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { CMCPriceData } from '../../types/model/CMCPriceData';
-import { PriceData } from '../../types';
+import { PriceDataDto } from '../../types';
 import { AppCache } from '../../config';
 const { performance } = require('perf_hooks');
 
@@ -46,10 +46,10 @@ const getBitcoinPrice = (): Promise<CMCPriceData> =>
             });
     });
 
-export const getPrice = (): Promise<PriceData> => {
+export const getPrice = (): Promise<PriceDataDto> => {
     return Promise.all([getBananoPrice(), getBitcoinPrice()])
         .then((results) => {
-            const dto: PriceData = {
+            const dto: PriceDataDto = {
                 bananoPriceUsd: results[0].data.BAN.quote.USD.price,
                 bitcoinPriceUsd: results[1].data.BTC.quote.USD.price,
             };

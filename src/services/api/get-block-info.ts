@@ -1,7 +1,7 @@
 import { getBlocksInfoRpc } from '../../rpc/calls/blocks-info';
 import { BlocksInfoResponse, BlocksInfoResponseContents } from '@dev-ptera/nano-node-rpc';
 import { formatError } from '../error.service';
-import { Block } from '../../types';
+import { BlockDto } from '../../types';
 
 export const blocksInfoPromise = (blocks: string[]): Promise<BlocksInfoResponse> =>
     getBlocksInfoRpc(blocks)
@@ -40,7 +40,7 @@ export const getBlockInfo = async (req, res): Promise<void> => {
                         signature: contents.signature,
                         work: contents.work,
                     },
-                } as Block)
+                } as BlockDto)
             );
         })
         .catch((err) => {

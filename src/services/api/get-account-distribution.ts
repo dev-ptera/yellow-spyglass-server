@@ -3,13 +3,13 @@ import { formatError } from '../error.service';
 import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { AppCache } from '../../config';
-import { AccountBalance, AccountDistributionStats } from '../../types';
+import { AccountBalanceDto, AccountDistributionStatsDto } from '../../types';
 import { getAccountRepresentativeRpc } from '../../rpc/calls/account-representative';
 const { performance } = require('perf_hooks');
 
 export const getFrontiersData = async (): Promise<{
-    distributionStats: AccountDistributionStats;
-    richList: AccountBalance[];
+    distributionStats: AccountDistributionStatsDto;
+    richList: AccountBalanceDto[];
 }> => {
     const frontiersCountResponse: FrontierCountResponse = await getFrontierCount().catch((err) => {
         return Promise.reject(formatError('getAccountDistribution.getFrontiersCount', err));
@@ -18,8 +18,8 @@ export const getFrontiersData = async (): Promise<{
         return Promise.reject(formatError('getAccountDistribution.getFrontiers', err));
     });
 
-    const richList: AccountBalance[] = [];
-    const distributionStats: AccountDistributionStats = {
+    const richList: AccountBalanceDto[] = [];
+    const distributionStats: AccountDistributionStatsDto = {
         number0_001: 0,
         number0_01: 0,
         number0_1: 0,
@@ -82,7 +82,7 @@ export const getFrontiersData = async (): Promise<{
         }
     }
 
-    const sortedAccounts = richList.sort((a: AccountBalance, b: AccountBalance) => {
+    const sortedAccounts = richList.sort((a: AccountBalanceDto, b: AccountBalanceDto) => {
         if (a.ban > b.ban) return -1;
         if (a.ban < b.ban) return 1;
         return 0;

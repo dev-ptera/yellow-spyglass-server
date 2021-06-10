@@ -1,4 +1,4 @@
-export type ConsensusStats = {
+export type ConsensusStatsDto = {
     allReps: {
         onlineTotal: number;
         onlinePercent: number;

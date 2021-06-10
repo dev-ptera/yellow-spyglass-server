@@ -1,4 +1,4 @@
-export type DistributionStats = {
+export type DistributionStatsDto = {
     maxSupplyTotal: number;
     burnedTotal: number;
     devFundTotal: number;
