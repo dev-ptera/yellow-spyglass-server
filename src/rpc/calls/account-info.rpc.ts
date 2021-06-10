@@ -1,7 +1,7 @@
 import { AccountInfoResponse } from '@dev-ptera/nano-node-rpc';
-import { NANO_CLIENT } from '../../config';
+import { NANO_CLIENT } from '@app/config';
 
-export const getAccountInfoRpc = async (address): Promise<AccountInfoResponse> =>
+export const accountInfoRpc = async (address): Promise<AccountInfoResponse> =>
     NANO_CLIENT.account_info(address, {
         representative: true,
         pending: true,

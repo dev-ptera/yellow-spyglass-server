@@ -1,7 +1,7 @@
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
-import { NANO_CLIENT } from '../../config';
+import { NANO_CLIENT } from '@app/config';
 
-export const getAccountHistoryRpc = async (address, offset, size): Promise<AccountHistoryResponse> =>
+export const accountHistoryRpc = async (address, offset, size): Promise<AccountHistoryResponse> =>
     NANO_CLIENT.account_history(address, size, {
         offset,
         raw: true,

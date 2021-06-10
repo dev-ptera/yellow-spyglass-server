@@ -1,8 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
-import { MonitoredRepDto, PeerMonitorStats } from '../../types';
-import { getPeersRpc, Peers } from '../../rpc/calls/peers';
-import { formatError } from '../error.service';
-import { populateDelegatorsCount } from './get-representatives';
+import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
+import { peersRpc, Peers } from '@app/rpc';
+import { formatError, populateDelegatorsCount } from '@app/services';
 
 // Given peer IP, queries banano node monitor stats.
 const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
@@ -83,7 +82,7 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
 // banano creeper does not have a api.php.
 export const getPeersService = async (req, res): Promise<void> =>
     new Promise((resolve, reject) => {
-        getPeersRpc()
+        peersRpc()
             .then((peers: Peers) => {
                 getRepDetails(peers)
                     .then((details: MonitoredRepDto[]) => {
@@ -103,7 +102,7 @@ export const getPeersService = async (req, res): Promise<void> =>
 
 export const getMonitoredRepsService = async (): Promise<MonitoredRepDto[]> =>
     new Promise((resolve, reject) => {
-        getPeersRpc()
+        peersRpc()
             .then((peers: Peers) => {
                 getRepDetails(peers)
                     .then((details: MonitoredRepDto[]) => {

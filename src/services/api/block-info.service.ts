@@ -1,10 +1,11 @@
-import { getBlocksInfoRpc } from '../../rpc/calls/blocks-info';
+import { blocksInfoRpc } from '@app/rpc';
+import { formatError } from '@app/services';
+import { BlockDto } from '@app/types';
+import { AppCache } from '@app/config';
 import { BlocksInfoResponse, BlocksInfoResponseContents } from '@dev-ptera/nano-node-rpc';
-import { formatError } from '../error.service';
-import { BlockDto } from '../../types';
 
 export const blocksInfoPromise = (blocks: string[]): Promise<BlocksInfoResponse> =>
-    getBlocksInfoRpc(blocks)
+    blocksInfoRpc(blocks)
         .then((blocks: BlocksInfoResponse) => {
             return Promise.resolve(blocks);
         })
@@ -26,7 +27,7 @@ export const getBlockInfo = async (req, res): Promise<void> => {
                     amount: block.amount,
                     balance: block.balance,
                     height: Number(block.height),
-                    timestamp: Number(block.local_timestamp),
+                    timestamp: Number(AppCache.historicHash.get(hash) || block.local_timestamp),
                     confirmed: block.confirmed,
                     subtype: block.subtype,
                     contents: {

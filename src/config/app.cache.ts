@@ -1,11 +1,11 @@
-import { AccountBalanceDto, PriceDataDto, RepresentativesResponseDto } from '../types';
-import { AccountDistributionStatsDto } from '../types/dto/AccountDistributionStatsDto';
+import { AccountDistributionStatsDto, AccountBalanceDto, PriceDataDto, RepresentativesResponseDto } from '@app/types';
 
 export type AppCache = {
     priceData: PriceDataDto;
     representatives: RepresentativesResponseDto;
     accountDistributionStats: AccountDistributionStatsDto;
     richList: AccountBalanceDto[];
+    historicHash: Map<string, string>;
 };
 
 export const AppCache: AppCache = {
@@ -13,4 +13,5 @@ export const AppCache: AppCache = {
     representatives: undefined,
     accountDistributionStats: undefined,
     richList: [],
+    historicHash: new Map<string, string>(),
 };

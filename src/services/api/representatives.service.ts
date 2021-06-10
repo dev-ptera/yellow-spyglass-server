@@ -1,13 +1,11 @@
-import { RepresentativeDto } from '../../types/dto/RepresentativeDto';
-import { AppCache, NANO_CLIENT } from '../../config';
-import { formatError } from '../error.service';
+import { RepresentativeDto, RepresentativesResponseDto } from '@app/types';
+import { AppCache, NANO_CLIENT } from '@app/config';
+import { formatError, getMonitoredRepsService } from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
-import { RepresentativesResponseDto } from '../../types';
-import { getMonitoredRepsService } from './get-monitored-reps';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
-const { performance } = require('perf_hooks');
 
+const { performance } = require('perf_hooks');
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 
 // Iterate through weighted reps to populate delegators count
@@ -79,7 +77,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     return reps;
 };
 
-export const getOnlineWeight = (): Promise<number> =>
+const getOnlineWeight = (): Promise<number> =>
     NANO_CLIENT.confirmation_quorum()
         .then((quorumResponse: ConfirmationQuorumResponse) =>
             Promise.resolve(Number(rawToBan(quorumResponse.online_stake_total)))
@@ -116,7 +114,7 @@ export const cacheRepresentatives = async (): Promise<void> => {
                 resolve();
             })
             .catch((err) => {
-                console.error('Could not reload representatives');
+                console.error(`[ERROR]: Could not reload representatives`);
                 reject(err);
             });
     });

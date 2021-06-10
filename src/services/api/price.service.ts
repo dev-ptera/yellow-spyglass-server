@@ -1,9 +1,8 @@
 import { cmcApiKey } from '../../config/cmc-api-key';
-import { formatError } from '../error.service';
+import { formatError } from '@app/services';
+import { CMCPriceData, PriceDataDto } from '@app/types';
+import { AppCache } from '@app/config';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { CMCPriceData } from '../../types/model/CMCPriceData';
-import { PriceDataDto } from '../../types';
-import { AppCache } from '../../config';
 const { performance } = require('perf_hooks');
 
 const method = 'GET';
@@ -72,7 +71,7 @@ export const cachePriceData = async (): Promise<void> => {
                 resolve();
             })
             .catch((err) => {
-                console.error('Could not reload representatives');
+                console.error(`[ERROR]: Could not refresh price data.`);
                 reject(err);
             });
     });

@@ -1,11 +1,11 @@
-import { getAccountsPendingRpc } from '../../rpc';
-import { formatError } from '../error.service';
+import { accountsPendingRpc } from '@app/rpc';
+import { formatError, blocksInfoPromise } from '@app/services';
+import { PendingTransactionDto } from '@app/types';
+import { AppCache } from '@app/config';
 import { AccountsPendingResponse, BlocksInfoResponse } from '@dev-ptera/nano-node-rpc';
-import { PendingTransactionDto } from '../../types';
-import { blocksInfoPromise } from './get-block-info';
 
 export const pendingTransactionsPromise = async (address: string, offset: number, size: number) =>
-    getAccountsPendingRpc([address])
+    accountsPendingRpc([address])
         .then(async (accountsPendingResponse: AccountsPendingResponse) => {
             const hashes: string[] = [];
             const pendingTxs = accountsPendingResponse.blocks[address];
@@ -25,7 +25,7 @@ export const pendingTransactionsPromise = async (address: string, offset: number
                         const block = blocksResponse.blocks[hash];
                         dto.push({
                             address: block.block_account,
-                            timestamp: Number(block.local_timestamp),
+                            timestamp: Number(AppCache.historicHash.get(hash) || block.local_timestamp),
                             balanceRaw: block.amount,
                             hash,
                         });

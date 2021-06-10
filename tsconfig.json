@@ -2,7 +2,13 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es2017",
-        "baseUrl": ".",
+        "baseUrl": "./src",
+        "paths": {
+            "@app/rpc": ["rpc/index.ts"],
+            "@app/config": ["config/index.ts"],
+            "@app/services": ["services/index.ts"],
+            "@app/types": ["types/index.ts"]
+        },
         "outDir": "dist"
     },
     "include": ["src"]

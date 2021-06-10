@@ -1,15 +1,17 @@
-import { getAccountHistoryRpc } from '../../rpc';
-import { formatError } from '../error.service';
+import { accountHistoryRpc } from '@app/rpc';
+import { formatError } from '@app/services';
+import { ConfirmedTransactionDto, SUBTYPE } from '@app/types';
+import { AppCache } from '@app/config';
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
-import { SUBTYPE } from '../../types/model/Subtype';
-import { ConfirmedTransactionDto } from '../../types';
+
+const MAX_PAGE_SIZE = 50;
 
 export const confirmedTransactionsPromise = (
     address: string,
     offset: number,
     size: number
 ): Promise<ConfirmedTransactionDto[]> =>
-    getAccountHistoryRpc(address, offset, size)
+    accountHistoryRpc(address, offset, size)
         .then((accountHistory: AccountHistoryResponse) => {
             const dtoTransactions: ConfirmedTransactionDto[] = [];
             for (const transaction of accountHistory.history) {
@@ -23,7 +25,7 @@ export const confirmedTransactionsPromise = (
                     type: transaction['subtype'],
                     balanceRaw: transaction.amount,
                     height: Number(transaction.height),
-                    timestamp: Number(transaction.local_timestamp),
+                    timestamp: Number(AppCache.historicHash.get(transaction.hash) || transaction.local_timestamp),
                     newRepresentative,
                 });
             }
@@ -35,7 +37,7 @@ export const confirmedTransactionsPromise = (
 
 export const getConfirmedTransactions = async (req, res): Promise<void> => {
     const address = req.query.address;
-    const size = Math.min(req.query.size || 50, 50);
+    const size = Math.min(req.query.size || MAX_PAGE_SIZE, MAX_PAGE_SIZE);
     const offset = req.query.offset;
 
     confirmedTransactionsPromise(address, offset, size)

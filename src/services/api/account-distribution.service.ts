@@ -1,20 +1,26 @@
-import { getFrontiers, getFrontierCount, getAccountBalanceRpc, getRepresentativesOnlineRpc } from '../../rpc';
-import { formatError } from '../error.service';
+import {
+    frontiersRpc,
+    frontierCountRpc,
+    accountBalanceRpc,
+    representativesOnlineRpc,
+    accountRepresentativeRpc,
+} from '@app/rpc';
+import { formatError } from '@app/services';
+import { AppCache } from '@app/config';
+import { AccountBalanceDto, AccountDistributionStatsDto } from '@app/types';
 import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
-import { AppCache } from '../../config';
-import { AccountBalanceDto, AccountDistributionStatsDto } from '../../types';
-import { getAccountRepresentativeRpc } from '../../rpc/calls/account-representative';
+
 const { performance } = require('perf_hooks');
 
 export const getFrontiersData = async (): Promise<{
     distributionStats: AccountDistributionStatsDto;
     richList: AccountBalanceDto[];
 }> => {
-    const frontiersCountResponse: FrontierCountResponse = await getFrontierCount().catch((err) => {
+    const frontiersCountResponse: FrontierCountResponse = await frontierCountRpc().catch((err) => {
         return Promise.reject(formatError('getAccountDistribution.getFrontiersCount', err));
     });
-    const frontiersResponse = await getFrontiers(Number(frontiersCountResponse.count)).catch((err) => {
+    const frontiersResponse = await frontiersRpc(Number(frontiersCountResponse.count)).catch((err) => {
         return Promise.reject(formatError('getAccountDistribution.getFrontiers', err));
     });
 
@@ -35,13 +41,13 @@ export const getFrontiersData = async (): Promise<{
         totalAccounts: 0,
     };
     const onlineRepSet = new Set<string>();
-    const repsOnline = await getRepresentativesOnlineRpc();
+    const repsOnline = await representativesOnlineRpc();
     for (const addr in repsOnline.representatives) {
         onlineRepSet.add(addr);
     }
     for (const addr in frontiersResponse.frontiers) {
-        const balanceResponse = await getAccountBalanceRpc(addr);
-        const accountRep = await getAccountRepresentativeRpc(addr);
+        const balanceResponse = await accountBalanceRpc(addr);
+        const accountRep = await accountRepresentativeRpc(addr);
         if (balanceResponse.balance !== '0') {
             const ban = Number(Number(rawToBan(balanceResponse.balance)).toFixed(3));
             const repOnline = onlineRepSet.has(accountRep.representative);

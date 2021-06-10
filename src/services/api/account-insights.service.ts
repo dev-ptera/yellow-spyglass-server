@@ -1,10 +1,10 @@
-import { formatError } from '../error.service';
-import { getAccountHistoryRpc } from '../../rpc';
+import { formatError } from '@app/services';
+import { accountHistoryRpc } from '@app/rpc';
+import { ConfirmedTransactionDto, SUBTYPE } from '@app/types';
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
-import { ConfirmedTransactionDto, SUBTYPE } from '../../types';
 
 const confirmedTransactionsPromise = (address: string, offset: number): Promise<ConfirmedTransactionDto[]> =>
-    getAccountHistoryRpc(address, offset, -1)
+    accountHistoryRpc(address, offset, -1)
         .then((accountHistory: AccountHistoryResponse) => {
             const dtoTransactions: ConfirmedTransactionDto[] = [];
             for (const transaction of accountHistory.history) {

@@ -1,6 +1,15 @@
+const moduleAlias = require('module-alias');
+moduleAlias.addAlias('@app/rpc', __dirname + '/rpc');
+moduleAlias.addAlias('@app/services', __dirname + '/services');
+moduleAlias.addAlias('@app/types', __dirname + '/types');
+moduleAlias.addAlias('@app/config', __dirname + '/config');
+
 import * as express from 'express';
 import * as cors from 'cors';
-import { IS_PRODUCTION, URL_WHITE_LIST, PATH_ROOT, AppCache } from './config';
+const http = require('http');
+const app = express();
+
+import { IS_PRODUCTION, URL_WHITE_LIST, PATH_ROOT, AppCache } from '@app/config';
 import {
     getAccountOverview,
     getConfirmedTransactions,
@@ -11,11 +20,11 @@ import {
     getNodeStats,
     cacheAccountDistribution,
     getAccountInsights,
-    getAccountsBalance,
     cachePriceData,
-} from './services';
-const http = require('http');
-const app = express();
+    importHistoricHashTimestamps,
+    getRichList,
+} from '@app/services';
+
 const corsOptions = {
     origin: function (origin, callback) {
         if (IS_PRODUCTION && origin && URL_WHITE_LIST.indexOf(origin) === -1) {
@@ -42,7 +51,7 @@ app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactio
 app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
 app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));
-app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getAccountsBalance(req, res));
+app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
 
 /* Cached Results */
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
@@ -61,6 +70,7 @@ const server = http.createServer(app);
 server.listen(port, () => {
     console.log(`Running yellow-spyglass server on port ${port}.`);
     console.log(`Production mode enabled? : ${IS_PRODUCTION}`);
+    importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
 
     /* Reload network stats every 5 minutes. */
     void cacheRepresentatives();

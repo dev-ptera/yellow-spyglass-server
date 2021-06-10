@@ -1,24 +1,25 @@
-import { formatError } from '../error.service';
-import { getAccountBalanceRpc, getAccountInfoRpc } from '../../rpc';
+import { accountBalanceRpc, accountInfoRpc, delegatorsRpc } from '@app/rpc';
+import {
+    getUnopenedAccount,
+    pendingTransactionsPromise,
+    confirmedTransactionsPromise,
+    formatError,
+} from '@app/services';
 import {
     AccountBalanceResponse,
     AccountInfoResponse,
     DelegatorsResponse,
     ErrorResponse,
 } from '@dev-ptera/nano-node-rpc';
-import { AccountOverviewDto, DelegatorDto } from '../../types';
-import { getUnopenedAccount } from '../account-utils';
-import { getDelegatorsRpc } from '../../rpc/calls/delegators';
-import { confirmedTransactionsPromise } from './get-confirmed-transactions';
-import { pendingTransactionsPromise } from './get-pending-transactions';
-import { AppCache } from '../../config';
+import { AccountOverviewDto, DelegatorDto } from '@app/types';
+import { AppCache } from '@app/config';
 
 export const getAccountOverview = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
     const size = Math.min(req.query.size || 50, 50);
     const address = parts[parts.length - 1];
 
-    const accountBalancePromise: Promise<AccountBalanceResponse> = getAccountBalanceRpc(address)
+    const accountBalancePromise: Promise<AccountBalanceResponse> = accountBalanceRpc(address)
         .then((accountInfo: AccountBalanceResponse) => {
             return Promise.resolve(accountInfo);
         })
@@ -26,7 +27,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             return Promise.reject(formatError('getAccountBalance', err, { address }));
         });
 
-    const accountInfoPromise: Promise<AccountInfoResponse> = getAccountInfoRpc(address)
+    const accountInfoPromise: Promise<AccountInfoResponse> = accountInfoRpc(address)
         .then((accountInfo: AccountInfoResponse) => {
             return Promise.resolve(accountInfo);
         })
@@ -38,7 +39,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             }
         });
 
-    const delegatorsPromise: Promise<DelegatorDto[]> = getDelegatorsRpc(address)
+    const delegatorsPromise: Promise<DelegatorDto[]> = delegatorsRpc(address)
         .then((delegatorsResponse: DelegatorsResponse) => {
             const delegatorsDto: DelegatorDto[] = [];
             for (const key in delegatorsResponse.delegators) {

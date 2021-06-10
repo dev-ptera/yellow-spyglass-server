@@ -1,6 +1,6 @@
-import { ErrorResponse } from '../../../../nano-node-rpc';
-import { formatError } from '../error.service';
-import { AppCache } from '../../config';
+import { ErrorResponse } from '@dev-ptera/nano-node-rpc';
+import { formatError } from '@app/services';
+import { AppCache } from '@app/config';
 
 export const getNodeStats = (req, res): void => {
     if (AppCache.representatives) {
