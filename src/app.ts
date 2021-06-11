@@ -70,7 +70,7 @@ const server = http.createServer(app);
 server.listen(port, () => {
     console.log(`Running yellow-spyglass server on port ${port}.`);
     console.log(`Production mode enabled? : ${IS_PRODUCTION}`);
-    importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
+    // importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
 
     /* Reload network stats every 5 minutes. */
     void cacheRepresentatives();
