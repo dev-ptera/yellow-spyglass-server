@@ -13,7 +13,7 @@ export const blocksInfoPromise = (blocks: string[]): Promise<BlocksInfoResponse>
             return Promise.reject(formatError('blocksInfoPromise', err, { blocks }));
         });
 
-export const getBlockInfo = async (req, res): Promise<void> => {
+export const getBlockInfo = (req, res): void => {
     const parts = req.url.split('/');
     const hash = parts[parts.length - 1];
 
@@ -21,28 +21,27 @@ export const getBlockInfo = async (req, res): Promise<void> => {
         .then((blockInfo: BlocksInfoResponse) => {
             const block = blockInfo.blocks[hash];
             const contents = block.contents as BlocksInfoResponseContents;
-            res.send(
-                JSON.stringify({
-                    blockAccount: block.block_account,
-                    amount: block.amount,
-                    balance: block.balance,
-                    height: Number(block.height),
-                    timestamp: Number(AppCache.historicHash.get(hash) || block.local_timestamp),
-                    confirmed: block.confirmed,
-                    subtype: block.subtype,
-                    contents: {
-                        type: contents.type,
-                        account: contents.account,
-                        previous: contents.previous,
-                        representative: contents.representative,
-                        balance: contents.balance,
-                        link: contents.link,
-                        linkAsAccount: contents.link_as_account,
-                        signature: contents.signature,
-                        work: contents.work,
-                    },
-                } as BlockDto)
-            );
+            res.send({
+                blockAccount: block.block_account,
+                amount: block.amount,
+                balance: block.balance,
+                height: Number(block.height),
+                timestamp: Number(AppCache.historicHash.get(hash) || block.local_timestamp),
+                confirmed: block.confirmed,
+                subtype: block.subtype,
+                sourceAccount: block.source_account,
+                contents: {
+                    type: contents.type,
+                    account: contents.account,
+                    previous: contents.previous,
+                    representative: contents.representative,
+                    balance: contents.balance,
+                    link: contents.link,
+                    linkAsAccount: contents.link_as_account,
+                    signature: contents.signature,
+                    work: contents.work,
+                },
+            } as BlockDto);
         })
         .catch((err) => {
             res.status(500).send(err);

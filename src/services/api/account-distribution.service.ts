@@ -1,10 +1,4 @@
-import {
-    frontiersRpc,
-    frontierCountRpc,
-    accountBalanceRpc,
-    representativesOnlineRpc,
-    accountRepresentativeRpc,
-} from '@app/rpc';
+import { frontiersRpc, frontierCountRpc, accountBalanceRpc, accountRepresentativeRpc } from '@app/rpc';
 import { formatError } from '@app/services';
 import { AppCache } from '@app/config';
 import { AccountBalanceDto, AccountDistributionStatsDto } from '@app/types';
@@ -40,20 +34,14 @@ export const getFrontiersData = async (): Promise<{
         number100_000_000: 0,
         totalAccounts: 0,
     };
-    const onlineRepSet = new Set<string>();
-    const repsOnline = await representativesOnlineRpc();
-    for (const addr in repsOnline.representatives) {
-        onlineRepSet.add(addr);
-    }
     for (const addr in frontiersResponse.frontiers) {
         const balanceResponse = await accountBalanceRpc(addr);
         const accountRep = await accountRepresentativeRpc(addr);
         if (balanceResponse.balance !== '0') {
             const ban = Number(Number(rawToBan(balanceResponse.balance)).toFixed(3));
-            const repOnline = onlineRepSet.has(accountRep.representative);
             // Add to address list
             if (ban > 0.001) {
-                richList.push({ addr, ban, repOnline });
+                richList.push({ addr, ban, representative: accountRep.representative });
             } else {
                 continue;
             }

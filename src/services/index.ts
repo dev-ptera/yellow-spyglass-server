@@ -6,9 +6,11 @@ export * from './api/block-info.service';
 export * from './api/confirmed-transactions.service';
 export * from './api/monitored-reps.service';
 export * from './api/node-stats.service';
+export * from './api/known-accounts.service';
 export * from './api/pending-transactions.services';
 export * from './api/price.service';
 export * from './api/representatives.service';
+export * from './api/online-reps.service';
 
 export * from './etc/error.service';
 export * from './etc/account-utils';

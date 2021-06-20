@@ -45,7 +45,7 @@ const getBitcoinPrice = (): Promise<CMCPriceData> =>
             });
     });
 
-export const getPrice = (): Promise<PriceDataDto> => {
+const getPrice = (): Promise<PriceDataDto> => {
     return Promise.all([getBananoPrice(), getBitcoinPrice()])
         .then((results) => {
             const dto: PriceDataDto = {

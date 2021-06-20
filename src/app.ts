@@ -22,7 +22,9 @@ import {
     getAccountInsights,
     cachePriceData,
     importHistoricHashTimestamps,
+    cacheKnownAccounts,
     getRichList,
+    getOnlineReps,
 } from '@app/services';
 
 const corsOptions = {
@@ -52,8 +54,10 @@ app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
 app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
+app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
 
 /* Cached Results */
+app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, AppCache.knownAccounts));
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
 app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.representatives));
 app.get(
@@ -71,6 +75,12 @@ server.listen(port, () => {
     console.log(`Running yellow-spyglass server on port ${port}.`);
     console.log(`Production mode enabled? : ${IS_PRODUCTION}`);
     // importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
+
+    /* Reload known accounts every hour */
+    void cacheKnownAccounts();
+    setInterval(() => {
+        void cacheKnownAccounts();
+    }, 60000 * 60);
 
     /* Reload network stats every 5 minutes. */
     void cacheRepresentatives();

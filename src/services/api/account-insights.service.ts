@@ -2,7 +2,7 @@ import { formatError } from '@app/services';
 import { accountHistoryRpc } from '@app/rpc';
 import { ConfirmedTransactionDto, SUBTYPE } from '@app/types';
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
-import { InsightsDto } from '../../types/dto/InsightsDto';
+import { InsightsDto } from '@app/types';
 import { rawToBan } from 'banano-unit-converter';
 
 const MAX_CHART_POINTS = 50;
