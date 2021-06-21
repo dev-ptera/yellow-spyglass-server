@@ -41,6 +41,7 @@ export const pendingTransactionsPromise = async (address: string, offset: number
             return Promise.reject(formatError('getAccountsPending', err, { address, source: false }));
         });
 
+/** Looks ups pending transactions for a given account. */
 export const getPendingTransactions = async (req, res): Promise<void> => {
     const address = req.query.address;
     const offset = req.query.offset || 0;

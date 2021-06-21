@@ -7,6 +7,8 @@ import { rawToBan } from 'banano-unit-converter';
 
 const { performance } = require('perf_hooks');
 
+/** Uses the frontiers RPC call to iterate through all accounts
+ * Then filters out small balance accounts & procedes to lookup each accounts' balance & representative */
 export const getFrontiersData = async (): Promise<{
     distributionStats: AccountDistributionStatsDto;
     richList: AccountBalanceDto[];
@@ -79,7 +81,6 @@ export const getFrontiersData = async (): Promise<{
             console.error(err);
             continue;
         }
-
     }
 
     const sortedAccounts = richList.sort((a: AccountBalanceDto, b: AccountBalanceDto) => {
@@ -93,6 +94,7 @@ export const getFrontiersData = async (): Promise<{
     });
 };
 
+/** Call this to repopulate the rich list. */
 export const cacheAccountDistribution = async (): Promise<void> => {
     return new Promise((resolve, reject) => {
         const t0 = performance.now();

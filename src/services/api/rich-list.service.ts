@@ -2,6 +2,7 @@ import { AppCache } from '@app/config';
 
 const MAX_RECORDS_PER_PAGE = 25;
 
+/** Uses the AppCache to return a section of all known accounts. */
 export const getRichList = async (req, res): Promise<void> => {
     if (AppCache.richList.length > 0) {
         const offset = Number(req.query.offset || 0);

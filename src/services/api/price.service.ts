@@ -58,6 +58,7 @@ const getPrice = (): Promise<PriceDataDto> => {
         });
 };
 
+/** This is called to update the Price Data in the AppCache.  Reads price data from CoinMarketCap. */
 export const cachePriceData = async (): Promise<void> => {
     return new Promise((resolve, reject) => {
         const t0 = performance.now();

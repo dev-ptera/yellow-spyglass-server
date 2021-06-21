@@ -9,6 +9,10 @@ import {
 export type AppCache = {
     priceData: PriceDataDto;
     representatives: RepresentativesResponseDto;
+    repPings: {
+        currPing: number;
+        map: Map<string, number>;
+    };
     accountDistributionStats: AccountDistributionStatsDto;
     richList: AccountBalanceDto[];
     knownAccounts: KnownAccountDto[];
@@ -18,6 +22,10 @@ export type AppCache = {
 export const AppCache: AppCache = {
     priceData: undefined,
     representatives: undefined,
+    repPings: {
+        currPing: 0,
+        map: new Map<string, number>(),
+    },
     accountDistributionStats: undefined,
     knownAccounts: [],
     richList: [],

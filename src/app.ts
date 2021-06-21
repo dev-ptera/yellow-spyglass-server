@@ -90,8 +90,10 @@ server.listen(port, () => {
         void cacheRepresentatives();
     }, 60000 * 5);
 
-    /* Reload rich list every 60 minutes. */
-    /* This is too slow an operation to run if node running on same machine as node. */
+    /*  Reload rich list every 60 minutes. */
+    /*  I've disabled this operation when developing since I don't develop on the same machine
+        that runs the node and inter-network calls are too slow for this run every hour.
+    */
     if (IS_PRODUCTION) {
         void cacheAccountDistribution();
         setInterval(() => {

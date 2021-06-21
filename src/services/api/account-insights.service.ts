@@ -1,23 +1,14 @@
 import { formatError } from '@app/services';
 import { accountHistoryRpc } from '@app/rpc';
-import { ConfirmedTransactionDto, SUBTYPE } from '@app/types';
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
 import { InsightsDto } from '@app/types';
 import { rawToBan } from 'banano-unit-converter';
 
-const MAX_CHART_POINTS = 50;
-
 const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
-    //TODO: check block count before doing this; max of 50,000 tx.
+    //TODO: check block count before doing this; max of 50,000 tx.  Client blocks this request, but server needs to as well.
 
     accountHistoryRpc(address, 0, -1, true)
         .then((accountHistory: AccountHistoryResponse) => {
-            const transactionCount = accountHistory.history.length;
-
-            // wtf?
-            //    const chartIndexIncrement = Math.round(Math.max(1, transactionCount / MAX_CHART_POINTS));
-            //    let chartIndex = 0;
-
             const accountSentMap = new Map<string, number>();
             const accountReceivedMap = new Map<string, number>();
             const insightsDto: InsightsDto = {
@@ -38,7 +29,6 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
             let index = 0;
             for (const transaction of accountHistory.history) {
                 const isLastDp = index === accountHistory.history.length;
-                // const addPoint = index++ === chartIndex;
                 const addPoint = true;
                 if (transaction.amount) {
                     const ban = Number(Number(rawToBan(transaction.amount)).toFixed(6));
@@ -68,7 +58,6 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     }
                 }
                 if (addPoint || isLastDp) {
-                    //     chartIndex += chartIndexIncrement;
                     const height = Number(transaction.height);
                     const roundedBalance = balance > 100 ? Math.round(balance) : balance;
                     insightsDto.data.push({ balance: Number(roundedBalance.toFixed(3)), height });
@@ -98,6 +87,9 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
             return Promise.reject(formatError('getAccountInsights.confirmedTransactionPromise', err, { address }));
         });
 
+/** Given an account address, it looks will return chart datapoints that represent that account's balance over time.
+ * It will also return account statistics for top balance, most common sender, etc.
+ */
 export const getAccountInsights = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
     const address = parts[parts.length - 1];

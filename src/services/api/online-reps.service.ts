@@ -1,30 +1,14 @@
-import { formatError } from '@app/services';
-import { representativesOnlineRpc } from '@app/rpc';
-import { RepresentativesOnlineWeightResponse } from '@dev-ptera/nano-node-rpc';
+import { AppCache } from '@app/config';
 
-const onlineRepsPromise = (): Promise<string[]> => {
-    return new Promise((resolve, reject) => {
-        representativesOnlineRpc()
-            .then((data: RepresentativesOnlineWeightResponse) => {
-                const reps: string[] = [];
-                for (const rep in data.representatives) {
-                    reps.push(rep);
-                }
-                resolve(reps);
-            })
-            .catch((err) => {
-                reject(formatError('onlineRepsPromise', err));
-            });
-    });
-};
-
+/** Using the AppCache, send a list of online rep addresses. */
 export const getOnlineReps = (req, res): void => {
-    onlineRepsPromise()
-        .then((data: string[]) => {
-            res.send(data);
-        })
-        .catch((err) => {
-            console.error(`[ERROR]: Could not fetch online reps.`);
-            res.status(500).send(err);
+    const reps: string[] = [];
+    if (AppCache.representatives?.representatives) {
+        AppCache.representatives.representatives.map((rep) => {
+            if (rep.online) {
+                reps.push(rep.address);
+            }
         });
+    }
+    res.send(reps);
 };
