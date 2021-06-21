@@ -15,6 +15,7 @@
         "banano-unit-converter": "^0.1.0",
         "cors": "^2.8.5",
         "csv-parser": "^3.0.0",
+        "dotenv": "^10.0.0",
         "esm": "^3.2.25",
         "express": "^4.16.4"
     },

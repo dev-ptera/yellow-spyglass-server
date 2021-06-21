@@ -1,4 +1,3 @@
-import { cmcApiKey } from '../../config/cmc-api-key';
 import { formatError } from '@app/services';
 import { CMCPriceData, PriceDataDto } from '@app/types';
 import { AppCache } from '@app/config';
@@ -8,7 +7,7 @@ const { performance } = require('perf_hooks');
 const method = 'GET';
 const url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
 const headers = {
-    'X-CMC_PRO_API_KEY': cmcApiKey,
+    'X-CMC_PRO_API_KEY': process.env.CMC_API_KEY,
 };
 
 const getBananoPrice = (): Promise<CMCPriceData> =>

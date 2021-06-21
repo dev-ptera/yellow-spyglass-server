@@ -26,3 +26,5 @@ pnpm-debug.log*
 
 cmc-api-key.ts
 timestamps.csv
+
+.env

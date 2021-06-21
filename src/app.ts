@@ -6,6 +6,8 @@ moduleAlias.addAlias('@app/config', __dirname + '/config');
 
 import * as express from 'express';
 import * as cors from 'cors';
+const dotenv = require('dotenv');
+dotenv.config();
 const http = require('http');
 const app = express();
 
