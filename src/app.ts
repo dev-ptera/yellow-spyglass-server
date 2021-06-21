@@ -90,11 +90,14 @@ server.listen(port, () => {
         void cacheRepresentatives();
     }, 60000 * 5);
 
-    /* Reload rich list every 20 minutes. */
-    void cacheAccountDistribution();
-    setInterval(() => {
+    /* Reload rich list every 60 minutes. */
+    /* This is too slow an operation to run if node running on same machine as node. */
+    if (IS_PRODUCTION) {
         void cacheAccountDistribution();
-    }, 60000 * 15);
+        setInterval(() => {
+            void cacheAccountDistribution();
+        }, 60000 * 60);
+    }
 
     /* Reload price data every 15 minutes. */
     void cachePriceData();

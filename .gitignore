@@ -5,7 +5,7 @@ node_modules
 cert.pem
 key.pem
 
-# local env files
+# local .env files
 .env.local
 .env.*.local
 

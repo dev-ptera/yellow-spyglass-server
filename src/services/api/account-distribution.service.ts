@@ -35,45 +35,51 @@ export const getFrontiersData = async (): Promise<{
         totalAccounts: 0,
     };
     for (const addr in frontiersResponse.frontiers) {
-        const balanceResponse = await accountBalanceRpc(addr);
-        const accountRep = await accountRepresentativeRpc(addr);
-        if (balanceResponse.balance !== '0') {
-            const ban = Number(Number(rawToBan(balanceResponse.balance)).toFixed(3));
-            // Add to address list
-            if (ban > 0.001) {
-                richList.push({ addr, ban, representative: accountRep.representative });
-            } else {
-                continue;
-            }
+        try {
+            const balanceResponse = await accountBalanceRpc(addr);
+            const accountRep = await accountRepresentativeRpc(addr);
+            if (balanceResponse.balance !== '0') {
+                const ban = Number(Number(rawToBan(balanceResponse.balance)).toFixed(3));
+                // Add to address list
+                if (ban > 0.001) {
+                    richList.push({ addr, ban, representative: accountRep.representative });
+                } else {
+                    continue;
+                }
 
-            // Bucket balances
-            distributionStats.totalAccounts++;
-            if (ban > 100_000_000) {
-                distributionStats.number100_000_000++;
-            } else if (ban > 10_000_000) {
-                distributionStats.number10_000_000++;
-            } else if (ban > 1_000_000) {
-                distributionStats.number1_000_000++;
-            } else if (ban > 100_000) {
-                distributionStats.number100_000++;
-            } else if (ban > 10_000) {
-                distributionStats.number10_000++;
-            } else if (ban > 1_000) {
-                distributionStats.number1_000++;
-            } else if (ban > 100) {
-                distributionStats.number100++;
-            } else if (ban > 10) {
-                distributionStats.number10++;
-            } else if (ban > 1) {
-                distributionStats.number1++;
-            } else if (ban > 0.1) {
-                distributionStats.number0_1++;
-            } else if (ban > 0.01) {
-                distributionStats.number0_01++;
-            } else if (ban > 0.001) {
-                distributionStats.number0_001++;
+                // Bucket balances
+                distributionStats.totalAccounts++;
+                if (ban > 100_000_000) {
+                    distributionStats.number100_000_000++;
+                } else if (ban > 10_000_000) {
+                    distributionStats.number10_000_000++;
+                } else if (ban > 1_000_000) {
+                    distributionStats.number1_000_000++;
+                } else if (ban > 100_000) {
+                    distributionStats.number100_000++;
+                } else if (ban > 10_000) {
+                    distributionStats.number10_000++;
+                } else if (ban > 1_000) {
+                    distributionStats.number1_000++;
+                } else if (ban > 100) {
+                    distributionStats.number100++;
+                } else if (ban > 10) {
+                    distributionStats.number10++;
+                } else if (ban > 1) {
+                    distributionStats.number1++;
+                } else if (ban > 0.1) {
+                    distributionStats.number0_1++;
+                } else if (ban > 0.01) {
+                    distributionStats.number0_01++;
+                } else if (ban > 0.001) {
+                    distributionStats.number0_001++;
+                }
             }
+        } catch (err) {
+            console.error(err);
+            continue;
         }
+
     }
 
     const sortedAccounts = richList.sort((a: AccountBalanceDto, b: AccountBalanceDto) => {
