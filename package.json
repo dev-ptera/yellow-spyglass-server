@@ -1,5 +1,6 @@
 {
-    "name": "is-banano-decentralized-server",
+    "name": "yellow-spyglass-server",
+    "description": "The API for www.yellowspyglass.com",
     "version": "1.0.0",
     "engines": {
         "node": ">=10.0.0"
