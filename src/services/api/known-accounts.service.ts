@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { KnownAccountDto } from '@app/types';
 import { AppCache } from '@app/config';
 import { formatError } from '../etc/error.service';
+import { KnownAccountDto } from '@app/types';
 
 const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
     new Promise<KnownAccountDto[]>((resolve, reject) => {
@@ -12,7 +12,7 @@ const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
             })
             .then((response: AxiosResponse<KnownAccountDto[]>) => resolve(response.data))
             .catch((err: AxiosError) => {
-                reject(formatError('getKnownAccountsPromise', err));
+                reject(formatError('getKnownaddresssPromise', err));
             });
     });
 
@@ -21,17 +21,274 @@ export const cacheKnownAccounts = (): Promise<void> => {
         console.log('[INFO]: Refreshing Known Accounts');
         getKnownAccountsPromise()
             .then((data: KnownAccountDto[]) => {
-                data.sort((a, b) => (a.alias > b.alias) ? 1 : -1)
+                const knownAddresses = new Set<string>();
+                for (const knownAccount of data) {
+                    knownAddresses.add(knownAccount.address);
+                }
+                for (const knownAccount of BANANO_LOOKER_KNOWN_ADDRESSES) {
+                    if (!knownAddresses.has(knownAccount.address)) {
+                        data.push(knownAccount);
+                    }
+                }
+                data.sort((a, b) => (a.alias > b.alias ? 1 : -1));
                 console.log('[INFO]: Known Accounts Updated');
                 AppCache.knownAccounts = data;
                 resolve();
             })
             .catch(() => {
-                console.error(`[ERROR]: Could not fetch known accounts.`);
+                console.error(`[ERROR]: Could not fetch known addresss.`);
                 reject();
             });
     });
 };
 
-// TODO: Add more known accounts
-// [{"account":"ban_3a1dokzzuc334kpsedakxz5hw4cauexjori8spcf7pninujry43dxkbam4o6","alias":"BNswap","balance":3927.9435644899195,"pending":0,"total":3927.9435644899195},{"account":"ban_1bananobh5rat99qfgt1ptpieie5swmoth87thi74qgbfrij7dcgjiij94xr","alias":"Genesis","balance":16306.327409,"pending":0,"total":16306.327409},{"account":"ban_1cake36ua5aqcq1c5i3dg7k8xtosw7r9r7qbbf5j15sk75csp9okesz87nfn","alias":"Official Rep - Cake","balance":2195.95,"pending":0,"total":2195.95},{"account":"ban_1fomoz167m7o38gw4rzt7hz67oq6itejpt4yocrfywujbpatd711cjew8gjj","alias":"Official Rep - FOMO","balance":1033.6,"pending":0,"total":1033.6},{"account":"ban_3runnerrxm74165sfmystpktzsyp7eurixwpk59tejnn8xamn8zog18abrda","alias":"Banano Runner","balance":2316560.0433333335,"pending":0,"total":2316560.0433333335},{"account":"ban_3fundbxxzrzfy3k9jbnnq8d44uhu5sug9rkh135bzqncyy9dw91dcrjg67wf","alias":"Giveaway Fund 3","balance":319682003.8863083,"pending":0,"total":319682003.8863083},{"account":"ban_1fundm3d7zritekc8bdt4oto5ut8begz6jnnt7n3tdxzjq3t46aiuse1h7gj","alias":"Giveaway Fund 1","balance":334620719.53,"pending":0,"total":334620719.53},{"account":"ban_3fo1d1ng6mfqumfoojqby13nahaugqbe5n6n3trof4q8kg5amo9mribg4muo","alias":"Folding","balance":2153081.7703200616,"pending":282.7400001,"total":2153364.5103201615},{"account":"ban_1burnbabyburndiscoinferno111111111111111111111111111aj49sw3w","alias":"Burn","balance":0,"pending":1483381995.5336878,"total":1483381995.5336878},{"account":"ban_1monkeyt1x77a1rp9bwtthajb8odapbmnzpyt8357ac8a1bcron34i3r9y66","alias":"MonkeyTalks","balance":36.56381488958246,"pending":180.59340506888972,"total":217.15721995847218},{"account":"ban_1ka1ium4pfue3uxtntqsrib8mumxgazsjf58gidh1xeo5te3whsq8z476goo","alias":"Kalium","balance":396.129980047118,"pending":0,"total":396.129980047118},{"account":"ban_1boompow14irck1yauquqypt7afqrh8b6bbu5r93pc6hgbqs7z6o99frcuym","alias":"BoomPoW","balance":301084.76,"pending":0,"total":301084.76},{"account":"ban_1faucetjuiyuwnz94j4c7s393r95sk5ac7p5usthmxct816osgqh3qd1caet","alias":"Banano Faucet","balance":13507.914334369483,"pending":0,"total":13507.914334369483},{"account":"ban_1nrcne47secz1hnm9syepdoob7t1r4xrhdzih3zohb1c3z178edd7b6ygc4x","alias":"CoinEx","balance":53881384.65277056,"pending":0,"total":53881384.65277056},{"account":"ban_1oaocnrcaystcdtaae6woh381wftyg4k7bespu19m5w18ze699refhyzu6bo","alias":"Kuyumcu","balance":215794.0675485821,"pending":0,"total":215794.0675485821},{"account":"ban_1tipbotgges3ss8pso6xf76gsyqnb69uwcxcyhouym67z7ofefy1jz7kepoy","alias":"Banano Tipbots","balance":1772.2,"pending":1002,"total":2774.2},{"account":"ban_1sebrep1mbkdtdb39nsouw5wkkk6o497wyrxtdp71sm878fxzo1kwbf9k79b","alias":"sebrock19.de","balance":1075.19,"pending":0,"total":1075.19},{"account":"ban_3px37c9f6w361j65yoasrcs6wh3hmmyb6eacpis7dwzp8th4hbb9izgba51j","alias":"Banano Italio - La Giungla","balance":52,"pending":0,"total":52},{"account":"ban_1wha1enz8k8r65k6nb89cxqh6cq534zpixmuzqwbifpnqrsycuegbmh54au6","alias":"bananode.eu","balance":97,"pending":0,"total":97},{"account":"ban_3p3sp1ynb5i3qxmqoha3pt79hyk8gxhtr58tk51qctwyyik6hy4dbbqbanan","alias":"BananOslo","balance":420.69,"pending":0,"total":420.69},{"account":"ban_3batmanuenphd7osrez9c45b3uqw9d9u81ne8xa6m43e1py56y9p48ap69zg","alias":"batman","balance":2.39,"pending":0,"total":2.39},{"account":"ban_1creepi89mp48wkyg5fktgap9j6165d8yz6g1fbe5pneinz3by9o54fuq63m","alias":"creeper.banano.cc","balance":320.58,"pending":0,"total":320.58},{"account":"ban_3grayknbwtrjdsbdgsjbx4fzds7eufjqghzu6on57aqxte7fhhh14gxbdz61","alias":"Gray","balance":0.0001,"pending":0,"total":0.0001},{"account":"ban_3m8mdu1jxuntoe19wemgohduss3cn7ctxbt41ioh87mfjz9ho8o15yhjas96","alias":"Cabbit Node","balance":3947.5688498142185,"pending":0,"total":3947.5688498142185},{"account":"ban_1fnx59bqpx11s1yn7i5hba3ot5no4ypy971zbkp5wtium3yyafpwhhwkq8fc","alias":"banano.nifni.net","balance":71,"pending":0,"total":71},{"account":"ban_1bestrep6gq14bt4bi7w446m9knc6matfad7qcii7edeb33iipooh46dotdz","alias":"node.banano.ch","balance":19,"pending":0,"total":19},{"account":"ban_3binance1adje7uwzjmsyxsqxjt8c471i33xo39k94twkipntmrqt1ii5t57","alias":"Unofficial Binance Representative 1","balance":651.69,"pending":0,"total":651.69},{"account":"ban_1banbet1hxxe9aeu11oqss9sxwe814jo9ym8c98653j1chq4k4yaxjsacnhc","alias":"BananoBet Rep","balance":0,"pending":0.12,"total":0.12},{"account":"ban_3srechjntpdomi9dbaksfxkpk4o134kchii8iozd98aa5f3txbej96wb77mg","alias":"Yellow Trust","balance":7.77,"pending":0,"total":7.77},{"account":"ban_1ce1ery6hqwyqqyh15m4atcoaywd8rycyapjjooqeg7gi149kmatjbb3wiwx","alias":"Dev Salary","balance":8259898.66,"pending":0,"total":8259898.66},{"account":"ban_3pp1antnfudas6ad44kwpad4jb376cihftskq9ne76hazosi654gjdohriai","alias":"Banano Powerplant","balance":512546.47,"pending":0.13,"total":512546.6},{"account":"ban_1crane864e1cn1g3p9mrduf49hp86gfgfosp8rib43smxxuqp3phq1yiu58k","alias":"Crane Faucet","balance":0,"pending":5.30608e-24,"total":5.30608e-24},{"account":"ban_1b1ack1188caohzjdj65uarnk4kobzrnr3q3oc3bew5rfkyqxzu81zhjgp1e","alias":"Black Monkey","balance":41920.16791919,"pending":0.54,"total":41920.70791919},{"account":"ban_36e1qnwo5faf7uapp6gbzzmzt3bgz6a93txuukmr45pmodcy4q7pwaray1u9","alias":"Atomars Hot Wallet","balance":1685366.77344287,"pending":0,"total":1685366.77344287},{"account":"ban_1fxc48dynhbjb69uuyue4bsfuymxick8js14synwznduy61g6i9esdeasmem","alias":"GJ Hot Wallet","balance":2735009.2268306683,"pending":0,"total":2735009.2268306683},{"account":"ban_16tduo1cu9ydp8ris3o5w4rm96myqics5o8tjw8s13ja8owba6xfpwc8399r","alias":"Banroulettecom Hot Wallet","balance":0,"pending":0,"total":0},{"account":"ban_1gooj14qko1u6md87aga9c53nf4iphyt1ua7x3kq1wnkdh49u5mndqygbr1q","alias":"Ataix Hot Wallet","balance":1043202.0317569604,"pending":0,"total":1043202.0317569604},{"account":"ban_16bfuppfebtmgh1t8ktpk4eq4dyz5m1ztxesznagd916jzk8b87qity3habz","alias":"Unnamed Hot Wallet","balance":74338.00861081808,"pending":0,"total":74338.00861081808},{"account":"ban_3yafcjcq79cjfm4wio5db6drffmf61jh8cosoijmg3eppzmbxb4kej8t3dze","alias":"qtrade Hot Wallet","balance":3535697.976245568,"pending":467.37999,"total":3536165.356235568},{"account":"ban_1bujgzb69qr4owkcm3qu35mb843qtwnx4zf8q3myjw1dui7br5k87k84e54d","alias":"ViteX Hot Wallet","balance":1.2311699507761065e-7,"pending":0,"total":1.2311699507761065e-7},{"account":"ban_1gtkt1ekpazojhxwnym9ur61cz4w7n8yez5yq81id6cb8k63bhwx7axhtsxx","alias":"Bitmesh Hot Wallet","balance":915499.2027057097,"pending":0,"total":915499.2027057097},{"account":"ban_3wwd51yoxeafubpn84gy7tje7yw6ccqcach9m4yfn46sf15itnysap9dd1xc","alias":"Citex Hot Wallet","balance":3457196.571831554,"pending":0,"total":3457196.571831554},{"account":"ban_3w6yatruhkxgu4bhx1d8zggpwafrq3z7xyrqchuw8h5xa9aqhnrj7mi79mtu","alias":"Qbtc Hot Wallet","balance":13829218.04988341,"pending":0,"total":13829218.04988341},{"account":"ban_3x1o69xsppjb1d9owsn8x6uqr8a1ttpitsu3yya7iyimaboqhb9urb8x61y8","alias":"Txbit Hot Wallet","balance":4021665.1703734025,"pending":0,"total":4021665.1703734025},{"account":"ban_31dhbgirwzd3ce7naor6o94woefws9hpxu4q8uxm1bz98w89zqpfks5rk3ad","alias":"Mercatox Cold Wallet","balance":25908631.56376102,"pending":4.082,"total":25908635.645761017},{"account":"ban_3k76rawffjm79qedoc54nhk3edkq5makoyp73b1t6q6j9yjeq633q1xck9g8","alias":"Mercatox Hot Wallet","balance":1619103.3509801836,"pending":1.51,"total":1619104.8609801836},{"account":"ban_1banbet955hwemgsqrb8afycd3nykaqaxsn7iaydcctfrwi3rbb36y17fbcb","alias":"Bananobet Hot Wallet","balance":1715633.8241684576,"pending":0,"total":1715633.8241684576},{"account":"ban_1w5q77ocgfrjn6sqwudfuygtomwyij8ijes3y5g8kaydxsf8f4jpz4n9q9a3","alias":"Nanogames Hot Wallet","balance":24402629.484446175,"pending":0,"total":24402629.484446175},{"account":"ban_3iejwmk1n3fqdntwcgudhmddo9bpwa8jzx6g361iq6rzbsrzonekmdus9yj5","alias":"Bananoroyale Hot Wallet","balance":0.25,"pending":0,"total":0.25},{"account":"ban_1nrcne47secz1hnm9syepdoob7t1r4xrhdzih3zohb1c3z178edd7b6ygc4x","alias":"Coinex Deposits","balance":53881384.65277056,"pending":0,"total":53881384.65277056},{"account":"ban_1gxx3dbrprrh9ycf1p5wo9qgmftppg6z7688njum14aybjkaiweqmwpuu9py","alias":"BananoLooker Donations","balance":995.52,"pending":1088,"total":2083.52}]
+const BANANO_LOOKER_KNOWN_ADDRESSES = [
+    {
+        address: 'ban_3a1dokzzuc334kpsedakxz5hw4cauexjori8spcf7pninujry43dxkbam4o6',
+        alias: 'BNswap',
+    },
+    {
+        address: 'ban_1bananobh5rat99qfgt1ptpieie5swmoth87thi74qgbfrij7dcgjiij94xr',
+        alias: 'Genesis',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1cake36ua5aqcq1c5i3dg7k8xtosw7r9r7qbbf5j15sk75csp9okesz87nfn',
+        alias: 'Official Rep - Cake',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1fomoz167m7o38gw4rzt7hz67oq6itejpt4yocrfywujbpatd711cjew8gjj',
+        alias: 'Official Rep - FOMO',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3runnerrxm74165sfmystpktzsyp7eurixwpk59tejnn8xamn8zog18abrda',
+        alias: 'Banano Runner',
+    },
+    {
+        address: 'ban_3fundbxxzrzfy3k9jbnnq8d44uhu5sug9rkh135bzqncyy9dw91dcrjg67wf',
+        alias: 'Giveaway Fund 3',
+    },
+    {
+        address: 'ban_1fundm3d7zritekc8bdt4oto5ut8begz6jnnt7n3tdxzjq3t46aiuse1h7gj',
+        alias: 'Giveaway Fund 1',
+    },
+    {
+        address: 'ban_3fo1d1ng6mfqumfoojqby13nahaugqbe5n6n3trof4q8kg5amo9mribg4muo',
+        alias: 'Folding',
+        type: 'Development',
+    },
+    {
+        address: 'ban_1burnbabyburndiscoinferno111111111111111111111111111aj49sw3w',
+        alias: 'Burn',
+        type: 'Burn',
+    },
+    {
+        address: 'ban_1monkeyt1x77a1rp9bwtthajb8odapbmnzpyt8357ac8a1bcron34i3r9y66',
+        alias: 'MonkeyTalks',
+    },
+    {
+        address: 'ban_1ka1ium4pfue3uxtntqsrib8mumxgazsjf58gidh1xeo5te3whsq8z476goo',
+        alias: 'Kalium',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1boompow14irck1yauquqypt7afqrh8b6bbu5r93pc6hgbqs7z6o99frcuym',
+        alias: 'BoomPoW',
+    },
+    {
+        address: 'ban_1faucetjuiyuwnz94j4c7s393r95sk5ac7p5usthmxct816osgqh3qd1caet',
+        alias: 'Banano Faucet',
+        type: 'Distribution',
+    },
+    {
+        address: 'ban_1nrcne47secz1hnm9syepdoob7t1r4xrhdzih3zohb1c3z178edd7b6ygc4x',
+        alias: 'CoinEx',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1oaocnrcaystcdtaae6woh381wftyg4k7bespu19m5w18ze699refhyzu6bo',
+        alias: 'Kuyumcu',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1tipbotgges3ss8pso6xf76gsyqnb69uwcxcyhouym67z7ofefy1jz7kepoy',
+        alias: 'Banano Tipbots',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1sebrep1mbkdtdb39nsouw5wkkk6o497wyrxtdp71sm878fxzo1kwbf9k79b',
+        alias: 'sebrock19.de',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3px37c9f6w361j65yoasrcs6wh3hmmyb6eacpis7dwzp8th4hbb9izgba51j',
+        alias: 'Banano Italio - La Giungla',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1wha1enz8k8r65k6nb89cxqh6cq534zpixmuzqwbifpnqrsycuegbmh54au6',
+        alias: 'bananode.eu',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3p3sp1ynb5i3qxmqoha3pt79hyk8gxhtr58tk51qctwyyik6hy4dbbqbanan',
+        alias: 'BananOslo',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3batmanuenphd7osrez9c45b3uqw9d9u81ne8xa6m43e1py56y9p48ap69zg',
+        alias: 'batman',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1creepi89mp48wkyg5fktgap9j6165d8yz6g1fbe5pneinz3by9o54fuq63m',
+        alias: 'creeper.banano.cc',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3grayknbwtrjdsbdgsjbx4fzds7eufjqghzu6on57aqxte7fhhh14gxbdz61',
+        alias: 'Gray',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3m8mdu1jxuntoe19wemgohduss3cn7ctxbt41ioh87mfjz9ho8o15yhjas96',
+        alias: 'Cabbit Node',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1fnx59bqpx11s1yn7i5hba3ot5no4ypy971zbkp5wtium3yyafpwhhwkq8fc',
+        alias: 'banano.nifni.net',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1bestrep6gq14bt4bi7w446m9knc6matfad7qcii7edeb33iipooh46dotdz',
+        alias: 'node.banano.ch',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3binance1adje7uwzjmsyxsqxjt8c471i33xo39k94twkipntmrqt1ii5t57',
+        alias: 'Unofficial Binance Representative 1',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1banbet1hxxe9aeu11oqss9sxwe814jo9ym8c98653j1chq4k4yaxjsacnhc',
+        alias: 'BananoBet Rep',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3srechjntpdomi9dbaksfxkpk4o134kchii8iozd98aa5f3txbej96wb77mg',
+        alias: 'Yellow Trust',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1ce1ery6hqwyqqyh15m4atcoaywd8rycyapjjooqeg7gi149kmatjbb3wiwx',
+        alias: 'Dev Salary',
+    },
+    {
+        address: 'ban_3pp1antnfudas6ad44kwpad4jb376cihftskq9ne76hazosi654gjdohriai',
+        alias: 'Banano Powerplant',
+        type: 'Distribution',
+    },
+    {
+        address: 'ban_1crane864e1cn1g3p9mrduf49hp86gfgfosp8rib43smxxuqp3phq1yiu58k',
+        alias: 'Crane Faucet',
+        type: 'Distribution',
+    },
+    {
+        address: 'ban_1b1ack1188caohzjdj65uarnk4kobzrnr3q3oc3bew5rfkyqxzu81zhjgp1e',
+        alias: 'Black Monkey',
+        type: 'Distribution',
+    },
+    {
+        address: 'ban_36e1qnwo5faf7uapp6gbzzmzt3bgz6a93txuukmr45pmodcy4q7pwaray1u9',
+        alias: 'Atomars Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1fxc48dynhbjb69uuyue4bsfuymxick8js14synwznduy61g6i9esdeasmem',
+        alias: 'GJ Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_16tduo1cu9ydp8ris3o5w4rm96myqics5o8tjw8s13ja8owba6xfpwc8399r',
+        alias: 'Banroulettecom Hot Wallet',
+        type: 'Distribution',
+    },
+    {
+        address: 'ban_1gooj14qko1u6md87aga9c53nf4iphyt1ua7x3kq1wnkdh49u5mndqygbr1q',
+        alias: 'Ataix Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_16bfuppfebtmgh1t8ktpk4eq4dyz5m1ztxesznagd916jzk8b87qity3habz',
+        alias: 'Unnamed Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_3yafcjcq79cjfm4wio5db6drffmf61jh8cosoijmg3eppzmbxb4kej8t3dze',
+        alias: 'qtrade Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1bujgzb69qr4owkcm3qu35mb843qtwnx4zf8q3myjw1dui7br5k87k84e54d',
+        alias: 'ViteX Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1gtkt1ekpazojhxwnym9ur61cz4w7n8yez5yq81id6cb8k63bhwx7axhtsxx',
+        alias: 'Bitmesh Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_3wwd51yoxeafubpn84gy7tje7yw6ccqcach9m4yfn46sf15itnysap9dd1xc',
+        alias: 'Citex Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_3w6yatruhkxgu4bhx1d8zggpwafrq3z7xyrqchuw8h5xa9aqhnrj7mi79mtu',
+        alias: 'Qbtc Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_3x1o69xsppjb1d9owsn8x6uqr8a1ttpitsu3yya7iyimaboqhb9urb8x61y8',
+        alias: 'Txbit Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_31dhbgirwzd3ce7naor6o94woefws9hpxu4q8uxm1bz98w89zqpfks5rk3ad',
+        alias: 'Mercatox Cold Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_3k76rawffjm79qedoc54nhk3edkq5makoyp73b1t6q6j9yjeq633q1xck9g8',
+        alias: 'Mercatox Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1banbet955hwemgsqrb8afycd3nykaqaxsn7iaydcctfrwi3rbb36y17fbcb',
+        alias: 'Bananobet Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1w5q77ocgfrjn6sqwudfuygtomwyij8ijes3y5g8kaydxsf8f4jpz4n9q9a3',
+        alias: 'Nanogames Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_3iejwmk1n3fqdntwcgudhmddo9bpwa8jzx6g361iq6rzbsrzonekmdus9yj5',
+        alias: 'Bananoroyale Hot Wallet',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1nrcne47secz1hnm9syepdoob7t1r4xrhdzih3zohb1c3z178edd7b6ygc4x',
+        alias: 'Coinex Deposits',
+        type: 'Exchange',
+    },
+    {
+        address: 'ban_1gxx3dbrprrh9ycf1p5wo9qgmftppg6z7688njum14aybjkaiweqmwpuu9py',
+        alias: 'BananoLooker Donations',
+        type: 'Explorer',
+    },
+];

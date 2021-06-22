@@ -7,7 +7,7 @@ export const URL_WHITE_LIST = [
     'https://www.yellow-spyglass.web.app',
     'https://yellowspyglass.com',
     'https://www.yellowspyglass.com',
-    'http://localhost:4200'
+    'http://localhost:4200',
 ];
 export const NANO_CLIENT = new NanoClient({
     url: process.env.RPC_URL,
