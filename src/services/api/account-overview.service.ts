@@ -13,6 +13,7 @@ import {
 } from '@dev-ptera/nano-node-rpc';
 import { AccountOverviewDto, DelegatorDto } from '@app/types';
 import { AppCache } from '@app/config';
+import { rawToBan } from 'banano-unit-converter';
 
 export const getAccountOverview = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
@@ -39,18 +40,37 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             }
         });
 
-    const delegatorsPromise: Promise<DelegatorDto[]> = delegatorsRpc(address)
+    const delegatorsPromise: Promise<{
+        delegators: DelegatorDto[];
+        count: number;
+        weightSum: number;
+    }> = delegatorsRpc(address)
         .then((delegatorsResponse: DelegatorsResponse) => {
             const delegatorsDto: DelegatorDto[] = [];
             for (const key in delegatorsResponse.delegators) {
+                /* Filters out 0-weight delegators.  These accounts delegate weight then transfer their funds.  */
                 if (delegatorsResponse.delegators[key] !== '0') {
                     delegatorsDto.push({
                         address: key,
-                        weightRaw: delegatorsResponse.delegators[key],
+                        weightBan: Number(rawToBan(delegatorsResponse.delegators[key])),
                     });
                 }
             }
-            return Promise.resolve(delegatorsDto);
+            const count = delegatorsDto.length;
+
+            // Sort by weight descending
+            delegatorsDto.sort((a, b) => (a.weightBan < b.weightBan ? 1 : -1));
+
+            let weightSum = 0;
+            // Get total delegated weight
+            delegatorsDto.map((a) => (weightSum += a.weightBan));
+
+            /* Only return first 1000 delegators */
+            return Promise.resolve({
+                delegators: delegatorsDto.slice(0, 1000),
+                count,
+                weightSum,
+            });
         })
         .catch((err) => {
             return Promise.reject(formatError('getDelegators', err, { address }));
@@ -73,7 +93,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         confirmedTransactionsPromise(address, 0, size),
         pendingTransactionsPromise(address, 0, size),
     ])
-        .then(([accountBalance, accountInfo, delegators, confirmedTransactions, pendingTransactions]) => {
+        .then(([accountBalance, accountInfo, delegatorsData, confirmedTransactions, pendingTransactions]) => {
             const accountOverview: AccountOverviewDto = {
                 address,
                 opened: Boolean(accountInfo.open_block),
@@ -83,10 +103,11 @@ export const getAccountOverview = async (req, res): Promise<void> => {
                 isRepOnline: isRepOnline(accountInfo.representative),
                 completedTxCount: Number(accountInfo.block_count),
                 pendingTxCount: Number(pendingTransactions.length),
-                delegatorsCount: Number(delegators.length),
+                delegatorsCount: delegatorsData.count,
+                delegatorsWeightSum: delegatorsData.weightSum,
                 confirmedTransactions,
                 pendingTransactions: pendingTransactions.splice(0, 50),
-                delegators,
+                delegators: delegatorsData.delegators,
             };
             res.send({ ...accountOverview });
         })
