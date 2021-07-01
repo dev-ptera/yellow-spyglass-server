@@ -50,9 +50,14 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             for (const key in delegatorsResponse.delegators) {
                 /* Filters out 0-weight delegators.  These accounts delegate weight then transfer their funds.  */
                 if (delegatorsResponse.delegators[key] !== '0') {
+                    /* Filters out dust. */
+                    const ban = Number(rawToBan(delegatorsResponse.delegators[key]));
+                    if (isNaN(ban) || Number(ban.toFixed(10)) === 0) {
+                        continue;
+                    }
                     delegatorsDto.push({
                         address: key,
-                        weightBan: Number(rawToBan(delegatorsResponse.delegators[key])),
+                        weightBan: ban
                     });
                 }
             }
