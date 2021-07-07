@@ -1,17 +1,28 @@
 const moduleAlias = require('module-alias');
+moduleAlias.addAlias('@app/config', __dirname + '/config');
+moduleAlias.addAlias('@app/firestore', __dirname + '/firestore');
 moduleAlias.addAlias('@app/rpc', __dirname + '/rpc');
 moduleAlias.addAlias('@app/services', __dirname + '/services');
 moduleAlias.addAlias('@app/types', __dirname + '/types');
-moduleAlias.addAlias('@app/config', __dirname + '/config');
 
 import * as express from 'express';
 import * as cors from 'cors';
+
 const dotenv = require('dotenv');
 dotenv.config();
 const http = require('http');
 const app = express();
 
-import { IS_PRODUCTION, URL_WHITE_LIST, PATH_ROOT, AppCache } from '@app/config';
+import {
+    IS_PRODUCTION,
+    URL_WHITE_LIST,
+    PATH_ROOT,
+    AppCache,
+    PRICE_DATA_REFRESH_INTERVAL_MS,
+    WALLETS_REFRESH_INTERVAL_MS,
+    REPRESENTATIVES_REFRESH_INTERVAL_MS,
+    KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS,
+} from '@app/config';
 import {
     getAccountOverview,
     getConfirmedTransactions,
@@ -48,7 +59,7 @@ const sendCached = (res, noCacheMethod: () => Promise<any>, cache): void => {
 };
 
 app.use(cors(corsOptions));
-app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res)); // TODO: rename these to [get-name-service], and rpc [action-rpc]
+app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res));
 app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeersService(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
@@ -62,6 +73,9 @@ app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
 app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, AppCache.knownAccounts));
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
 app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.representatives));
+app.get(`/${PATH_ROOT}/representatives-uptime`, (req, res) =>
+    sendCached(res, cacheRepresentatives, AppCache.representatives)
+);
 app.get(
     `/${PATH_ROOT}/accounts-distribution`,
     (
@@ -78,19 +92,16 @@ server.listen(port, () => {
     console.log(`Production mode enabled? : ${IS_PRODUCTION}`);
     // importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
 
-    /* Reload known accounts every hour */
     void cacheKnownAccounts();
     setInterval(() => {
         void cacheKnownAccounts();
-    }, 60000 * 60);
+    }, KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS);
 
-    /* Reload network stats every 5 minutes. */
     void cacheRepresentatives();
     setInterval(() => {
         void cacheRepresentatives();
-    }, 60000 * 5);
+    }, REPRESENTATIVES_REFRESH_INTERVAL_MS);
 
-    /*  Reload rich list every 60 minutes. */
     /*  I've disabled this operation when developing since I don't develop on the same machine
         that runs the node and inter-network calls are too slow for this run every hour.
     */
@@ -98,12 +109,11 @@ server.listen(port, () => {
         void cacheAccountDistribution();
         setInterval(() => {
             void cacheAccountDistribution();
-        }, 60000 * 60);
+        }, WALLETS_REFRESH_INTERVAL_MS);
     }
 
-    /* Reload price data every 15 minutes. */
     void cachePriceData();
     setInterval(() => {
         void cachePriceData();
-    }, 60000 * 15);
+    }, PRICE_DATA_REFRESH_INTERVAL_MS);
 });

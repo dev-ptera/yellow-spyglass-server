@@ -28,3 +28,4 @@ cmc-api-key.ts
 timestamps.csv
 
 .env
+serviceAccountKey.ts

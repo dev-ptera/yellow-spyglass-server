@@ -4,6 +4,8 @@ import {
     PriceDataDto,
     RepresentativesResponseDto,
     KnownAccountDto,
+    RepPingMap,
+    RepPingMapData,
 } from '@app/types';
 
 export type AppCache = {
@@ -17,6 +19,7 @@ export type AppCache = {
     richList: AccountBalanceDto[];
     knownAccounts: KnownAccountDto[];
     historicHash: Map<string, string>;
+    firestoreRepPings: RepPingMap;
 };
 
 export const AppCache: AppCache = {
@@ -30,4 +33,5 @@ export const AppCache: AppCache = {
     knownAccounts: [],
     richList: [],
     historicHash: new Map<string, string>(),
+    firestoreRepPings: new Map<string, RepPingMapData>(),
 };
