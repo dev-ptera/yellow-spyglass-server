@@ -1,13 +1,25 @@
-import { RepresentativeDto, RepresentativesResponseDto } from '@app/types';
+import { Ping, RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
 import { formatError, getMonitoredRepsService } from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
+import { writeRepStatistics } from '@app/firestore';
 
 const { performance } = require('perf_hooks');
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
-const OFFLINE_AFTER_PINGS = 3;
+const OFFLINE_AFTER_PINGS = 4;
+
+/** Given a list of pings, where 1 represents ONLINE and 0 represents OFFLINE, returns online percentage. */
+const calculateUptimePercentage = (pings: Ping[]): number => {
+    let onlinePings = 0;
+    for (const ping of pings) {
+        if (ping === 1) {
+            onlinePings++;
+        }
+    }
+    return Number(((onlinePings / pings.length) * 100).toFixed(1));
+};
 
 /** Using the AppCache, will mark a rep as offline if it has been unresponsive for [OFFLINE_AFTER_PINGS] pings. */
 export const isRepOnline = (repAddress: string): boolean =>
@@ -45,8 +57,8 @@ export const populateDelegatorsCount = async (
 };
 
 /**
- * Gets the top 100 representatives & then filters out smaller ones.
- * Then marks the remaining as online/offline & adds a delegator count.
+ * Gets the top 100 representatives & filters out smaller ones.
+ * Then to the remaining, adds delegator count, marks each as online/offline, and stores ping data in firestore.
  */
 const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     const rpcData = await NANO_CLIENT.representatives(100, true);
@@ -67,8 +79,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     await populateDelegatorsCount(weightedReps);
 
     // Get all online reps & update the AppCache.
-    // The `representatives_online` RPC call is unreliable.
-    // I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
+    // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
     await NANO_CLIENT.representatives_online()
         .then((onlineReps: RPC.RepresentativesOnlineResponse) => {
             AppCache.repPings.currPing++;
@@ -84,14 +95,26 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
         rep.online = isRepOnline(address);
     }
 
+    // Save representative online/offline status in firestore
+    for (const address of weightedReps.keys()) {
+        await writeRepStatistics(address, weightedReps.get(address).online);
+    }
+
     // Construct response array
     for (const address of weightedReps.keys()) {
         const rep = weightedReps.get(address);
+        const fsPings = AppCache.firestoreRepPings.get(address);
+
         reps.push({
             address,
             weight: rep.weight,
             online: Boolean(rep.online),
             delegatorsCount: rep.delegatorsCount,
+            uptimePercentDay: calculateUptimePercentage(fsPings.day),
+            uptimePercentWeek: calculateUptimePercentage(fsPings.week),
+            uptimePercentMonth: calculateUptimePercentage(fsPings.month),
+            uptimePercentSemiAnnual: calculateUptimePercentage(fsPings.semiAnnual),
+            uptimePercentYear: calculateUptimePercentage(fsPings.year),
         });
     }
     return reps;
@@ -106,10 +129,10 @@ const getOnlineWeight = (): Promise<number> =>
         .catch((err) => Promise.reject(formatError('getRepresentativesService.getOnlineWeight', err)));
 
 /** Representatives Promise aggregate; makes the all required to populate the rep data in AppCache. */
-const getRepresentativesDto = () =>
+const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
     Promise.all([getAllRepresentatives(), getMonitoredRepsService(), getOnlineWeight()])
         .then((data) => {
-            const response: RepresentativesResponseDto = {
+            const response = {
                 representatives: data[0],
                 monitoredReps: data[1],
                 onlineWeight: data[2],
@@ -124,7 +147,7 @@ export const cacheRepresentatives = async (): Promise<void> => {
         const t0 = performance.now();
         console.log('[INFO]: Refreshing Representatives');
         getRepresentativesDto()
-            .then((data) => {
+            .then((data: RepresentativesResponseDto) => {
                 const t1 = performance.now();
                 console.log(`[INFO]: Representatives Updated, took ${Math.round(t1 - t0)}ms`);
                 AppCache.representatives = data;

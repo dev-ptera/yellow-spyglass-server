@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
 import { formatError, populateDelegatorsCount } from '@app/services';
+import { MANUAL_PEER_MONITOR_IPS } from '@app/config';
 
 // Given peer IP, queries banano node monitor stats.
 const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
@@ -13,6 +14,12 @@ const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
             response.data.ip = ip;
+
+            /* Remove non-banano representatives from the peers list. */
+            if (!response.data.repAccount.includes('ban_')) {
+                return Promise.resolve(undefined);
+            }
+
             return Promise.resolve(response.data);
         })
         .catch(() => Promise.resolve(undefined));
@@ -59,15 +66,21 @@ const extractIpAddress = (dirtyIp: string): string => dirtyIp.replace('::ffff:',
 // Fetches banano peer details, then sends groomed response.
 const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
     const peerMonitorStatsPromises: Array<Promise<PeerMonitorStats>> = [];
+    const duplicateIpSet = new Set<string>();
 
-    // Include my own node too
-    peerMonitorStatsPromises.push(getPeerMonitorStats('108.39.249.5'));
+    // Include all monitors this node is not connected to.  Batman node has poor peer count.
+    MANUAL_PEER_MONITOR_IPS.map((ip: string) => {
+        peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
+        duplicateIpSet.add(ip);
+    });
+
     // Add all peer ips to the list of ips to fetch
     for (const dirtyIp in rpcData.peers) {
         const ip = extractIpAddress(dirtyIp);
         const rpcDetails = rpcData.peers[dirtyIp];
-        if (ip && rpcDetails) {
+        if (ip && rpcDetails && !duplicateIpSet.has(ip)) {
             peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
+            duplicateIpSet.add(ip);
         }
     }
     return Promise.all(peerMonitorStatsPromises)
