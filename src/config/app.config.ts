@@ -34,4 +34,5 @@ export const MANUAL_PEER_MONITOR_IPS = [
     '45.77.190.142', // Cabbit
     'banano.nifni.net',
     '192.210.243.189', // hentai
+    'bagend.notellem.win',
 ];

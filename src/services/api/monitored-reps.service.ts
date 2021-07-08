@@ -66,16 +66,21 @@ const extractIpAddress = (dirtyIp: string): string => dirtyIp.replace('::ffff:',
 // Fetches banano peer details, then sends groomed response.
 const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
     const peerMonitorStatsPromises: Array<Promise<PeerMonitorStats>> = [];
+    const duplicateIpSet = new Set<string>();
 
     // Include all monitors this node is not connected to.  Batman node has poor peer count.
-    MANUAL_PEER_MONITOR_IPS.map((ip: string) => peerMonitorStatsPromises.push(getPeerMonitorStats(ip)));
+    MANUAL_PEER_MONITOR_IPS.map((ip: string) => {
+        peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
+        duplicateIpSet.add(ip);
+    });
 
     // Add all peer ips to the list of ips to fetch
     for (const dirtyIp in rpcData.peers) {
         const ip = extractIpAddress(dirtyIp);
         const rpcDetails = rpcData.peers[dirtyIp];
-        if (ip && rpcDetails) {
+        if (ip && rpcDetails && !duplicateIpSet.has(ip)) {
             peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
+            duplicateIpSet.add(ip);
         }
     }
     return Promise.all(peerMonitorStatsPromises)
