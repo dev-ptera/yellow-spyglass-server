@@ -10,11 +10,11 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-const dayMaxPings = 86400000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
+const dayMaxPings = 86_400_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const weekMaxPings = 604_800_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
-const monthMaxPings = 2_419_200_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
-const semiAnnualMaxPings = (6 * 2_419_200_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
-const yearMaxPings = (12 * 2_419_200_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
+const monthMaxPings = 2_629_800_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
+const semiAnnualMaxPings = (6 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
+const yearMaxPings = (12 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 
 const getRepDoc = async (collection: string, repAddress: string): Promise<RepPingMapData> => {
     const repDoc = await db.collection(collection).doc(repAddress);

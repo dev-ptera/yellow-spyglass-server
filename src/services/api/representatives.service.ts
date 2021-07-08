@@ -8,7 +8,7 @@ import { writeRepStatistics } from '@app/firestore';
 
 const { performance } = require('perf_hooks');
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
-const OFFLINE_AFTER_PINGS = 3;
+const OFFLINE_AFTER_PINGS = 4;
 
 /** Given a list of pings, where 1 represents ONLINE and 0 represents OFFLINE, returns online percentage. */
 const calculateUptimePercentage = (pings: Ping[]): number => {
@@ -57,8 +57,8 @@ export const populateDelegatorsCount = async (
 };
 
 /**
- * Gets the top 100 representatives & then filters out smaller ones.
- * Then marks the remaining as online/offline & adds a delegator count.
+ * Gets the top 100 representatives & filters out smaller ones.
+ * Then to the remaining, adds delegator count, marks each as online/offline, and stores ping data in firestore.
  */
 const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     const rpcData = await NANO_CLIENT.representatives(100, true);
@@ -79,8 +79,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     await populateDelegatorsCount(weightedReps);
 
     // Get all online reps & update the AppCache.
-    // The `representatives_online` RPC call is unreliable.
-    // I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
+    // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
     await NANO_CLIENT.representatives_online()
         .then((onlineReps: RPC.RepresentativesOnlineResponse) => {
             AppCache.repPings.currPing++;
