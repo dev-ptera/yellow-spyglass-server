@@ -62,47 +62,54 @@ export const populateDelegatorsCount = async (
  */
 const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     const rpcData = await NANO_CLIENT.representatives(100, true);
-    const weightedReps = new Map<string, Partial<RepresentativeDto>>();
-    const reps: RepresentativeDto[] = [];
+    const trackedReps = new Map<string, Partial<RepresentativeDto>>();
 
     // Add all reps with high-enough delegated weight to a map.
     for (const address in rpcData.representatives) {
         const raw = rpcData.representatives[address];
         const weight = Math.round(Number(rawToBan(raw)));
         if (weight >= MIN_WEIGHT_TO_BE_COUNTED) {
-            weightedReps.set(address, { weight });
+            trackedReps.set(address, { weight });
         } else {
             break;
         }
     }
 
-    await populateDelegatorsCount(weightedReps);
+    // Adds delegatorsCount to each weightedRep.
+    await populateDelegatorsCount(trackedReps);
 
-    // Get all online reps & update the AppCache.
+    // Get all online reps from nano rpc.
     // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
-    await NANO_CLIENT.representatives_online()
-        .then((onlineReps: RPC.RepresentativesOnlineResponse) => {
-            AppCache.repPings.currPing++;
-            for (const address of onlineReps.representatives) {
-                AppCache.repPings.map.set(address, AppCache.repPings.currPing);
-            }
-        })
-        .catch((err) => Promise.reject(formatError('getRepresentativesApi.representatives_online', err)));
+    const onlineReps = (await NANO_CLIENT.representatives_online().catch((err) =>
+        Promise.reject(formatError('getRepresentativesApi.representatives_online', err))
+    )) as RPC.RepresentativesOnlineResponse;
 
-    // Use the AppCache to mark reps are online or offline.
-    for (const address of weightedReps.keys()) {
-        const rep = weightedReps.get(address);
+    // Update online pings
+    AppCache.onlineReps.clear();
+    AppCache.repPings.currPing++;
+    for (const address of onlineReps.representatives) {
+        // Use nano rpc results to add online/offline status to untracked reps.
+        AppCache.onlineReps.add(address);
+        AppCache.repPings.map.set(address, AppCache.repPings.currPing);
+    }
+
+    // Use the AppCache to mark trackedReps as online or offline.
+    for (const address of trackedReps.keys()) {
+        const rep = trackedReps.get(address);
         rep.online = isRepOnline(address);
+        // Update onlinReps cache results to match trackedReps cache results.
+        rep.online ? AppCache.onlineReps.add(rep.address) : AppCache.onlineReps.delete(rep.address);
     }
 
     // Save representative online/offline status in firestore
-    for (const address of weightedReps.keys()) {
-        await writeRepStatistics(address, weightedReps.get(address).online);
+    for (const address of trackedReps.keys()) {
+        await writeRepStatistics(address, trackedReps.get(address).online);
     }
 
     // Construct response array
-    for (const address of weightedReps.keys()) {
-        const rep = weightedReps.get(address);
+    const reps: RepresentativeDto[] = [];
+    for (const address of trackedReps.keys()) {
+        const rep = trackedReps.get(address);
         const fsPings = AppCache.firestoreRepPings.get(address);
 
         reps.push({
@@ -133,7 +140,7 @@ const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
     Promise.all([getAllRepresentatives(), getMonitoredRepsService(), getOnlineWeight()])
         .then((data) => {
             const response = {
-                representatives: data[0],
+                thresholdReps: data[0],
                 monitoredReps: data[1],
                 onlineWeight: data[2],
             };
@@ -150,7 +157,7 @@ export const cacheRepresentatives = async (): Promise<void> => {
             .then((data: RepresentativesResponseDto) => {
                 const t1 = performance.now();
                 console.log(`[INFO]: Representatives Updated, took ${Math.round(t1 - t0)}ms`);
-                AppCache.representatives = data;
+                AppCache.trackedReps = data;
                 resolve();
             })
             .catch((err) => {

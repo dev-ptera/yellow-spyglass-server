@@ -57,7 +57,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
                     }
                     delegatorsDto.push({
                         address: key,
-                        weightBan: ban
+                        weightBan: ban,
                     });
                 }
             }
@@ -82,7 +82,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
         });
 
     const isRepOnline = (accountRep: string): boolean => {
-        const repCache = AppCache.representatives?.representatives || [];
+        const repCache = AppCache.trackedReps?.thresholdReps || [];
         for (const rep of repCache) {
             if (rep.address === accountRep) {
                 return rep.online;

@@ -72,9 +72,9 @@ app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
 /* Cached Results */
 app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, AppCache.knownAccounts));
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
-app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.representatives));
+app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.trackedReps));
 app.get(`/${PATH_ROOT}/representatives-uptime`, (req, res) =>
-    sendCached(res, cacheRepresentatives, AppCache.representatives)
+    sendCached(res, cacheRepresentatives, AppCache.trackedReps)
 );
 app.get(
     `/${PATH_ROOT}/accounts-distribution`,

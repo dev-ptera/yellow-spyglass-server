@@ -10,7 +10,11 @@ import {
 
 export type AppCache = {
     priceData: PriceDataDto;
-    representatives: RepresentativesResponseDto;
+    /** Representatives that either run the node monitor software or have a weight greater than min threshold. */
+    trackedReps: RepresentativesResponseDto;
+    /** All reps online, regardless of voting weight. */
+
+    onlineReps: Set<string>;
 
     /** An object used to keep track of whether a representative has fallen offline.
      *  Since the `representatives_online` nano RPC call is unreliable (sometimes it returns far fewer reps than expected),
@@ -20,9 +24,12 @@ export type AppCache = {
         currPing: number;
         map: Map<string, number>;
     };
+
     accountDistributionStats: AccountDistributionStatsDto;
     richList: AccountBalanceDto[];
     knownAccounts: KnownAccountDto[];
+
+    /** Populated by a csv of hash -> timestamp pairs. */
     historicHash: Map<string, string>;
 
     /** This object matches the firestore collection for representative pings. */
@@ -31,7 +38,8 @@ export type AppCache = {
 
 export const AppCache: AppCache = {
     priceData: undefined,
-    representatives: undefined,
+    trackedReps: undefined,
+    onlineReps: new Set<string>(),
     repPings: {
         currPing: 0,
         map: new Map<string, number>(),

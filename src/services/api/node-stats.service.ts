@@ -3,8 +3,8 @@ import { formatError } from '@app/services';
 import { AppCache } from '@app/config';
 
 export const getNodeStats = (req, res): void => {
-    if (AppCache.representatives) {
-        for (const dto of AppCache.representatives.monitoredReps) {
+    if (AppCache.trackedReps) {
+        for (const dto of AppCache.trackedReps.monitoredReps) {
             if (dto.name === 'batman') {
                 return res.send({
                     ...dto,
