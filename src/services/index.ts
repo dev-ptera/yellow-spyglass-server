@@ -11,6 +11,7 @@ export * from './api/pending-transactions.services';
 export * from './api/price.service';
 export * from './api/representatives.service';
 export * from './api/online-reps.service';
+export * from './api/representative-uptime.service';
 
 export * from './etc/error.service';
 export * from './etc/account-utils';

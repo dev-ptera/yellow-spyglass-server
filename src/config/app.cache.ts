@@ -32,8 +32,8 @@ export type AppCache = {
     /** Populated by a csv of hash -> timestamp pairs. */
     historicHash: Map<string, string>;
 
-    /** This object matches the firestore collection for representative pings. */
-    firestoreRepPings: RepPingMap;
+    /** This object matches the json collection for representative pings. */
+    dbRepPings: RepPingMap;
 };
 
 export const AppCache: AppCache = {
@@ -48,5 +48,5 @@ export const AppCache: AppCache = {
     knownAccounts: [],
     richList: [],
     historicHash: new Map<string, string>(),
-    firestoreRepPings: new Map<string, RepPingMapData>(),
+    dbRepPings: new Map<string, RepPingMapData>(),
 };
