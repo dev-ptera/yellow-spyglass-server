@@ -5,7 +5,6 @@
         "baseUrl": "./src",
         "paths": {
             "@app/config": ["config/index.ts"],
-            "@app/firestore": ["firestore/index.ts"],
             "@app/rpc": ["rpc/index.ts"],
             "@app/services": ["services/index.ts"],
             "@app/types": ["types/index.ts"],

@@ -1,10 +1,9 @@
 import { Ping, RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
-import { formatError, getMonitoredRepsService } from '@app/services';
+import { formatError, getMonitoredRepsService, writeRepStatistics} from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
-import { writeRepStatistics } from '@app/firestore';
 
 const { performance } = require('perf_hooks');
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
@@ -101,7 +100,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
         rep.online ? AppCache.onlineReps.add(rep.address) : AppCache.onlineReps.delete(rep.address);
     }
 
-    // Save representative online/offline status in firestore
+    // Save representative online/offline status in local database
     for (const address of trackedReps.keys()) {
         await writeRepStatistics(address, trackedReps.get(address).online);
     }
@@ -110,7 +109,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     const reps: RepresentativeDto[] = [];
     for (const address of trackedReps.keys()) {
         const rep = trackedReps.get(address);
-        const fsPings = AppCache.firestoreRepPings.get(address);
+        const fsPings = AppCache.dbRepPings.get(address);
 
         reps.push({
             address,

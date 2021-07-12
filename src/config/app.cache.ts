@@ -5,17 +5,16 @@ import {
     RepresentativesResponseDto,
     KnownAccountDto,
     RepPingMap,
-    RepPingMapData, ConsensusStatsDto, Quorum,
+    RepPingMapData,
 } from '@app/types';
 import {NetworkStatsDto} from "../types/dto/NetworkStatsDto";
-import {DistributionStatsDto} from "../types/dto/DistributionStatsDto";
 
 export type AppCache = {
     /** Graph data for BAN distribution. */
     accountDistributionStats: AccountDistributionStatsDto;
 
-    /** This object matches the firestore collection for representative pings. */
-    firestoreRepPings: RepPingMap;
+    /** This object matches the json collection for representative pings. */
+    dbRepPings: RepPingMap;
 
     /** Populated by a csv of hash -> timestamp pairs. */
     historicHash: Map<string, string>;
@@ -49,7 +48,7 @@ export type AppCache = {
 
 export const AppCache: AppCache = {
     accountDistributionStats: undefined,
-    firestoreRepPings: new Map<string, RepPingMapData>(),
+    dbRepPings: new Map<string, RepPingMapData>(),
     historicHash: new Map<string, string>(),
     knownAccounts: [],
     networkStats: {

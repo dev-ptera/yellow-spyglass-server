@@ -1,6 +1,5 @@
 const moduleAlias = require('module-alias');
 moduleAlias.addAlias('@app/config', __dirname + '/config');
-moduleAlias.addAlias('@app/firestore', __dirname + '/firestore');
 moduleAlias.addAlias('@app/rpc', __dirname + '/rpc');
 moduleAlias.addAlias('@app/services', __dirname + '/services');
 moduleAlias.addAlias('@app/types', __dirname + '/types');
