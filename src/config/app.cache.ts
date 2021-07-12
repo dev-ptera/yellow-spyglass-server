@@ -5,16 +5,31 @@ import {
     RepresentativesResponseDto,
     KnownAccountDto,
     RepPingMap,
-    RepPingMapData,
+    RepPingMapData, ConsensusStatsDto, Quorum,
 } from '@app/types';
+import {NetworkStatsDto} from "../types/dto/NetworkStatsDto";
+import {DistributionStatsDto} from "../types/dto/DistributionStatsDto";
 
 export type AppCache = {
-    priceData: PriceDataDto;
-    /** Representatives that either run the node monitor software or have a weight greater than min threshold. */
-    trackedReps: RepresentativesResponseDto;
-    /** All reps online, regardless of voting weight. */
+    /** Graph data for BAN distribution. */
+    accountDistributionStats: AccountDistributionStatsDto;
 
+    /** This object matches the firestore collection for representative pings. */
+    firestoreRepPings: RepPingMap;
+
+    /** Populated by a csv of hash -> timestamp pairs. */
+    historicHash: Map<string, string>;
+
+    /** BAN accounts with an alias. */
+    knownAccounts: KnownAccountDto[];
+
+    networkStats: NetworkStatsDto,
+
+    /** All reps online, regardless of voting weight. */
     onlineReps: Set<string>;
+
+    /** Populated by CoinMarketCap API. */
+    priceData: PriceDataDto;
 
     /** An object used to keep track of whether a representative has fallen offline.
      *  Since the `representatives_online` nano RPC call is unreliable (sometimes it returns far fewer reps than expected),
@@ -25,28 +40,31 @@ export type AppCache = {
         map: Map<string, number>;
     };
 
-    accountDistributionStats: AccountDistributionStatsDto;
+    /** Top BANANO holders, sorted by balance. */
     richList: AccountBalanceDto[];
-    knownAccounts: KnownAccountDto[];
 
-    /** Populated by a csv of hash -> timestamp pairs. */
-    historicHash: Map<string, string>;
-
-    /** This object matches the firestore collection for representative pings. */
-    firestoreRepPings: RepPingMap;
+    /** Representatives that either run the node monitor software or have a weight greater than min threshold. */
+    trackedReps: RepresentativesResponseDto;
 };
 
 export const AppCache: AppCache = {
-    priceData: undefined,
-    trackedReps: undefined,
+    accountDistributionStats: undefined,
+    firestoreRepPings: new Map<string, RepPingMapData>(),
+    historicHash: new Map<string, string>(),
+    knownAccounts: [],
+    networkStats: {
+        consensus: undefined,
+        distribution: undefined,
+        quorum: undefined,
+        nakamotoCoefficient: undefined,
+        repWeights: [],
+    },
     onlineReps: new Set<string>(),
+    priceData: undefined,
     repPings: {
         currPing: 0,
         map: new Map<string, number>(),
     },
-    accountDistributionStats: undefined,
-    knownAccounts: [],
     richList: [],
-    historicHash: new Map<string, string>(),
-    firestoreRepPings: new Map<string, RepPingMapData>(),
+    trackedReps: undefined,
 };
