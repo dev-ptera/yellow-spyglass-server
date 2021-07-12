@@ -1,5 +1,5 @@
 import { accountsPendingRpc } from '@app/rpc';
-import { formatError, blocksInfoPromise } from '@app/services';
+import { LOG_ERR, blocksInfoPromise } from '@app/services';
 import { PendingTransactionDto } from '@app/types';
 import { AppCache } from '@app/config';
 import { AccountsPendingResponse, BlocksInfoResponse } from '@dev-ptera/nano-node-rpc';
@@ -38,7 +38,7 @@ export const pendingTransactionsPromise = async (address: string, offset: number
             return Promise.resolve(dto);
         })
         .catch((err) => {
-            return Promise.reject(formatError('getAccountsPending', err, { address, source: false }));
+            return Promise.reject(LOG_ERR('getAccountsPending', err, { address, source: false }));
         });
 
 /** Looks ups pending transactions for a given account. */

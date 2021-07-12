@@ -7,7 +7,7 @@ import {
     RepPingMap,
     RepPingMapData,
 } from '@app/types';
-import {NetworkStatsDto} from "../types/dto/NetworkStatsDto";
+import { NetworkStatsDto } from '../types/dto/NetworkStatsDto';
 
 export type AppCache = {
     /** Graph data for BAN distribution. */
@@ -22,7 +22,7 @@ export type AppCache = {
     /** BAN accounts with an alias. */
     knownAccounts: KnownAccountDto[];
 
-    networkStats: NetworkStatsDto,
+    networkStats: NetworkStatsDto;
 
     /** All reps online, regardless of voting weight. */
     onlineReps: Set<string>;

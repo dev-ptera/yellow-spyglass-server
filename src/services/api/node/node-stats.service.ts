@@ -1,5 +1,5 @@
 import { ErrorResponse } from '@dev-ptera/nano-node-rpc';
-import { formatError } from '@app/services';
+import { LOG_ERR } from '@app/services';
 import { AppCache } from '@app/config';
 
 export const getNodeStats = (req, res): void => {
@@ -15,5 +15,5 @@ export const getNodeStats = (req, res): void => {
     const err: ErrorResponse = {
         error: 'Batman missing in monitored rep list. Maybe the list is empty?',
     };
-    res.status(500).send(formatError('getNodeStats', err));
+    res.status(500).send(LOG_ERR('getNodeStats', err));
 };

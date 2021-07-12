@@ -1,4 +1,4 @@
-import { formatError } from '@app/services';
+import { LOG_ERR } from '@app/services';
 import { accountHistoryRpc } from '@app/rpc';
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
 import { InsightsDto } from '@app/types';
@@ -84,7 +84,7 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
             return Promise.resolve(insightsDto);
         })
         .catch((err) => {
-            return Promise.reject(formatError('getAccountInsights.confirmedTransactionPromise', err, { address }));
+            return Promise.reject(LOG_ERR('getAccountInsights.confirmedTransactionPromise', err, { address }));
         });
 
 /** Given an account address, it looks will return chart datapoints that represent that account's balance over time.

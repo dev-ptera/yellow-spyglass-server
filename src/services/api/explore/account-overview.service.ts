@@ -3,7 +3,7 @@ import {
     getUnopenedAccount,
     pendingTransactionsPromise,
     confirmedTransactionsPromise,
-    formatError,
+    LOG_ERR,
 } from '@app/services';
 import {
     AccountBalanceResponse,
@@ -25,7 +25,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             return Promise.resolve(accountInfo);
         })
         .catch((err) => {
-            return Promise.reject(formatError('getAccountBalance', err, { address }));
+            return Promise.reject(LOG_ERR('getAccountBalance', err, { address }));
         });
 
     const accountInfoPromise: Promise<AccountInfoResponse> = accountInfoRpc(address)
@@ -36,7 +36,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             if (err.error && err.error === 'Account not found') {
                 return Promise.resolve(getUnopenedAccount());
             } else {
-                return Promise.reject(formatError('getAccountInfo', err, { address }));
+                return Promise.reject(LOG_ERR('getAccountInfo', err, { address }));
             }
         });
 
@@ -78,7 +78,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             });
         })
         .catch((err) => {
-            return Promise.reject(formatError('getDelegators', err, { address }));
+            return Promise.reject(LOG_ERR('getDelegators', err, { address }));
         });
 
     const isRepOnline = (accountRep: string): boolean => {
@@ -117,6 +117,6 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             res.send({ ...accountOverview });
         })
         .catch((err) => {
-            res.status(500).send(formatError('getAccountOverview', err));
+            res.status(500).send(LOG_ERR('getAccountOverview', err));
         });
 };

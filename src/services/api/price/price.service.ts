@@ -1,4 +1,4 @@
-import { formatError } from '@app/services';
+import { LOG_ERR } from '@app/services';
 import { CMCPriceData, PriceDataDto } from '@app/types';
 import { AppCache } from '@app/config';
 import axios, { AxiosError, AxiosResponse } from 'axios';
@@ -23,7 +23,7 @@ const getBananoPrice = (): Promise<CMCPriceData> =>
             })
             .then((response: AxiosResponse<CMCPriceData>) => resolve(response.data))
             .catch((err: AxiosError) => {
-                reject(formatError('getBananoPrice', err));
+                reject(LOG_ERR('getBananoPrice', err));
             });
     });
 
@@ -40,7 +40,7 @@ const getBitcoinPrice = (): Promise<CMCPriceData> =>
             })
             .then((response: AxiosResponse<CMCPriceData>) => resolve(response.data))
             .catch((err: AxiosError) => {
-                reject(formatError('getBitcoinPrice', err));
+                reject(LOG_ERR('getBitcoinPrice', err));
             });
     });
 

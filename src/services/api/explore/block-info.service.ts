@@ -1,5 +1,5 @@
 import { blocksInfoRpc } from '@app/rpc';
-import { formatError } from '@app/services';
+import { LOG_ERR } from '@app/services';
 import { BlockDto } from '@app/types';
 import { AppCache } from '@app/config';
 import { BlocksInfoResponse, BlocksInfoResponseContents } from '@dev-ptera/nano-node-rpc';
@@ -10,7 +10,7 @@ export const blocksInfoPromise = (blocks: string[]): Promise<BlocksInfoResponse>
             return Promise.resolve(blocks);
         })
         .catch((err) => {
-            return Promise.reject(formatError('blocksInfoPromise', err, { blocks }));
+            return Promise.reject(LOG_ERR('blocksInfoPromise', err, { blocks }));
         });
 
 export const getBlockInfo = (req, res): void => {

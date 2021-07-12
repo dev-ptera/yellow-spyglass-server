@@ -27,6 +27,7 @@ export const REPRESENTATIVES_REFRESH_INTERVAL_MS = calcMinutes(5);
 export const WALLETS_REFRESH_INTERVAL_MS = calcMinutes(60);
 export const KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS = calcMinutes(60);
 export const PRICE_DATA_REFRESH_INTERVAL_MS = calcMinutes(IS_PRODUCTION ? 15 : 120);
+export const NETWORK_STATS_REFRESH_INTERVAL_MS = calcMinutes(5);
 
 /** List of monitored representatives to counter-act low peer count. */
 export const MANUAL_PEER_MONITOR_IPS = [

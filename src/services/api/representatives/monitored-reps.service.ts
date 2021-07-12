@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
-import { formatError, populateDelegatorsCount } from '@app/services';
+import { LOG_ERR, populateDelegatorsCount } from '@app/services';
 import { MANUAL_PEER_MONITOR_IPS } from '@app/config';
 
 // Given peer IP, queries banano node monitor stats.
@@ -87,9 +87,9 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
         .then((data) =>
             groomDto(data)
                 .then((groomed) => Promise.resolve(groomed))
-                .catch((err) => Promise.reject(formatError('getMonitoredRepsService.groomDto', err)))
+                .catch((err) => Promise.reject(LOG_ERR('getMonitoredRepsService.groomDto', err)))
         )
-        .catch((err) => Promise.reject(formatError('getMonitoredRepsService.getRepDetails', err)));
+        .catch((err) => Promise.reject(LOG_ERR('getMonitoredRepsService.getRepDetails', err)));
 };
 
 // banano creeper does not have a api.php.
@@ -103,12 +103,12 @@ export const getPeersService = async (req, res): Promise<void> =>
                         return Promise.resolve();
                     })
                     .catch((err) => {
-                        res.status(500).send(formatError('getPeersService', err));
+                        res.status(500).send(LOG_ERR('getPeersService', err));
                         return Promise.resolve();
                     });
             })
             .catch((err) => {
-                res.status(500).send(formatError('getPeersService', err));
+                res.status(500).send(LOG_ERR('getPeersService', err));
                 return Promise.resolve();
             });
     });
@@ -126,7 +126,7 @@ export const getMonitoredRepsService = async (): Promise<MonitoredRepDto[]> =>
                         });
                         resolve(details);
                     })
-                    .catch((err) => reject(formatError('getMonitoredRepsService', err)));
+                    .catch((err) => reject(LOG_ERR('getMonitoredRepsService', err)));
             })
-            .catch((err) => reject(formatError('getMonitoredRepsService', err)));
+            .catch((err) => reject(LOG_ERR('getMonitoredRepsService', err)));
     });

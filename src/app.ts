@@ -21,6 +21,7 @@ import {
     WALLETS_REFRESH_INTERVAL_MS,
     REPRESENTATIVES_REFRESH_INTERVAL_MS,
     KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS,
+    NETWORK_STATS_REFRESH_INTERVAL_MS,
 } from '@app/config';
 import {
     getAccountOverview,
@@ -37,6 +38,7 @@ import {
     cacheKnownAccounts,
     getRichList,
     getOnlineReps,
+    cacheNetworkStats, LOG_INFO,
 } from '@app/services';
 
 const corsOptions = {
@@ -72,6 +74,7 @@ app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
 app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, AppCache.knownAccounts));
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
 app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.trackedReps));
+app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, cacheNetworkStats, AppCache.networkStats));
 app.get(`/${PATH_ROOT}/representatives-uptime`, (req, res) =>
     sendCached(res, cacheRepresentatives, AppCache.trackedReps)
 );
@@ -87,8 +90,8 @@ const port: number = Number(process.env.PORT || 3000);
 const server = http.createServer(app);
 
 server.listen(port, () => {
-    console.log(`Running yellow-spyglass server on port ${port}.`);
-    console.log(`Production mode enabled? : ${IS_PRODUCTION}`);
+    LOG_INFO(`Running yellow-spyglass server on port ${port}.`);
+    LOG_INFO(`Production mode enabled? : ${IS_PRODUCTION}`);
     // importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
 
     void cacheKnownAccounts();
@@ -115,4 +118,9 @@ server.listen(port, () => {
     setInterval(() => {
         void cachePriceData();
     }, PRICE_DATA_REFRESH_INTERVAL_MS);
+
+    void cacheNetworkStats();
+    setInterval(() => {
+        void cacheNetworkStats();
+    }, NETWORK_STATS_REFRESH_INTERVAL_MS);
 });

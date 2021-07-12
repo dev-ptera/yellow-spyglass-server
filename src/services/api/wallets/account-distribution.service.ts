@@ -1,5 +1,5 @@
 import { frontiersRpc, frontierCountRpc, accountBalanceRpc, accountRepresentativeRpc } from '@app/rpc';
-import { formatError } from '@app/services';
+import { LOG_ERR } from '@app/services';
 import { AppCache } from '@app/config';
 import { AccountBalanceDto, AccountDistributionStatsDto } from '@app/types';
 import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
@@ -14,10 +14,10 @@ export const getFrontiersData = async (): Promise<{
     richList: AccountBalanceDto[];
 }> => {
     const frontiersCountResponse: FrontierCountResponse = await frontierCountRpc().catch((err) => {
-        return Promise.reject(formatError('getAccountDistribution.getFrontiersCount', err));
+        return Promise.reject(LOG_ERR('getAccountDistribution.getFrontiersCount', err));
     });
     const frontiersResponse = await frontiersRpc(Number(frontiersCountResponse.count)).catch((err) => {
-        return Promise.reject(formatError('getAccountDistribution.getFrontiers', err));
+        return Promise.reject(LOG_ERR('getAccountDistribution.getFrontiers', err));
     });
 
     const richList: AccountBalanceDto[] = [];

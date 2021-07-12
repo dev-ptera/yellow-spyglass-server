@@ -1,7 +1,7 @@
-import {AppCache, IS_PRODUCTION, REPRESENTATIVES_REFRESH_INTERVAL_MS} from '@app/config';
+import { AppCache, IS_PRODUCTION, REPRESENTATIVES_REFRESH_INTERVAL_MS } from '@app/config';
 import { RepPingMapData } from '@app/types';
-import {formatError} from "../etc/error.service";
-const fs = require('fs')
+import { LOG_ERR } from '../../log/error.service';
+const fs = require('fs');
 
 const dayMaxPings = 86_400_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const weekMaxPings = 604_800_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
@@ -10,7 +10,8 @@ const semiAnnualMaxPings = (6 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVA
 const yearMaxPings = (12 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 
 /** Given a rep address, returns the location o the file to write to store rep uptime. */
-const formatDocName = (repAddress: string): string => `src/database/${IS_PRODUCTION ? 'rep-uptime' : 'rep-uptime-dev'}/${repAddress}.json`;
+const formatDocName = (repAddress: string): string =>
+    `src/database/${IS_PRODUCTION ? 'rep-uptime' : 'rep-uptime-dev'}/${repAddress}.json`;
 
 /** Returns data for how long a rep has been online. Either reads from file, or uses internal map if populated. */
 const getRepDoc = async (repAddress: string): Promise<RepPingMapData> => {
@@ -30,25 +31,23 @@ const getRepDoc = async (repAddress: string): Promise<RepPingMapData> => {
             err ? resolve(newPingMap) : resolve(JSON.parse(data));
         });
     });
-}
+};
 
 /** Stores updated ping data in local collection of JSON files. */
 const writeRepDoc = async (data: RepPingMapData, repAddress: string): Promise<void> => {
-
     return new Promise(async (resolve) => {
-        await fs.writeFile(formatDocName(repAddress), JSON.stringify(data), { flag: 'w' }, err => {
+        await fs.writeFile(formatDocName(repAddress), JSON.stringify(data), { flag: 'w' }, (err) => {
             if (err) {
                 console.log('[ERROR]: Writing rep-uptime file', err);
-                formatError('representativeUptimeService.writeRepDoc', err, { repAddress} );
+                LOG_ERR('representativeUptimeService.writeRepDoc', err, { repAddress });
             }
             resolve();
-        })
+        });
     });
-}
+};
 
 /** Stores representative ping data in a local JSON file. */
 export const writeRepStatistics = async (repAddress: string, isOnline: boolean) => {
-
     const data = await getRepDoc(repAddress);
 
     // Remove older pings

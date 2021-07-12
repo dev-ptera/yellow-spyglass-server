@@ -1,8 +1,9 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { AppCache } from '@app/config';
-import { formatError } from '../etc/error.service';
 import { KnownAccountDto } from '@app/types';
+import {LOG_INFO, LOG_ERR} from "@app/services";
 
+/** Makes API call to Kirby's API to fetch known accounts list. */
 const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
     new Promise<KnownAccountDto[]>((resolve, reject) => {
         axios
@@ -11,14 +12,14 @@ const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
                 url: 'https://kirby.eu.pythonanywhere.com/api/v1/resources/addresses/all',
             })
             .then((response: AxiosResponse<KnownAccountDto[]>) => resolve(response.data))
-            .catch((err: AxiosError) => {
-                reject(formatError('getKnownaddresssPromise', err));
-            });
+            .catch(reject);
     });
 
+/** Saves known accounts in the App Cache. */
+
 export const cacheKnownAccounts = (): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        console.log('[INFO]: Refreshing Known Accounts');
+    return new Promise((resolve) => {
+        const start = LOG_INFO('Refreshing Known Accounts');
         getKnownAccountsPromise()
             .then((data: KnownAccountDto[]) => {
                 const knownAddresses = new Set<string>();
@@ -31,13 +32,13 @@ export const cacheKnownAccounts = (): Promise<void> => {
                     }
                 }
                 data.sort((a, b) => (a.alias > b.alias ? 1 : -1));
-                console.log('[INFO]: Known Accounts Updated');
                 AppCache.knownAccounts = data;
+                LOG_INFO('Known Accounts Updated', start);
                 resolve();
             })
-            .catch(() => {
-                console.error(`[ERROR]: Could not fetch known addresss.`);
-                reject();
+            .catch((err) => {
+                LOG_ERR('knownAccounts', err);
+                resolve();
             });
     });
 };

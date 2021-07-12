@@ -1,5 +1,5 @@
 import { accountHistoryRpc } from '@app/rpc';
-import { formatError } from '@app/services';
+import { LOG_ERR } from '@app/services';
 import { ConfirmedTransactionDto, SUBTYPE } from '@app/types';
 import { AppCache } from '@app/config';
 import { AccountHistoryResponse } from '@dev-ptera/nano-node-rpc';
@@ -32,7 +32,7 @@ export const confirmedTransactionsPromise = (
             return Promise.resolve(dtoTransactions);
         })
         .catch((err) => {
-            return Promise.reject(formatError('getConfirmedTransactions', err, { address }));
+            return Promise.reject(LOG_ERR('getConfirmedTransactions', err, { address }));
         });
 
 export const getConfirmedTransactions = async (req, res): Promise<void> => {
