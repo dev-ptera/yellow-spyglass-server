@@ -7,25 +7,25 @@ import { RepresentativeDto } from '@app/types';
  *  This extra step is intended to give representatives the benefit of the doubt as to
  *  not mark their representative as offline when it actually isn't. */
 export const getOnlineReps = async (req, res): Promise<void> => {
-    const online = new Set<string>();
-    const onlineReps = (await NANO_CLIENT.representatives_online()) as RPC.RepresentativesOnlineResponse;
+    const allOnlineReps = new Set<string>();
+    const rpcOnlineReps = (await NANO_CLIENT.representatives_online()) as RPC.RepresentativesOnlineResponse;
 
     const offlineTrackedReps = new Map<string, RepresentativeDto>();
     AppCache.trackedReps?.thresholdReps.map((rep) => {
-        rep.online ? online.add(rep.address) : offlineTrackedReps.set(rep.address, rep);
+        rep.online ? allOnlineReps.add(rep.address) : offlineTrackedReps.set(rep.address, rep);
     });
 
-    for (const address of onlineReps.representatives) {
+    for (const address of rpcOnlineReps.representatives) {
         /* Mark this representative as online in the AppCache. */
         if (offlineTrackedReps.has(address)) {
             AppCache.repPings.map.set(address, AppCache.repPings.currPing); // Update last successful ping to current.
             offlineTrackedReps.get(address).online = true; // Manually mark as online.
         }
-        online.add(address);
+        allOnlineReps.add(address);
     }
 
     const response: string[] = [];
-    for (const rep of online.values()) {
+    for (const rep of allOnlineReps.values()) {
         response.push(rep);
     }
     res.send(response);
