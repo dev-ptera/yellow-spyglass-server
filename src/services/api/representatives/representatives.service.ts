@@ -56,10 +56,10 @@ export const populateDelegatorsCount = async (
 
 /**
  * Gets the top 100 representatives & filters out smaller ones.
- * Then to the remaining, adds delegator count, marks each as online/offline, and stores ping data in firestore.
+ * Then to the remaining, adds delegator count, marks each as online/offline, and stores ping data in JSON files.
  */
 const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
-    const rpcData = await NANO_CLIENT.representatives(100, true);
+    const rpcData = await NANO_CLIENT.representatives(150, true);
     const trackedReps = new Map<string, Partial<RepresentativeDto>>();
 
     // Add all reps with high-enough delegated weight to a map.
@@ -77,26 +77,20 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     await populateDelegatorsCount(trackedReps);
 
     // Get all online reps from nano rpc.
-    // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
-    const onlineReps = (await NANO_CLIENT.representatives_online().catch((err) =>
-        Promise.reject(LOG_ERR('cacheRepresentatives.representatives_online', err))
-    )) as RPC.RepresentativesOnlineResponse;
+    const onlineReps = (await NANO_CLIENT.representatives_online()) as RPC.RepresentativesOnlineResponse;
 
     // Update online pings
-    AppCache.onlineReps.clear();
     AppCache.repPings.currPing++;
     for (const address of onlineReps.representatives) {
         // Use nano rpc results to add online/offline status to untracked reps.
-        AppCache.onlineReps.add(address);
         AppCache.repPings.map.set(address, AppCache.repPings.currPing);
     }
 
     // Use the AppCache to mark trackedReps as online or offline.
+    // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
     for (const address of trackedReps.keys()) {
         const rep = trackedReps.get(address);
         rep.online = isRepOnline(address);
-        // Update onlinReps cache results to match trackedReps cache results.
-        rep.online ? AppCache.onlineReps.add(rep.address) : AppCache.onlineReps.delete(rep.address);
     }
 
     // Save representative online/offline status in local database
@@ -108,18 +102,18 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     const reps: RepresentativeDto[] = [];
     for (const address of trackedReps.keys()) {
         const rep = trackedReps.get(address);
-        const fsPings = AppCache.dbRepPings.get(address);
+        const repPings = AppCache.dbRepPings.get(address);
 
         reps.push({
             address,
             weight: rep.weight,
             online: Boolean(rep.online),
             delegatorsCount: rep.delegatorsCount,
-            uptimePercentDay: calculateUptimePercentage(fsPings.day),
-            uptimePercentWeek: calculateUptimePercentage(fsPings.week),
-            uptimePercentMonth: calculateUptimePercentage(fsPings.month),
-            uptimePercentSemiAnnual: calculateUptimePercentage(fsPings.semiAnnual),
-            uptimePercentYear: calculateUptimePercentage(fsPings.year),
+            uptimePercentDay: calculateUptimePercentage(repPings.day),
+            uptimePercentWeek: calculateUptimePercentage(repPings.week),
+            uptimePercentMonth: calculateUptimePercentage(repPings.month),
+            uptimePercentSemiAnnual: calculateUptimePercentage(repPings.semiAnnual),
+            uptimePercentYear: calculateUptimePercentage(repPings.year),
         });
     }
     return reps;

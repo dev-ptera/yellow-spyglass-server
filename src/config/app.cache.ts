@@ -24,9 +24,6 @@ export type AppCache = {
 
     networkStats: NetworkStatsDto;
 
-    /** All reps online, regardless of voting weight. */
-    onlineReps: Set<string>;
-
     /** Populated by CoinMarketCap API. */
     priceData: PriceDataDto;
 
@@ -57,7 +54,6 @@ export const AppCache: AppCache = {
         quorum: undefined,
         nakamotoCoefficient: undefined,
     },
-    onlineReps: new Set<string>(),
     priceData: undefined,
     repPings: {
         currPing: 0,
