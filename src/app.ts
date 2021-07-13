@@ -38,7 +38,8 @@ import {
     cacheKnownAccounts,
     getRichList,
     getOnlineReps,
-    cacheNetworkStats, LOG_INFO,
+    cacheNetworkStats,
+    LOG_INFO,
 } from '@app/services';
 
 const corsOptions = {

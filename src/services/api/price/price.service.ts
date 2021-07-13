@@ -1,8 +1,7 @@
-import { LOG_ERR } from '@app/services';
+import { LOG_ERR, LOG_INFO } from '@app/services';
 import { CMCPriceData, PriceDataDto } from '@app/types';
 import { AppCache } from '@app/config';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-const { performance } = require('perf_hooks');
 
 const method = 'GET';
 const url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
@@ -60,19 +59,15 @@ const getPrice = (): Promise<PriceDataDto> => {
 
 /** This is called to update the Price Data in the AppCache.  Reads price data from CoinMarketCap. */
 export const cachePriceData = async (): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        const t0 = performance.now();
-        console.log('[INFO]: Refreshing Price Data');
+    return new Promise((resolve) => {
+        const start = LOG_INFO('Refreshing Price Data');
         getPrice()
             .then((data) => {
-                const t1 = performance.now();
-                console.log(`[INFO]: Price Data Updated, took ${Math.round(t1 - t0)}ms`);
                 AppCache.priceData = data;
-                resolve();
+                resolve(LOG_INFO('Price Data Updated', start));
             })
             .catch((err) => {
-                console.error(`[ERROR]: Could not refresh price data.`);
-                reject(err);
+                resolve(LOG_ERR('cachePriceData', err));
             });
     });
 };

@@ -1,10 +1,5 @@
 import { accountBalanceRpc, accountInfoRpc, delegatorsRpc } from '@app/rpc';
-import {
-    getUnopenedAccount,
-    pendingTransactionsPromise,
-    confirmedTransactionsPromise,
-    LOG_ERR,
-} from '@app/services';
+import { getUnopenedAccount, pendingTransactionsPromise, confirmedTransactionsPromise, LOG_ERR } from '@app/services';
 import {
     AccountBalanceResponse,
     AccountInfoResponse,
@@ -25,7 +20,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             return Promise.resolve(accountInfo);
         })
         .catch((err) => {
-            return Promise.reject(LOG_ERR('getAccountBalance', err, { address }));
+            return Promise.reject(LOG_ERR('getAccountOverview.getAccountBalance', err, { address }));
         });
 
     const accountInfoPromise: Promise<AccountInfoResponse> = accountInfoRpc(address)
@@ -36,7 +31,7 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             if (err.error && err.error === 'Account not found') {
                 return Promise.resolve(getUnopenedAccount());
             } else {
-                return Promise.reject(LOG_ERR('getAccountInfo', err, { address }));
+                return Promise.reject(LOG_ERR('getAccountOverview.getAccountInfo', err, { address }));
             }
         });
 

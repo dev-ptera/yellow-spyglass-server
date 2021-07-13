@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { AppCache } from '@app/config';
 import { KnownAccountDto } from '@app/types';
-import {LOG_INFO, LOG_ERR} from "@app/services";
+import { LOG_INFO, LOG_ERR } from '@app/services';
 
 /** Makes API call to Kirby's API to fetch known accounts list. */
 const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
@@ -16,7 +16,6 @@ const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
     });
 
 /** Saves known accounts in the App Cache. */
-
 export const cacheKnownAccounts = (): Promise<void> => {
     return new Promise((resolve) => {
         const start = LOG_INFO('Refreshing Known Accounts');
@@ -33,12 +32,10 @@ export const cacheKnownAccounts = (): Promise<void> => {
                 }
                 data.sort((a, b) => (a.alias > b.alias ? 1 : -1));
                 AppCache.knownAccounts = data;
-                LOG_INFO('Known Accounts Updated', start);
-                resolve();
+                resolve(LOG_INFO('Known Accounts Updated', start));
             })
             .catch((err) => {
-                LOG_ERR('knownAccounts', err);
-                resolve();
+                resolve(LOG_ERR('cacheKnownAccounts', err));
             });
     });
 };

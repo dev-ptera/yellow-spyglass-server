@@ -7,5 +7,5 @@ export type NetworkStatsDto = {
     distribution: DistributionStatsDto;
     quorum: Quorum;
     nakamotoCoefficient: number;
-    repWeights: number[];
+    // repWeights: number[];
 };

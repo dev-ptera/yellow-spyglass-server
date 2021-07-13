@@ -1,6 +1,6 @@
 import { AppCache } from '@app/config';
 
-/** Using the AppCache, send a list of online rep addresses. */
+/** Using the AppCache, sends a list of online representative addresses. */
 export const getOnlineReps = (req, res): void => {
     const reps: string[] = [];
     for (const rep of AppCache.onlineReps.values()) {

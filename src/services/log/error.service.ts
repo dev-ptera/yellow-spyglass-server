@@ -23,7 +23,11 @@ export const logError = (err: ErrorResponse | AxiosError<ErrorResponse>) => {
     }
 };
 
-export const LOG_ERR = (reqType: string, err: ErrorResponse | AxiosError<ErrorResponse>, params?) => {
+export const LOG_ERR = (
+    reqType: string,
+    err: ErrorResponse | AxiosError<ErrorResponse>,
+    params?
+): any | { error: string } => {
     console.error(`[ERROR]: Request type [${reqType}] failed.`);
     logError(err);
     if (params) {

@@ -71,12 +71,10 @@ export const calcNakamotoCoefficient = (
     reps: BasicRepDetails[],
     quorum: Quorum,
     consensus: ConsensusStatsDto
-): {
-    coefficient: number;
-    repWeights: number[];
-} => {
+): number => {
     const unofficialWeights: number[] = [];
     const officialWeightSum = consensus.official.onlineTotal + consensus.official.offlineTotal;
+
     for (const rep of reps) {
         if (!_isOfficialRep(rep.address)) {
             unofficialWeights.push(rep.votingWeight);
@@ -88,13 +86,11 @@ export const calcNakamotoCoefficient = (
 
     let total = 0;
     let coefficient = 1;
-    let repWeights = [];
     const MAX_BREAKPOINTS = 15;
     let i = 0;
     for (const weight of weights) {
         i++;
         total += weight;
-        repWeights.push(weight);
         if (i > MAX_BREAKPOINTS) {
             break;
         }
@@ -102,8 +98,5 @@ export const calcNakamotoCoefficient = (
             coefficient++;
         }
     }
-    return {
-        coefficient,
-        repWeights,
-    };
+    return coefficient;
 };

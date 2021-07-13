@@ -4,7 +4,7 @@ import { rawToBan } from 'banano-unit-converter';
 import { BasicRepDetails } from '@app/types';
 import { LOG_ERR } from '@app/services';
 
-const MIN_WEIGHT_TO_BE_COUNTED = 5000;
+const MIN_WEIGHT_TO_BE_COUNTED = 1000;
 
 /**
  * Filters out reps with a lower balance, adds flag if rep is online.
@@ -49,8 +49,9 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
     return reps;
 };
 
+/** Gets a large amount of representatives so we can aggregate online voting weight stats. */
 export const getRepresentatives = (): Promise<BasicRepDetails[]> =>
-    NANO_CLIENT.representatives(500, true)
+    NANO_CLIENT.representatives(1000, true)
         .then(processNodeResponse)
         .then((reps) => Promise.resolve(reps))
         .catch((err) => Promise.reject(err));

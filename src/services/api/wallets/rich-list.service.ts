@@ -11,6 +11,6 @@ export const getRichList = async (req, res): Promise<void> => {
         const addresses = AppCache.richList.slice(offset, end);
         res.send(addresses);
     } else {
-        res.status(500).send('Account list not loaded yet');
+        res.status(500).send({ error: 'Account list not loaded yet' });
     }
 };

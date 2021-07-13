@@ -56,7 +56,6 @@ export const AppCache: AppCache = {
         distribution: undefined,
         quorum: undefined,
         nakamotoCoefficient: undefined,
-        repWeights: [],
     },
     onlineReps: new Set<string>(),
     priceData: undefined,

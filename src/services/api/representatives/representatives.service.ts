@@ -1,11 +1,10 @@
 import { Ping, RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
-import { LOG_ERR, getMonitoredRepsService, writeRepStatistics } from '@app/services';
+import { LOG_ERR, getMonitoredRepsService, writeRepStatistics, LOG_INFO } from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
 
-const { performance } = require('perf_hooks');
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 const OFFLINE_AFTER_PINGS = 4;
 
@@ -42,7 +41,7 @@ export const populateDelegatorsCount = async (
                     })
                 )
                 .catch((err) => {
-                    LOG_ERR('getRepresentativesApi.delegators_count', err, { address });
+                    LOG_ERR('cacheRepresentatives.delegators_count', err, { address });
                     return Promise.resolve({
                         address,
                         delegatorsCount: 0,
@@ -80,7 +79,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     // Get all online reps from nano rpc.
     // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
     const onlineReps = (await NANO_CLIENT.representatives_online().catch((err) =>
-        Promise.reject(LOG_ERR('getRepresentativesApi.representatives_online', err))
+        Promise.reject(LOG_ERR('cacheRepresentatives.representatives_online', err))
     )) as RPC.RepresentativesOnlineResponse;
 
     // Update online pings
@@ -132,7 +131,7 @@ const getOnlineWeight = (): Promise<number> =>
         .then((quorumResponse: ConfirmationQuorumResponse) =>
             Promise.resolve(Number(rawToBan(quorumResponse.online_stake_total)))
         )
-        .catch((err) => Promise.reject(LOG_ERR('getRepresentativesService.getOnlineWeight', err)));
+        .catch((err) => Promise.reject(LOG_ERR('cacheRepresentatives.getOnlineWeight', err)));
 
 /** Representatives Promise aggregate; makes the all required to populate the rep data in AppCache. */
 const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
@@ -145,23 +144,19 @@ const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
             };
             return Promise.resolve(response);
         })
-        .catch((err) => Promise.reject(LOG_ERR('getRepresentativesService', err)));
+        .catch((err) => Promise.reject(LOG_ERR('cacheRepresentatives.getRepresentativesDto', err)));
 
 /** This is called to update the representatives list in the AppCache */
 export const cacheRepresentatives = async (): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        const t0 = performance.now();
-        console.log('[INFO]: Refreshing Representatives');
+    return new Promise((resolve) => {
+        const start = LOG_INFO('Refreshing Representatives');
         getRepresentativesDto()
             .then((data: RepresentativesResponseDto) => {
-                const t1 = performance.now();
-                console.log(`[INFO]: Representatives Updated, took ${Math.round(t1 - t0)}ms`);
                 AppCache.trackedReps = data;
-                resolve();
+                resolve(LOG_INFO('Representatives Updated', start));
             })
             .catch((err) => {
-                console.error(`[ERROR]: Could not reload representatives`);
-                reject(err);
+                resolve(LOG_ERR('cacheRepresentatives', err));
             });
     });
 };

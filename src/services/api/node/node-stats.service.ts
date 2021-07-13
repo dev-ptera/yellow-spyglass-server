@@ -13,7 +13,7 @@ export const getNodeStats = (req, res): void => {
         }
     }
     const err: ErrorResponse = {
-        error: 'Batman missing in monitored rep list. Maybe the list is empty?',
+        error: 'Node data not loaded in AppCache',
     };
     res.status(500).send(LOG_ERR('getNodeStats', err));
 };
