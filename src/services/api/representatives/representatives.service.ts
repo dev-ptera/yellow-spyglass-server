@@ -55,7 +55,7 @@ export const populateDelegatorsCount = async (
 };
 
 /**
- * Gets the top 100 representatives & filters out smaller ones.
+ * Gets the top 150 representatives & filters out smaller ones.
  * Then to the remaining, adds delegator count, marks each as online/offline, and stores ping data in JSON files.
  */
 const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
@@ -81,21 +81,17 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
 
     // Update online pings
     AppCache.repPings.currPing++;
+    // The following representatives get to increase their last-known ping since they were included in representatives_online result.
     for (const address of onlineReps.representatives) {
-        // Use nano rpc results to add online/offline status to untracked reps.
         AppCache.repPings.map.set(address, AppCache.repPings.currPing);
     }
 
-    // Use the AppCache to mark trackedReps as online or offline.
     // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
+    // Save representative online/offline status in local database
     for (const address of trackedReps.keys()) {
         const rep = trackedReps.get(address);
         rep.online = isRepOnline(address);
-    }
-
-    // Save representative online/offline status in local database
-    for (const address of trackedReps.keys()) {
-        await writeRepStatistics(address, trackedReps.get(address).online);
+        await writeRepStatistics(address, rep.online);
     }
 
     // Construct response array
