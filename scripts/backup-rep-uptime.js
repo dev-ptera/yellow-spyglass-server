@@ -1,6 +1,6 @@
 const { exec } = require("child_process");
 
-const dayMs = 86400000;
+const dayMs = 1000 * 60 * 60 * 24;
 
 const backupUptimeJson = () => {
     const today = new Date();
@@ -11,7 +11,7 @@ const backupUptimeJson = () => {
     const todayString = mm + '/' + dd + '/' + yyyy;
     console.log(`Committing Representative Uptime Backup for date: ${todayString}`);
 
-    exec(`git add src/database/rep-uptime/* && git commit -m "[AUTO]: Backup Rep Uptime for ${todayString}" & git push `,
+    const dir = exec(`git add src/database/rep-uptime/* && git commit -m "[AUTO]: Backup Rep Uptime for ${todayString}" && git push `,
         (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
@@ -21,6 +21,10 @@ const backupUptimeJson = () => {
             console.log(`stderr: ${stderr}`);
             return;
         }
+    });
+
+    dir.on('exit', function (code) {
+        console.log("Backup complete; will attempt next backup in one day.");
     });
 }
 
