@@ -68,7 +68,8 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
     const peerMonitorStatsPromises: Array<Promise<PeerMonitorStats>> = [];
     const duplicateIpSet = new Set<string>();
 
-    // Include all monitors this node is not connected to.  Batman node has poor peer count.
+    // This service includes the ability to manually hard-code peer monitor ips.
+    // Even if this node isn't directly connected to these monitors as a peer, we can still display their node stats.
     MANUAL_PEER_MONITOR_IPS.map((ip: string) => {
         peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
         duplicateIpSet.add(ip);
@@ -87,33 +88,30 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
         .then((data) =>
             groomDto(data)
                 .then((groomed) => Promise.resolve(groomed))
-                .catch((err) => Promise.reject(LOG_ERR('getMonitoredRepsService.groomDto', err)))
+                .catch((err) => Promise.reject(LOG_ERR('getMonitoredReps.groomDto', err)))
         )
-        .catch((err) => Promise.reject(LOG_ERR('getMonitoredRepsService.getRepDetails', err)));
+        .catch((err) => Promise.reject(LOG_ERR('getMonitoredReps.getRepDetails', err)));
 };
 
 // banano creeper does not have a api.php.
-export const getPeers = async (req, res): Promise<void> =>
-    new Promise((resolve, reject) => {
-        peersRpc()
-            .then((peers: Peers) => {
-                getRepDetails(peers)
-                    .then((details: MonitoredRepDto[]) => {
-                        res.send(JSON.stringify(details));
-                        return Promise.resolve();
-                    })
-                    .catch((err) => {
-                        res.status(500).send(LOG_ERR('getPeersService', err));
-                        return Promise.resolve();
-                    });
-            })
-            .catch((err) => {
-                res.status(500).send(LOG_ERR('getPeersService', err));
-                return Promise.resolve();
-            });
-    });
+export const getPeers = (req, res): void => {
+    peersRpc()
+        .then((peers: Peers) => {
+            getRepDetails(peers)
+                .then((details: MonitoredRepDto[]) => {
+                    res.send(JSON.stringify(details));
+                })
+                .catch((err) => {
+                    res.status(500).send(LOG_ERR('getPeers', err));
+                });
+        })
+        .catch((err) => {
+            res.status(500).send(LOG_ERR('getPeers', err));
+        });
+};
 
-export const getMonitoredRepsService = async (): Promise<MonitoredRepDto[]> =>
+/** Using a combination of hard-coded ips & the peers RPC command, returns a list of representatives running the Nano Node Monitor software. */
+export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> =>
     new Promise((resolve, reject) => {
         peersRpc()
             .then((peers: Peers) => {
@@ -126,7 +124,7 @@ export const getMonitoredRepsService = async (): Promise<MonitoredRepDto[]> =>
                         });
                         resolve(details);
                     })
-                    .catch((err) => reject(LOG_ERR('getMonitoredRepsService', err)));
+                    .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
             })
-            .catch((err) => reject(LOG_ERR('getMonitoredRepsService', err)));
+            .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
     });

@@ -31,6 +31,7 @@ export const getSupplyPromise = (): Promise<Supply> => {
         .catch((err) => Promise.reject(err));
 };
 
+/** Returns circulating, burned, and core-team controlled supply statistics. */
 export const getSupply = (req, res): void => {
     getSupplyPromise()
         .then((supply: Supply) => {

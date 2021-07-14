@@ -31,6 +31,7 @@ export const getQuorumPromise = async (): Promise<Quorum> => {
         .catch((err) => Promise.reject(err));
 };
 
+/** Returns statistics about amount of BAN required to confirm transactions, online staking weight, etc. */
 export const getQuorum = (req, res): void => {
     getQuorumPromise()
         .then((quorumData: Quorum) => {

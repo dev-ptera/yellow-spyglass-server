@@ -41,7 +41,8 @@ import {
     cacheNetworkStats,
     LOG_INFO,
     getQuorum,
-    getSupply, getPeerVersions,
+    getSupply,
+    getPeerVersions,
 } from '@app/services';
 
 const corsOptions = {
@@ -65,25 +66,25 @@ const sendCached = (res, noCacheMethod: () => Promise<any>, cache): void => {
 app.use(cors(corsOptions));
 
 /* Real time results */
-app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res));
-app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeers(req, res));
-app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
-app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
-app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
-app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
-app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
+app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res));
+app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
+app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
+app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));
+app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
 app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
+app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeers(req, res));
+app.get(`/${PATH_ROOT}/peer-versions`, (req, res) => getPeerVersions(req, res));
+app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
 app.get(`/${PATH_ROOT}/quorum`, (req, res) => getQuorum(req, res));
 app.get(`/${PATH_ROOT}/supply`, (req, res) => getSupply(req, res));
-app.get(`/${PATH_ROOT}/peer-versions`, (req, res) => getPeerVersions(req, res));
 
 /* Cached Results */
 app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, AppCache.knownAccounts));
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
 app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.trackedReps));
 app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, cacheNetworkStats, AppCache.networkStats));
-app.get(`/${PATH_ROOT}/accounts-distribution`,(req,res) =>
+app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) =>
     sendCached(res, cacheAccountDistribution, AppCache.accountDistributionStats || [])
 );
 
