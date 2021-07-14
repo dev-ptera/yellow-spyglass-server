@@ -19,6 +19,9 @@ export * from './api/known-accounts/known-accounts.service';
 export * from './api/price/price.service';
 
 export * from './api/network/network-stats.service';
+export * from './api/network/quorum.service';
+export * from './api/network/supply.service';
+export * from './api/network/peer-versions.service';
 
 export * from './etc/account-utils';
 export * from './etc/timestamps.service';

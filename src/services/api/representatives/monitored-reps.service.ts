@@ -93,7 +93,7 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
 };
 
 // banano creeper does not have a api.php.
-export const getPeersService = async (req, res): Promise<void> =>
+export const getPeers = async (req, res): Promise<void> =>
     new Promise((resolve, reject) => {
         peersRpc()
             .then((peers: Peers) => {

@@ -15,5 +15,6 @@ export const getNodeStats = (req, res): void => {
     const err: ErrorResponse = {
         error: 'Node data not loaded in AppCache',
     };
-    res.status(500).send(LOG_ERR('getNodeStats', err));
+    LOG_ERR('getNodeStats', err)
+    res.status(500).send(err);
 };

@@ -1,8 +1,9 @@
 import { ConfirmationQuorumResponse, UnitConversionResponse } from '@dev-ptera/nano-node-rpc';
 import { Quorum } from '@app/types';
 import { NANO_CLIENT } from '@app/config';
+import { LOG_ERR } from '@app/services';
 
-export const getQuorum = async (): Promise<Quorum> => {
+export const getQuorumPromise = async (): Promise<Quorum> => {
     let rawQuorum: ConfirmationQuorumResponse;
     await NANO_CLIENT.confirmation_quorum()
         .then((quorumResponse: ConfirmationQuorumResponse) => {
@@ -28,4 +29,14 @@ export const getQuorum = async (): Promise<Quorum> => {
             });
         })
         .catch((err) => Promise.reject(err));
+};
+
+export const getQuorum = (req, res): void => {
+    getQuorumPromise()
+        .then((quorumData: Quorum) => {
+            res.send(quorumData);
+        })
+        .catch((err) => {
+            res.status(500).send(LOG_ERR('getQuorum', err));
+        });
 };
