@@ -35,7 +35,8 @@ export const confirmedTransactionsPromise = (
             return Promise.reject(LOG_ERR('getConfirmedTransactions', err, { address }));
         });
 
-export const getConfirmedTransactions = async (req, res): Promise<void> => {
+/** For a given address, return a list of confirmed transactions. */
+export const getConfirmedTransactions = (req, res): void => {
     const address = req.query.address;
     const size = Math.min(req.query.size || MAX_PAGE_SIZE, MAX_PAGE_SIZE);
     const offset = req.query.offset;
