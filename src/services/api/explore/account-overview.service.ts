@@ -7,15 +7,16 @@ import {
     ErrorResponse,
 } from '@dev-ptera/nano-node-rpc';
 import { AccountOverviewDto, DelegatorDto } from '@app/types';
-import { AppCache } from '@app/config';
 import { rawToBan } from 'banano-unit-converter';
 
-export const getAccountOverview = async (req, res): Promise<void> => {
-    const parts = req.url.split('/');
-    const size = Math.min(req.query.size || 50, 50);
-    const address = parts[parts.length - 1];
+type DelegatorsOverview = {
+    delegators: DelegatorDto[];
+    count: number;
+    weightSum: number;
+};
 
-    const accountBalancePromise: Promise<AccountBalanceResponse> = accountBalanceRpc(address)
+const accountBalancePromise = (address: string): Promise<AccountBalanceResponse> =>
+    accountBalanceRpc(address)
         .then((accountInfo: AccountBalanceResponse) => {
             return Promise.resolve(accountInfo);
         })
@@ -23,7 +24,8 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             return Promise.reject(LOG_ERR('getAccountOverview.getAccountBalance', err, { address }));
         });
 
-    const accountInfoPromise: Promise<AccountInfoResponse> = accountInfoRpc(address)
+const accountInfoPromise = (address: string): Promise<AccountInfoResponse> =>
+    accountInfoRpc(address)
         .then((accountInfo: AccountInfoResponse) => {
             return Promise.resolve(accountInfo);
         })
@@ -35,11 +37,8 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             }
         });
 
-    const delegatorsPromise: Promise<{
-        delegators: DelegatorDto[];
-        count: number;
-        weightSum: number;
-    }> = delegatorsRpc(address)
+const delegatorsPromise = (address: string): Promise<DelegatorsOverview> =>
+    delegatorsRpc(address)
         .then((delegatorsResponse: DelegatorsResponse) => {
             const delegatorsDto: DelegatorDto[] = [];
             for (const key in delegatorsResponse.delegators) {
@@ -76,20 +75,16 @@ export const getAccountOverview = async (req, res): Promise<void> => {
             return Promise.reject(LOG_ERR('getDelegators', err, { address }));
         });
 
-    const isRepOnline = (accountRep: string): boolean => {
-        const repCache = AppCache.trackedReps?.thresholdReps || [];
-        for (const rep of repCache) {
-            if (rep.address === accountRep) {
-                return rep.online;
-            }
-        }
-        return false;
-    };
+/** Given an address, returns an overview of the account including balance, confirmed/pending transactions, delegators, etc. */
+export const getAccountOverview = (req, res): void => {
+    const parts = req.url.split('/');
+    const size = Math.min(req.query.size || 50, 50);
+    const address = parts[parts.length - 1];
 
     Promise.all([
-        accountBalancePromise,
-        accountInfoPromise,
-        delegatorsPromise,
+        accountBalancePromise(address),
+        accountInfoPromise(address),
+        delegatorsPromise(address),
         confirmedTransactionsPromise(address, 0, size),
         pendingTransactionsPromise(address, 0, size),
     ])
@@ -100,7 +95,6 @@ export const getAccountOverview = async (req, res): Promise<void> => {
                 balanceRaw: accountBalance.balance,
                 pendingRaw: accountBalance.pending,
                 representative: accountInfo.representative,
-                isRepOnline: isRepOnline(accountInfo.representative),
                 completedTxCount: Number(accountInfo.block_count),
                 pendingTxCount: Number(pendingTransactions.length),
                 delegatorsCount: delegatorsData.count,

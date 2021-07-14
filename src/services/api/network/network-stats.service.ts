@@ -2,15 +2,15 @@ import { AppCache } from '@app/config';
 import { LOG_ERR, LOG_INFO } from '@app/services';
 import { BasicRepDetails, Quorum, Supply } from '@app/types';
 import { getRepresentatives } from './get-representatives';
-import { getSupply } from './get-supply';
-import { getQuorum } from './get-quorum';
+import { getSupplyPromise } from './supply.service';
+import { getQuorumPromise } from './quorum.service';
 import { calcConsensusStats, calcDistributionStats, calcNakamotoCoefficient } from './network-calculations';
 
 /** This is called to update the Network Stats in the AppCache. */
 export const cacheNetworkStats = async (): Promise<void> => {
     const start = LOG_INFO('Refreshing Network Stats');
     return new Promise((resolve) => {
-        Promise.all([getRepresentatives(), getSupply(), getQuorum()])
+        Promise.all([getRepresentatives(), getSupplyPromise(), getQuorumPromise()])
             .then((response: [BasicRepDetails[], Supply, Quorum]) => {
                 const reps = response[0];
                 const supply = response[1];
