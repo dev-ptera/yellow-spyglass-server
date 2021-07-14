@@ -1,8 +1,9 @@
 import { UnitConversionResponse } from '@dev-ptera/nano-node-rpc';
 import { NANO_CLIENT } from '@app/config';
 import { Supply } from '@app/types';
+import { LOG_ERR } from '@app/services';
 
-export const getSupply = (): Promise<Supply> => {
+export const getSupplyPromise = (): Promise<Supply> => {
     const burnAddress1 = 'ban_1burnbabyburndiscoinferno111111111111111111111111111aj49sw3w';
     const burnAddress2 = 'ban_1ban116su1fur16uo1cano16su1fur16161616161616161616166a1sf7xw';
 
@@ -28,4 +29,15 @@ export const getSupply = (): Promise<Supply> => {
             });
         })
         .catch((err) => Promise.reject(err));
+};
+
+/** Returns circulating, burned, and core-team controlled supply statistics. */
+export const getSupply = (req, res): void => {
+    getSupplyPromise()
+        .then((supply: Supply) => {
+            res.send(supply);
+        })
+        .catch((err) => {
+            res.status(500).send(LOG_ERR('getSupply', err));
+        });
 };

@@ -11,6 +11,7 @@ export * from './InsightsDto';
 export * from './KnownAccountDto';
 export * from './MonitoredRepDto';
 export * from './NetworkStatsDto';
+export * from './PeerVersionsDto';
 export * from './PriceDataDto';
 export * from './PendingTransactionDto';
 export * from './RepresentativeDto';
