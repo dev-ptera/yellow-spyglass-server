@@ -42,7 +42,7 @@ export const pendingTransactionsPromise = async (address: string, offset: number
         });
 
 /** Looks ups pending transactions for a given account. */
-export const getPendingTransactions = async (req, res): Promise<void> => {
+export const getPendingTransactions = (req, res): void => {
     const address = req.query.address;
     const offset = req.query.offset || 0;
     const size = Math.min(req.query.size || 50, 50);

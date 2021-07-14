@@ -123,7 +123,7 @@ const getOnlineWeight = (): Promise<number> =>
         )
         .catch((err) => Promise.reject(LOG_ERR('cacheRepresentatives.getOnlineWeight', err)));
 
-/** Representatives Promise aggregate; makes the all required to populate the rep data in AppCache. */
+/** Representatives Promise aggregate; makes all calls required to populate the rep data in AppCache. */
 const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
     Promise.all([getAllRepresentatives(), getMonitoredReps(), getOnlineWeight()])
         .then((data) => {
