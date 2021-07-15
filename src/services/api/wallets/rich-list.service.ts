@@ -1,6 +1,6 @@
 import { AppCache } from '@app/config';
-import {ACCOUNT_BALANCE_FILE_NAME} from "./account-distribution.service";
-import {LOG_ERR} from "../../log/error.service";
+import {ALL_BALANCES_FILE_NAME} from "./account-distribution.service";
+import {LOG_ERR} from "@app/services";
 const fs = require('fs');
 
 const MAX_RECORDS_PER_PAGE = 25;
@@ -17,11 +17,16 @@ export const getRichList = async (req, res) => {
         const addresses = AppCache.richList.slice(offset, end);
         res.send(addresses);
     } else {
-        fs.readFile(ACCOUNT_BALANCE_FILE_NAME, 'utf8', (err, data) => {
+        const clientErr = { error: 'Account list not loaded yet' };
+        fs.readFile(ALL_BALANCES_FILE_NAME, 'utf8', (err, data) => {
             if (err) {
-                res.status(500).send(LOG_ERR(err, { error: 'Account list not loaded yet'}));
+                res.status(500).send(LOG_ERR('getRichList.readFile', clientErr));
             } else {
-                res.send(JSON.parse(data).richList.slice(offset, end));
+                try {
+                    res.send(JSON.parse(data).richList.slice(offset, end));
+                } catch (err) {
+                    res.status(500).send(LOG_ERR('getRichList.parseFile', clientErr));
+                }
             }
         });
     }

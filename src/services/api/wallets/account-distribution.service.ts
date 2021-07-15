@@ -6,7 +6,7 @@ import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 const fs = require('fs');
 
-export const ACCOUNT_BALANCE_FILE_NAME = 'src/database/account-distribution.json';
+export const ALL_BALANCES_FILE_NAME = 'src/database/wallets/balances.json';
 
 /** Uses the frontiers RPC call to iterate through all accounts
  * Then filters out small balance accounts & proceeds to lookup each accounts' balance & representative */
@@ -99,13 +99,17 @@ export const getFrontiersData = async (): Promise<{
 /** Whenever the rich list is still loading due to a server restart, read from a stored file.  Prevents unnecessary downtime of Wallets page. */
 export const parseRichListFromFile = async (): Promise<void> =>
     new Promise((resolve) => {
-        fs.readFile(ACCOUNT_BALANCE_FILE_NAME, 'utf8', (err, data) => {
+        fs.readFile(ALL_BALANCES_FILE_NAME, 'utf8', (err, data) => {
             if (err) {
                 LOG_ERR('parseRichListFromFile', err)
             } else {
-                const parsed = JSON.parse(data);
-                AppCache.accountDistributionStats = parsed.distributionStats;
-                AppCache.richList = parsed.richList;
+                try {
+                    const parsed = JSON.parse(data);
+                    AppCache.accountDistributionStats = parsed.distributionStats;
+                    AppCache.richList = parsed.richList;
+                } catch (err) {
+                    LOG_ERR('parseRichListFromFile.parseFile', err);
+                }
             }
             resolve();
         })
@@ -117,7 +121,11 @@ export const cacheAccountDistribution = async (): Promise<void> => {
         const start = LOG_INFO('Refreshing Rich List');
         getFrontiersData()
             .then((data) => {
-                fs.writeFile(ACCOUNT_BALANCE_FILE_NAME, JSON.stringify(data), { flag: 'w' });
+                fs.writeFile(ALL_BALANCES_FILE_NAME, JSON.stringify(data), { flag: 'w' }, (err) => {
+                    if (err) {
+                        LOG_ERR('cacheAccountDistribution.writeFile', err);
+                    }
+                });
                 AppCache.accountDistributionStats = data.distributionStats;
                 AppCache.richList = data.richList;
                 const used = process.memoryUsage();
