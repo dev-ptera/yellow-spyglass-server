@@ -1,6 +1,6 @@
 import { AppCache, IS_PRODUCTION, REPRESENTATIVES_REFRESH_INTERVAL_MS } from '@app/config';
 import { RepPingMapData } from '@app/types';
-import { LOG_ERR } from '../../log/error.service';
+import { LOG_ERR } from '@app/services';
 const fs = require('fs');
 
 const dayMaxPings = 86_400_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;

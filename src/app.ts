@@ -43,6 +43,7 @@ import {
     getQuorum,
     getSupply,
     getPeerVersions,
+    parseRichListFromFile,
 } from '@app/services';
 
 const corsOptions = {
@@ -55,11 +56,11 @@ const corsOptions = {
     },
 };
 
-const sendCached = (res, noCacheMethod: () => Promise<any>, cache): void => {
-    cache
-        ? res.send(JSON.stringify(cache))
+const sendCached = (res, noCacheMethod: () => Promise<void>, cacheKey: keyof AppCache): void => {
+    AppCache[cacheKey]
+        ? res.send(JSON.stringify(AppCache[cacheKey]))
         : noCacheMethod()
-              .then((fresh) => res.send(JSON.stringify(fresh)))
+              .then(() => res.send(JSON.stringify(AppCache[cacheKey])))
               .catch((err) => res.status(500).send(JSON.stringify(err)));
 };
 
@@ -80,12 +81,12 @@ app.get(`/${PATH_ROOT}/quorum`, (req, res) => getQuorum(req, res));
 app.get(`/${PATH_ROOT}/supply`, (req, res) => getSupply(req, res));
 
 /* Cached Results */
-app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, AppCache.knownAccounts));
-app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, AppCache.priceData));
-app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, AppCache.trackedReps));
-app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, cacheNetworkStats, AppCache.networkStats));
+app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, 'knownAccounts'));
+app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, 'priceData'));
+app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, 'trackedReps'));
+app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, cacheNetworkStats, 'networkStats'));
 app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) =>
-    sendCached(res, cacheAccountDistribution, AppCache.accountDistributionStats || [])
+    sendCached(res, parseRichListFromFile, 'accountDistributionStats')
 );
 
 const port: number = Number(process.env.PORT || 3000);
