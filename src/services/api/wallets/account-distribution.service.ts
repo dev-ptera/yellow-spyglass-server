@@ -1,12 +1,15 @@
 import { frontiersRpc, frontierCountRpc, accountBalanceRpc, accountRepresentativeRpc } from '@app/rpc';
 import { LOG_ERR, LOG_INFO } from '@app/services';
-import { AppCache } from '@app/config';
+import {AppCache} from '@app/config';
 import { AccountBalanceDto, AccountDistributionStatsDto } from '@app/types';
 import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
+const fs = require('fs');
+
+export const ACCOUNT_BALANCE_FILE_NAME = 'src/database/account-distribution.json';
 
 /** Uses the frontiers RPC call to iterate through all accounts
- * Then filters out small balance accounts & procedes to lookup each accounts' balance & representative */
+ * Then filters out small balance accounts & proceeds to lookup each accounts' balance & representative */
 export const getFrontiersData = async (): Promise<{
     distributionStats: AccountDistributionStatsDto;
     richList: AccountBalanceDto[];
@@ -93,12 +96,28 @@ export const getFrontiersData = async (): Promise<{
     });
 };
 
+/** Whenever the rich list is still loading due to a server restart, read from a stored file.  Prevents unnecessary downtime of Wallets page. */
+export const parseRichListFromFile = async (): Promise<void> =>
+    new Promise((resolve) => {
+        fs.readFile(ACCOUNT_BALANCE_FILE_NAME, 'utf8', (err, data) => {
+            if (err) {
+                LOG_ERR('parseRichListFromFile', err)
+            } else {
+                const parsed = JSON.parse(data);
+                AppCache.accountDistributionStats = parsed.distributionStats;
+                AppCache.richList = parsed.richList;
+            }
+            resolve();
+        })
+    });
+
 /** Call this to repopulate the rich list in the AppCache. */
 export const cacheAccountDistribution = async (): Promise<void> => {
     return new Promise((resolve) => {
         const start = LOG_INFO('Refreshing Rich List');
         getFrontiersData()
             .then((data) => {
+                fs.writeFile(ACCOUNT_BALANCE_FILE_NAME, JSON.stringify(data), { flag: 'w' });
                 AppCache.accountDistributionStats = data.distributionStats;
                 AppCache.richList = data.richList;
                 const used = process.memoryUsage();
