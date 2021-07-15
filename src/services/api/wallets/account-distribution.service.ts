@@ -101,7 +101,7 @@ export const parseRichListFromFile = async (): Promise<void> =>
     new Promise((resolve) => {
         fs.readFile(ALL_BALANCES_FILE_NAME, 'utf8', (err, data) => {
             if (err) {
-                LOG_ERR('parseRichListFromFile', err);
+                LOG_ERR('parseRichListFromFile.readFile', err);
             } else {
                 try {
                     const parsed = JSON.parse(data);
