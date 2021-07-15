@@ -42,7 +42,8 @@ import {
     LOG_INFO,
     getQuorum,
     getSupply,
-    getPeerVersions, parseRichListFromFile,
+    getPeerVersions,
+    parseRichListFromFile,
 } from '@app/services';
 
 const corsOptions = {

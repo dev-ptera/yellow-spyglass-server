@@ -1,6 +1,6 @@
 import { frontiersRpc, frontierCountRpc, accountBalanceRpc, accountRepresentativeRpc } from '@app/rpc';
 import { LOG_ERR, LOG_INFO } from '@app/services';
-import {AppCache} from '@app/config';
+import { AppCache } from '@app/config';
 import { AccountBalanceDto, AccountDistributionStatsDto } from '@app/types';
 import { FrontierCountResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
@@ -101,7 +101,7 @@ export const parseRichListFromFile = async (): Promise<void> =>
     new Promise((resolve) => {
         fs.readFile(ALL_BALANCES_FILE_NAME, 'utf8', (err, data) => {
             if (err) {
-                LOG_ERR('parseRichListFromFile', err)
+                LOG_ERR('parseRichListFromFile', err);
             } else {
                 try {
                     const parsed = JSON.parse(data);
@@ -112,7 +112,7 @@ export const parseRichListFromFile = async (): Promise<void> =>
                 }
             }
             resolve();
-        })
+        });
     });
 
 /** Call this to repopulate the rich list in the AppCache. */
