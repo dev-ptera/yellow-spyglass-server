@@ -1,9 +1,9 @@
 import { ConfirmationQuorumResponse, UnitConversionResponse } from '@dev-ptera/nano-node-rpc';
-import { Quorum } from '@app/types';
+import { QuorumDto } from '@app/types';
 import { NANO_CLIENT } from '@app/config';
 import { LOG_ERR } from '@app/services';
 
-export const getQuorumPromise = async (): Promise<Quorum> => {
+export const getQuorumPromise = async (): Promise<QuorumDto> => {
     let rawQuorum: ConfirmationQuorumResponse;
     await NANO_CLIENT.confirmation_quorum()
         .then((quorumResponse: ConfirmationQuorumResponse) => {
@@ -34,7 +34,7 @@ export const getQuorumPromise = async (): Promise<Quorum> => {
 /** Returns statistics about amount of BAN required to confirm transactions, online staking weight, etc. */
 export const getQuorum = (req, res): void => {
     getQuorumPromise()
-        .then((quorumData: Quorum) => {
+        .then((quorumData: QuorumDto) => {
             res.send(quorumData);
         })
         .catch((err) => {

@@ -1,4 +1,4 @@
-export type Quorum = {
+export type QuorumDto = {
     quorumDelta: number;
     onlineWeightQuorumPercent: number;
     onlineWeightMinimum: number;

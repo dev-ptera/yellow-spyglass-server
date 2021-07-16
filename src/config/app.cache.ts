@@ -50,7 +50,7 @@ export const AppCache: AppCache = {
     knownAccounts: [],
     networkStats: {
         consensus: undefined,
-        distribution: undefined,
+        supply: undefined,
         quorum: undefined,
         nakamotoCoefficient: undefined,
     },

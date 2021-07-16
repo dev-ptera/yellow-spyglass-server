@@ -22,7 +22,7 @@ export const getPeerVersionsPromise = (): Promise<PeerVersionsDto[]> =>
             .catch(reject);
     });
 
-/** Returns BANANO protocol versions of all connected peers. */
+/** Returns protocol versions of all connected peers. */
 export const getPeerVersions = (req, res): void => {
     getPeerVersionsPromise()
         .then((data: PeerVersionsDto[]) => {

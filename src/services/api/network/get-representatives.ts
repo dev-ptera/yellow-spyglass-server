@@ -28,9 +28,10 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
     // Get all online reps from nano rpc.
     // TODO: Make this a combo of tracked online + representatives_online
     const onlineReps = (await NANO_CLIENT.representatives_online().catch((err) =>
-        Promise.reject(LOG_ERR('representatives_online', err))
+        Promise.reject(LOG_ERR('getAllReps.representatives_online', err))
     )) as RPC.RepresentativesOnlineResponse;
 
+    // Mark reps as online
     for (const address of onlineReps.representatives) {
         const rep = weightedReps.get(address);
         if (rep) {
@@ -50,7 +51,7 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
 };
 
 /** Gets a large amount of representatives so we can aggregate online voting weight stats. */
-export const getRepresentatives = (): Promise<BasicRepDetails[]> =>
+export const getAllReps = (): Promise<BasicRepDetails[]> =>
     NANO_CLIENT.representatives(1000, true)
         .then(processNodeResponse)
         .then((reps) => Promise.resolve(reps))

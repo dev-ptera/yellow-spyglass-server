@@ -14,5 +14,7 @@ export * from './NetworkStatsDto';
 export * from './PeerVersionsDto';
 export * from './PriceDataDto';
 export * from './PendingTransactionDto';
+export * from './QuorumDto';
 export * from './RepresentativeDto';
 export * from './RepresentativesResponseDto';
+export * from './SupplyDto';
