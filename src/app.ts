@@ -11,6 +11,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 const http = require('http');
 const app = express();
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.json()); //utilizes the body-parser package
 
 import {
     IS_PRODUCTION,
@@ -43,7 +46,7 @@ import {
     getQuorum,
     getSupply,
     getPeerVersions,
-    parseRichListFromFile,
+    parseRichListFromFile, useMegaphone,
 } from '@app/services';
 
 const corsOptions = {
@@ -72,6 +75,7 @@ app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));
+app.post(`/${PATH_ROOT}/megaphone`, (req, res) => useMegaphone(req, res));
 app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
 app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
 app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeers(req, res));
