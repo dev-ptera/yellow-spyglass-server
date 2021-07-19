@@ -1,4 +1,4 @@
-import { BasicRepDetails, ConsensusStatsDto, DistributionStatsDto, Quorum, Supply } from '@app/types';
+import { BasicRepDetails, ConsensusStatsDto, QuorumDto } from '@app/types';
 
 const officialRepresentatives = new Set<string>()
     .add('ban_1fomoz167m7o38gw4rzt7hz67oq6itejpt4yocrfywujbpatd711cjew8gjj')
@@ -8,21 +8,16 @@ const officialRepresentatives = new Set<string>()
 
 const _isOfficialRep = (addr: string): boolean => officialRepresentatives.has(addr);
 
-export const calcDistributionStats = (supply: Supply): DistributionStatsDto => ({
-    maxSupplyTotal: supply.total,
-    circulatingTotal: supply.circulating,
-    devFundTotal: supply.devFund,
-    burnedTotal: supply.burned,
-    circulatingPercent: supply.circulating / supply.total,
-    devFundPercent: supply.devFund / supply.total,
-});
-
-export const calcConsensusStats = (reps: BasicRepDetails[], supply: Supply, quorum: Quorum): ConsensusStatsDto => {
+export const calcConsensusStats = (
+    reps: BasicRepDetails[],
+    totalSupply: number,
+    quorum: QuorumDto
+): ConsensusStatsDto => {
     const allReps = {
-        onlineTotal: quorum.onlineStakeTotal,
-        onlinePercent: quorum.onlineStakeTotal / supply.total,
-        offlineTotal: supply.total - quorum.onlineStakeTotal,
-        offlinePercent: (supply.total - quorum.onlineStakeTotal) / supply.total,
+        onlineAmount: quorum.onlineStakeTotal,
+        onlinePercent: quorum.onlineStakeTotal / totalSupply,
+        offlineAmount: totalSupply - quorum.onlineStakeTotal,
+        offlinePercent: (totalSupply - quorum.onlineStakeTotal) / totalSupply,
     };
     let officialOnlineWeight = 0;
     let officialOfflineWeight = 0;
@@ -37,24 +32,24 @@ export const calcConsensusStats = (reps: BasicRepDetails[], supply: Supply, quor
         }
     }
     const official = {
-        onlineTotal: officialOnlineWeight,
-        onlinePercent: officialOnlineWeight / supply.total,
-        offlineTotal: officialOfflineWeight,
-        offlinePercent: officialOfflineWeight / supply.total,
+        onlineAmount: officialOnlineWeight,
+        onlinePercent: officialOnlineWeight / totalSupply,
+        offlineAmount: officialOfflineWeight,
+        offlinePercent: officialOfflineWeight / totalSupply,
     };
     const unofficial = {
-        onlineTotal: quorum.onlineStakeTotal - officialOnlineWeight - officialOfflineWeight,
-        onlinePercent: (quorum.onlineStakeTotal - (officialOnlineWeight + officialOfflineWeight)) / supply.total,
-        offlineTotal: unofficialOfflineWeight,
-        offlinePercent: unofficialOfflineWeight / supply.total,
+        onlineAmount: quorum.onlineStakeTotal - officialOnlineWeight - officialOfflineWeight,
+        onlinePercent: (quorum.onlineStakeTotal - (officialOnlineWeight + officialOfflineWeight)) / totalSupply,
+        offlineAmount: unofficialOfflineWeight,
+        offlinePercent: unofficialOfflineWeight / totalSupply,
     };
     const noRep = {
-        total:
-            supply.total -
-            official.onlineTotal -
-            official.offlineTotal -
-            unofficial.offlineTotal -
-            unofficial.onlineTotal,
+        amount:
+            totalSupply -
+            official.onlineAmount -
+            official.offlineAmount -
+            unofficial.offlineAmount -
+            unofficial.onlineAmount,
         percent:
             1 - official.onlinePercent - official.offlinePercent - unofficial.onlinePercent - unofficial.offlinePercent,
     };
@@ -69,11 +64,11 @@ export const calcConsensusStats = (reps: BasicRepDetails[], supply: Supply, quor
 
 export const calcNakamotoCoefficient = (
     reps: BasicRepDetails[],
-    quorum: Quorum,
+    quorum: QuorumDto,
     consensus: ConsensusStatsDto
 ): number => {
     const unofficialWeights: number[] = [];
-    const officialWeightSum = consensus.official.onlineTotal + consensus.official.offlineTotal;
+    const officialWeightSum = consensus.official.onlineAmount + consensus.official.offlineAmount;
 
     for (const rep of reps) {
         if (!_isOfficialRep(rep.address)) {
