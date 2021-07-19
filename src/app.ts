@@ -46,7 +46,8 @@ import {
     getQuorum,
     getSupply,
     getPeerVersions,
-    parseRichListFromFile, useMegaphone,
+    parseRichListFromFile,
+    useMegaphone,
 } from '@app/services';
 
 const corsOptions = {

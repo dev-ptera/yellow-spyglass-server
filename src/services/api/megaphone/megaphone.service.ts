@@ -1,7 +1,6 @@
-
 import { sendRpc } from '@app/rpc';
 import { LOG_ERR, LOG_INFO } from '@app/services';
-import { megaphoneAccounts } from "../../../config/megaphone-accounts";
+import { megaphoneAccounts } from '../../../config/megaphone-accounts';
 
 const sendFunds = (wallet: string, source: string, destination: string): Promise<any> =>
     new Promise((resolve) => {
