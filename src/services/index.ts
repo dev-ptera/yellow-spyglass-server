@@ -28,3 +28,5 @@ export * from './etc/timestamps.service';
 
 export * from './log/error.service';
 export * from './log/info.service';
+
+export * from './api/megaphone/megaphone.service';

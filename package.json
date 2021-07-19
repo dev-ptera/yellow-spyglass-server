@@ -13,6 +13,7 @@
     "dependencies": {
         "@dev-ptera/nano-node-rpc": "^2.0.2",
         "banano-unit-converter": "^0.1.0",
+        "body-parser": "^1.19.0",
         "cors": "^2.8.5",
         "csv-parser": "^3.0.0",
         "dotenv": "^10.0.0",

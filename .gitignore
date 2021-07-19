@@ -33,3 +33,4 @@ rep-uptime-dev
 serviceAccountKey.ts
 known-accounts.ts
 balances.json
+megaphone-accounts.ts
