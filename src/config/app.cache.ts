@@ -53,6 +53,7 @@ export const AppCache: AppCache = {
         supply: undefined,
         quorum: undefined,
         nakamotoCoefficient: undefined,
+        peerVersions: undefined,
     },
     priceData: undefined,
     repPings: {
