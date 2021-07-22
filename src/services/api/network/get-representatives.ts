@@ -1,5 +1,5 @@
 import * as RPC from '@dev-ptera/nano-node-rpc';
-import {AppCache, NANO_CLIENT} from '@app/config';
+import { AppCache, NANO_CLIENT } from '@app/config';
 import { rawToBan } from 'banano-unit-converter';
 import { BasicRepDetails } from '@app/types';
 import { LOG_ERR } from '@app/services';

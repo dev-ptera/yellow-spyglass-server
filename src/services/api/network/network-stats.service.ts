@@ -1,6 +1,6 @@
 import { AppCache } from '@app/config';
-import {getPeerVersionsPromise, LOG_ERR, LOG_INFO} from '@app/services';
-import {BasicRepDetails, PeerVersionsDto, QuorumDto, SupplyDto} from '@app/types';
+import { getPeerVersionsPromise, LOG_ERR, LOG_INFO } from '@app/services';
+import { BasicRepDetails, PeerVersionsDto, QuorumDto, SupplyDto } from '@app/types';
 import { getAllReps } from './get-representatives';
 import { getSupplyPromise } from './supply.service';
 import { getQuorumPromise } from './quorum.service';
@@ -23,7 +23,7 @@ export const cacheNetworkStats = async (): Promise<void> => {
                     consensus,
                     quorum,
                     nakamotoCoefficient,
-                    peerVersions
+                    peerVersions,
                     // repWeights: nakamotoStats.repWeights,
                 };
                 resolve(LOG_INFO('Network Stats Updated', start));

@@ -64,6 +64,6 @@ export const AppCache: AppCache = {
     trackedReps: {
         thresholdReps: [],
         monitoredReps: [],
-        onlineWeight: 0
+        onlineWeight: 0,
     },
 };
