@@ -61,5 +61,9 @@ export const AppCache: AppCache = {
         map: new Map<string, number>(),
     },
     richList: [],
-    trackedReps: undefined,
+    trackedReps: {
+        thresholdReps: [],
+        monitoredReps: [],
+        onlineWeight: 0
+    },
 };
