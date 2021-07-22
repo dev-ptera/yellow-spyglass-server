@@ -9,5 +9,6 @@ export type NetworkStatsDto = {
     quorum: QuorumDto;
     nakamotoCoefficient: number;
     peerVersions: PeerVersionsDto[];
+    principalRepMinBan: number;
     // repWeights: number[];
 };

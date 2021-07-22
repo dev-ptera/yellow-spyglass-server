@@ -105,6 +105,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
             weight: rep.weight,
             online: Boolean(rep.online),
             delegatorsCount: rep.delegatorsCount,
+            principal: rep.weight > AppCache.networkStats.principalRepMinBan,
             uptimePercentDay: calculateUptimePercentage(repPings.day),
             uptimePercentWeek: calculateUptimePercentage(repPings.week),
             uptimePercentMonth: calculateUptimePercentage(repPings.month),

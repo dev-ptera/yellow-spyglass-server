@@ -8,6 +8,7 @@ import {
 } from '@dev-ptera/nano-node-rpc';
 import { AccountOverviewDto, DelegatorDto } from '@app/types';
 import { rawToBan } from 'banano-unit-converter';
+import { AppCache } from '@app/config';
 
 type DelegatorsOverview = {
     delegators: DelegatorDto[];
@@ -95,6 +96,7 @@ export const getAccountOverview = (req, res): void => {
                 balanceRaw: accountBalance.balance,
                 pendingRaw: accountBalance.pending,
                 representative: accountInfo.representative,
+                principal: delegatorsData.weightSum >= AppCache.networkStats.principalRepMinBan,
                 completedTxCount: Number(accountInfo.block_count),
                 pendingTxCount: Number(pendingTransactions.length),
                 delegatorsCount: delegatorsData.count,
