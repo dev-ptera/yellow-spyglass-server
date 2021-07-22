@@ -48,6 +48,7 @@ import {
     getPeerVersions,
     parseRichListFromFile,
     useMegaphone,
+    getAliases,
 } from '@app/services';
 
 const corsOptions = {
@@ -73,6 +74,7 @@ app.use(cors(corsOptions));
 /* Real time results */
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
 app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res));
+app.get(`/${PATH_ROOT}/aliases`, (req, res) => getAliases(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
 app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransactions(req, res));
 app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));

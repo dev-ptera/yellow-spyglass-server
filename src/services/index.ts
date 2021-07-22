@@ -30,3 +30,5 @@ export * from './log/error.service';
 export * from './log/info.service';
 
 export * from './api/megaphone/megaphone.service';
+
+export * from './api/alias/alias.service';
