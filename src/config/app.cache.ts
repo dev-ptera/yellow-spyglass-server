@@ -53,6 +53,7 @@ export const AppCache: AppCache = {
         supply: undefined,
         quorum: undefined,
         nakamotoCoefficient: undefined,
+        peerVersions: undefined,
     },
     priceData: undefined,
     repPings: {
@@ -60,5 +61,9 @@ export const AppCache: AppCache = {
         map: new Map<string, number>(),
     },
     richList: [],
-    trackedReps: undefined,
+    trackedReps: {
+        thresholdReps: [],
+        monitoredReps: [],
+        onlineWeight: 0,
+    },
 };

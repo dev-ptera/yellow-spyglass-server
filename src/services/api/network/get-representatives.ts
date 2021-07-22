@@ -1,5 +1,5 @@
 import * as RPC from '@dev-ptera/nano-node-rpc';
-import { NANO_CLIENT } from '@app/config';
+import { AppCache, NANO_CLIENT } from '@app/config';
 import { rawToBan } from 'banano-unit-converter';
 import { BasicRepDetails } from '@app/types';
 import { LOG_ERR } from '@app/services';
@@ -25,17 +25,24 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
         }
     }
 
-    // Get all online reps from nano rpc.
-    // TODO: Make this a combo of tracked online + representatives_online
+    // Get all online reps from nano rpc (includes non-tracked reps) & mark included weighted reps as online.
     const onlineReps = (await NANO_CLIENT.representatives_online().catch((err) =>
         Promise.reject(LOG_ERR('getAllReps.representatives_online', err))
     )) as RPC.RepresentativesOnlineResponse;
-
-    // Mark reps as online
     for (const address of onlineReps.representatives) {
-        const rep = weightedReps.get(address);
-        if (rep) {
-            rep.online = true;
+        const weightedRep = weightedReps.get(address);
+        if (weightedRep) {
+            weightedRep.online = true;
+        }
+    }
+
+    // Mark reps as online using AppCache.  Network stats must respect AppCache online status.
+    for (const trackedRep of AppCache.trackedReps.thresholdReps) {
+        if (trackedRep.online) {
+            const weightedRep = weightedReps.get(trackedRep.address);
+            if (weightedRep) {
+                weightedRep.online = true;
+            }
         }
     }
 
@@ -52,7 +59,7 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
 
 /** Gets a large amount of representatives so we can aggregate online voting weight stats. */
 export const getAllReps = (): Promise<BasicRepDetails[]> =>
-    NANO_CLIENT.representatives(1000, true)
+    NANO_CLIENT.representatives(2000, true)
         .then(processNodeResponse)
         .then((reps) => Promise.resolve(reps))
         .catch((err) => Promise.reject(err));
