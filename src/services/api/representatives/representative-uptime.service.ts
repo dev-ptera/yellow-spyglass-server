@@ -97,6 +97,12 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
     const repAddress = parts[parts.length - 1];
     const repPings: RepPingMapData  = await getRepDoc(repAddress);
     const yearPings = repPings.year;
+
+    if (!yearPings || yearPings.length === 0) {
+        res.status(500).send({ error: `No uptime data for representative: ${repAddress}`});
+        return Promise.resolve();
+    }
+
     yearPings.reverse();
 
     const online = yearPings[0] === 1;
