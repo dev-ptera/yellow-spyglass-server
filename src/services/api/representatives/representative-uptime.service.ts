@@ -109,6 +109,7 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
     let timeSinceOfflineMs = 0;
 
     let hasFoundOffline = false;
+    // Each ping represents 5 minutes.
     for (const ping of yearPings) {
         if (ping === 1) {
             timeSinceOfflineMs += 5 * 1000 * 60;
@@ -122,7 +123,6 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
         }
     }
 
-    const lastOfflineDateMs = Date.now() - timeSinceOfflineMs;
     const dto: RepresentativeUptimeDto = {
         address: repAddress,
         online,
@@ -132,9 +132,13 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
         uptimePercentSemiAnnual: calculateUptimePercentage(repPings.semiAnnual),
         uptimePercentYear: calculateUptimePercentage(repPings.year),
         lastOfflineDurationMinutes,
-        lastOfflineDateMs,
-        lastOfflineDate: new Date(lastOfflineDateMs).toLocaleDateString(),
     };
+
+    if (hasFoundOffline) {
+        const lastOfflineDateMs = Date.now() - timeSinceOfflineMs;
+        dto.lastOfflineDateMs = lastOfflineDateMs;
+        dto.lastOfflineDate = new Date(lastOfflineDateMs).toLocaleDateString();
+    }
 
     res.send(dto);
     return Promise.resolve();
