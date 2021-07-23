@@ -7,6 +7,6 @@ export type RepresentativeUptimeDto = {
     uptimePercentSemiAnnual: number;
     uptimePercentYear: number;
     lastOfflineDurationMinutes: number;
-    lastOfflineTimeMs: number;
+    lastOfflineDateMs: number;
     lastOfflineDate: string;
 }

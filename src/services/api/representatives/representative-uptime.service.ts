@@ -117,7 +117,7 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
         }
     }
 
-    const lastOfflineTimeMs = Date.now() - timeSinceOfflineMs;
+    const lastOfflineDateMs = Date.now() - timeSinceOfflineMs;
     const dto: RepresentativeUptimeDto = {
         address: repAddress,
         online,
@@ -127,8 +127,8 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
         uptimePercentSemiAnnual: calculateUptimePercentage(repPings.semiAnnual),
         uptimePercentYear: calculateUptimePercentage(repPings.year),
         lastOfflineDurationMinutes,
-        lastOfflineTimeMs,
-        lastOfflineDate: new Date(lastOfflineTimeMs).toLocaleDateString()
+        lastOfflineDateMs,
+        lastOfflineDate: new Date(lastOfflineDateMs).toLocaleDateString()
     }
 
     res.send(dto);
