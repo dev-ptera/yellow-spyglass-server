@@ -9,4 +9,4 @@ export type RepresentativeUptimeDto = {
     lastOfflineDurationMinutes: number;
     lastOfflineDateMs: number;
     lastOfflineDate: string;
-}
+};

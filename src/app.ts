@@ -48,7 +48,8 @@ import {
     getPeerVersions,
     parseRichListFromFile,
     useMegaphone,
-    getAliases, getRepresentativeUptime,
+    getAliases,
+    getRepresentativeUptime,
 } from '@app/services';
 
 const corsOptions = {

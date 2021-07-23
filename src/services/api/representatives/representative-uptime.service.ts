@@ -1,5 +1,5 @@
 import { AppCache, IS_PRODUCTION, REPRESENTATIVES_REFRESH_INTERVAL_MS } from '@app/config';
-import {Ping, RepPingMapData, RepresentativeUptimeDto} from '@app/types';
+import { Ping, RepPingMapData, RepresentativeUptimeDto } from '@app/types';
 import { LOG_ERR } from '@app/services';
 const fs = require('fs');
 
@@ -8,7 +8,6 @@ const weekMaxPings = 604_800_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const monthMaxPings = 2_629_800_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const semiAnnualMaxPings = (6 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const yearMaxPings = (12 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
-
 
 /** Given a list of pings, where 1 represents ONLINE and 0 represents OFFLINE, returns online percentage. */
 export const calculateUptimePercentage = (pings: Ping[]): number => {
@@ -95,11 +94,11 @@ export const writeRepStatistics = async (repAddress: string, isOnline: boolean) 
 export const getRepresentativeUptime = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
     const repAddress = parts[parts.length - 1];
-    const repPings: RepPingMapData  = await getRepDoc(repAddress);
+    const repPings: RepPingMapData = await getRepDoc(repAddress);
     const yearPings = repPings.year;
 
     if (!yearPings || yearPings.length === 0) {
-        res.status(500).send({ error: `No uptime data for representative: ${repAddress}`});
+        res.status(500).send({ error: `No uptime data for representative: ${repAddress}` });
         return Promise.resolve();
     }
 
@@ -112,14 +111,14 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
     let hasFoundOffline = false;
     for (const ping of yearPings) {
         if (ping === 1) {
-            timeSinceOfflineMs+=5*1000*60
+            timeSinceOfflineMs += 5 * 1000 * 60;
         }
         if (ping === 1 && hasFoundOffline) {
             break;
         }
         if (ping === 0) {
             hasFoundOffline = true;
-            lastOfflineDurationMinutes+=5;
+            lastOfflineDurationMinutes += 5;
         }
     }
 
@@ -134,10 +133,9 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
         uptimePercentYear: calculateUptimePercentage(repPings.year),
         lastOfflineDurationMinutes,
         lastOfflineDateMs,
-        lastOfflineDate: new Date(lastOfflineDateMs).toLocaleDateString()
-    }
+        lastOfflineDate: new Date(lastOfflineDateMs).toLocaleDateString(),
+    };
 
     res.send(dto);
     return Promise.resolve();
 };
-
