@@ -1,24 +1,12 @@
 import { Ping, RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
-import { LOG_ERR, getMonitoredReps, writeRepStatistics, LOG_INFO } from '@app/services';
+import {LOG_ERR, getMonitoredReps, writeRepStatistics, LOG_INFO, calculateUptimePercentage} from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
 
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 const OFFLINE_AFTER_PINGS = 4;
-
-/** Given a list of pings, where 1 represents ONLINE and 0 represents OFFLINE, returns online percentage. */
-const calculateUptimePercentage = (pings: Ping[]): number => {
-    let onlinePings = 0;
-    for (const ping of pings) {
-        if (ping === 1) {
-            onlinePings++;
-        }
-    }
-    return Number(((onlinePings / pings.length) * 100).toFixed(1));
-};
-
 /** Using the AppCache, will mark a rep as offline if it has been unresponsive for [OFFLINE_AFTER_PINGS] pings. */
 export const isRepOnline = (repAddress: string): boolean =>
     AppCache.repPings.map.get(repAddress) !== undefined &&

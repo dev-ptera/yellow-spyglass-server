@@ -1,5 +1,5 @@
 import { AppCache, IS_PRODUCTION, REPRESENTATIVES_REFRESH_INTERVAL_MS } from '@app/config';
-import { RepPingMapData } from '@app/types';
+import {Ping, RepPingMapData, RepresentativeUptimeDto} from '@app/types';
 import { LOG_ERR } from '@app/services';
 const fs = require('fs');
 
@@ -8,6 +8,18 @@ const weekMaxPings = 604_800_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const monthMaxPings = 2_629_800_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const semiAnnualMaxPings = (6 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
 const yearMaxPings = (12 * 2_629_800_000) / REPRESENTATIVES_REFRESH_INTERVAL_MS;
+
+
+/** Given a list of pings, where 1 represents ONLINE and 0 represents OFFLINE, returns online percentage. */
+export const calculateUptimePercentage = (pings: Ping[]): number => {
+    let onlinePings = 0;
+    for (const ping of pings) {
+        if (ping === 1) {
+            onlinePings++;
+        }
+    }
+    return Number(((onlinePings / pings.length) * 100).toFixed(1));
+};
 
 /** Given a rep address, returns the location o the file to write to store rep uptime. */
 const formatDocName = (repAddress: string): string =>
@@ -78,3 +90,48 @@ export const writeRepStatistics = async (repAddress: string, isOnline: boolean) 
     AppCache.dbRepPings.set(repAddress, data);
     return Promise.resolve();
 };
+
+/** Returns uptime metrics for a given representative. */
+export const getRepresentativeUptime = async (req, res): Promise<void> => {
+    const parts = req.url.split('/');
+    const repAddress = parts[parts.length - 1];
+    const repPings: RepPingMapData  = await getRepDoc(repAddress);
+    const yearPings = repPings.year;
+    yearPings.reverse();
+
+    const online = yearPings[0] === 1;
+    let lastOfflineDurationMinutes = 0;
+    let timeSinceOfflineMs = 0;
+
+    let hasFoundOffline = false;
+    for (const ping of yearPings) {
+        if (ping === 1) {
+            timeSinceOfflineMs+=5*1000*60
+        }
+        if (ping === 1 && hasFoundOffline) {
+            break;
+        }
+        if (ping === 0) {
+            hasFoundOffline = true;
+            lastOfflineDurationMinutes+=5;
+        }
+    }
+
+    const lastOfflineTimeMs = Date.now() - timeSinceOfflineMs;
+    const dto: RepresentativeUptimeDto = {
+        address: repAddress,
+        online,
+        uptimePercentDay: calculateUptimePercentage(repPings.day),
+        uptimePercentWeek: calculateUptimePercentage(repPings.week),
+        uptimePercentMonth: calculateUptimePercentage(repPings.month),
+        uptimePercentSemiAnnual: calculateUptimePercentage(repPings.semiAnnual),
+        uptimePercentYear: calculateUptimePercentage(repPings.year),
+        lastOfflineDurationMinutes,
+        lastOfflineTimeMs,
+        lastOfflineDate: new Date(lastOfflineTimeMs).toLocaleDateString()
+    }
+
+    res.send(dto);
+    return Promise.resolve();
+};
+
