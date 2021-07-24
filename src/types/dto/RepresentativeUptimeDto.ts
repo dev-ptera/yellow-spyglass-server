@@ -6,9 +6,18 @@ export type RepresentativeUptimeDto = {
     uptimePercentMonth: number;
     uptimePercentSemiAnnual: number;
     uptimePercentYear: number;
-    lastOfflineDurationMinutes: number;
+
+    creationUnixTimestamp: number;
+    creationDate: string;
 
     /* Not provided if representative has been offline. */
-    lastOfflineDateMs?: number;
-    lastOfflineDate?: string;
+    lastOutage?: LastOutage;
+};
+
+export type LastOutage = {
+    offlineUnixTimestamp: number;
+    onlineUnixTimestamp: number;
+    onlineDate: string;
+    offlineDate: string;
+    durationMinutes: number;
 };

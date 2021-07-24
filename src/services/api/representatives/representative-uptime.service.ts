@@ -1,6 +1,7 @@
 import { AppCache, IS_PRODUCTION, REPRESENTATIVES_REFRESH_INTERVAL_MS } from '@app/config';
 import { Ping, RepPingMapData, RepresentativeUptimeDto } from '@app/types';
 import { LOG_ERR } from '@app/services';
+
 const fs = require('fs');
 
 const dayMaxPings = 86_400_000 / REPRESENTATIVES_REFRESH_INTERVAL_MS;
@@ -90,6 +91,8 @@ export const writeRepStatistics = async (repAddress: string, isOnline: boolean) 
     return Promise.resolve();
 };
 
+const minsToMs = (mins: number): number => mins * 60 * 1000;
+
 /** Returns uptime metrics for a given representative. */
 export const getRepresentativeUptime = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
@@ -105,24 +108,29 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
     yearPings.reverse();
 
     const online = yearPings[0] === 1;
-    let lastOfflineDurationMinutes = 0;
-    let timeSinceOfflineMs = 0;
-
+    let outageDurationMinutes = 0;
+    let minutesSinceLastOutage = 0;
     let hasFoundOffline = false;
+
     // Each ping represents 5 minutes.
+    // Calc last offline time.
     for (const ping of yearPings) {
-        if (ping === 1) {
-            timeSinceOfflineMs += 5 * 1000 * 60;
-        }
         if (ping === 1 && hasFoundOffline) {
             break;
         }
+        if (ping === 1) {
+            minutesSinceLastOutage += 5;
+        }
         if (ping === 0) {
             hasFoundOffline = true;
-            lastOfflineDurationMinutes += 5;
+            outageDurationMinutes += 5;
         }
     }
 
+    const now = Date.now();
+    const repAgeMinutes = yearPings.length * 5;
+    const creationUnixTimestamp = now - minsToMs(repAgeMinutes);
+    const creationDate = new Date(creationUnixTimestamp).toLocaleDateString();
     const dto: RepresentativeUptimeDto = {
         address: repAddress,
         online,
@@ -131,15 +139,21 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
         uptimePercentMonth: calculateUptimePercentage(repPings.month),
         uptimePercentSemiAnnual: calculateUptimePercentage(repPings.semiAnnual),
         uptimePercentYear: calculateUptimePercentage(repPings.year),
-        lastOfflineDurationMinutes,
+        creationUnixTimestamp,
+        creationDate,
     };
 
     if (hasFoundOffline) {
-        const lastOfflineDateMs = Date.now() - timeSinceOfflineMs;
-        dto.lastOfflineDateMs = lastOfflineDateMs;
-        dto.lastOfflineDate = new Date(lastOfflineDateMs).toLocaleDateString();
+        const onlineUnixTimestamp = now - minsToMs(minutesSinceLastOutage);
+        const offlineUnixTimestamp = onlineUnixTimestamp - minsToMs(outageDurationMinutes);
+        dto.lastOutage = {
+            offlineUnixTimestamp: offlineUnixTimestamp,
+            offlineDate: new Date(offlineUnixTimestamp).toLocaleDateString(),
+            onlineUnixTimestamp: onlineUnixTimestamp,
+            onlineDate: new Date(onlineUnixTimestamp).toLocaleDateString(),
+            durationMinutes: outageDurationMinutes,
+        };
     }
-
     res.send(dto);
     return Promise.resolve();
 };
