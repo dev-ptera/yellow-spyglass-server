@@ -287,4 +287,9 @@ export const MANUAL_ACCOUNTS = [
         alias: 'Cutenods',
         type: 'Representative',
     },
+    {
+        address: 'ban_1hentaiqzbhasuyg5tcyhso79ma3wuiektphbnjcekifmawuugdri93trt8f',
+        alias: 'Hentai',
+        type: 'Representative'
+    }
 ];
