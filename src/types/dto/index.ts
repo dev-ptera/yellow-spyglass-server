@@ -7,7 +7,6 @@ export * from './BlockDto';
 export * from './ConfirmedTransactionDto';
 export * from './ConsensusStatsDto';
 export * from './DelegatorDto';
-export * from './DistributionStatsDto';
 export * from './InsightsDto';
 export * from './KnownAccountDto';
 export * from './MonitoredRepDto';
