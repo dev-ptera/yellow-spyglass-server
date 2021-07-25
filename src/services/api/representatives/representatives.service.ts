@@ -1,6 +1,13 @@
 import { Ping, RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
-import { LOG_ERR, getMonitoredReps, writeRepStatistics, LOG_INFO, calculateUptimePercentage } from '@app/services';
+import {
+    LOG_ERR,
+    getMonitoredReps,
+    writeRepStatistics,
+    LOG_INFO,
+    calculateUptimePercentage,
+    calculateUptimeStatistics,
+} from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
@@ -87,6 +94,7 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
     for (const address of trackedReps.keys()) {
         const rep = trackedReps.get(address);
         const repPings = AppCache.dbRepPings.get(address);
+        const uptimeStats = calculateUptimeStatistics(address, repPings);
 
         reps.push({
             address,
@@ -94,11 +102,14 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
             online: Boolean(rep.online),
             delegatorsCount: rep.delegatorsCount,
             principal: rep.weight > AppCache.networkStats.principalRepMinBan,
-            uptimePercentDay: calculateUptimePercentage(repPings.day),
-            uptimePercentWeek: calculateUptimePercentage(repPings.week),
-            uptimePercentMonth: calculateUptimePercentage(repPings.month),
-            uptimePercentSemiAnnual: calculateUptimePercentage(repPings.semiAnnual),
-            uptimePercentYear: calculateUptimePercentage(repPings.year),
+            uptimePercentDay: uptimeStats.uptimePercentDay,
+            uptimePercentWeek: uptimeStats.uptimePercentWeek,
+            uptimePercentMonth: uptimeStats.uptimePercentMonth,
+            uptimePercentSemiAnnual: uptimeStats.uptimePercentSemiAnnual,
+            uptimePercentYear: uptimeStats.uptimePercentYear,
+            lastOutage: uptimeStats.lastOutage,
+            creationDate: uptimeStats.creationDate,
+            creationUnixTimestamp: uptimeStats.creationUnixTimestamp,
         });
     }
     return reps;

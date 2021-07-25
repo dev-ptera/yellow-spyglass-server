@@ -93,18 +93,8 @@ export const writeRepStatistics = async (repAddress: string, isOnline: boolean) 
 
 const minsToMs = (mins: number): number => mins * 60 * 1000;
 
-/** Returns uptime metrics for a given representative. */
-export const getRepresentativeUptime = async (req, res): Promise<void> => {
-    const parts = req.url.split('/');
-    const repAddress = parts[parts.length - 1];
-    const repPings: RepPingMapData = await getRepDoc(repAddress);
-    const yearPings = repPings.year;
-
-    if (!yearPings || yearPings.length === 0) {
-        res.status(500).send({ error: `No uptime data for representative: ${repAddress}` });
-        return Promise.resolve();
-    }
-
+export const calculateUptimeStatistics = (repAddress: string, repPings: RepPingMapData): RepresentativeUptimeDto => {
+    const yearPings = Array.from(repPings.year);
     yearPings.reverse();
 
     const online = yearPings[0] === 1;
@@ -131,7 +121,7 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
     const repAgeMinutes = yearPings.length * 5;
     const creationUnixTimestamp = now - minsToMs(repAgeMinutes);
     const creationDate = new Date(creationUnixTimestamp).toLocaleDateString();
-    const dto: RepresentativeUptimeDto = {
+    const uptimeDto: RepresentativeUptimeDto = {
         address: repAddress,
         online,
         uptimePercentDay: calculateUptimePercentage(repPings.day),
@@ -146,7 +136,7 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
     if (hasFoundOffline) {
         const onlineUnixTimestamp = now - minsToMs(minutesSinceLastOutage);
         const offlineUnixTimestamp = onlineUnixTimestamp - minsToMs(outageDurationMinutes);
-        dto.lastOutage = {
+        uptimeDto.lastOutage = {
             offlineUnixTimestamp: offlineUnixTimestamp,
             offlineDate: new Date(offlineUnixTimestamp).toLocaleDateString(),
             onlineUnixTimestamp: onlineUnixTimestamp,
@@ -154,6 +144,22 @@ export const getRepresentativeUptime = async (req, res): Promise<void> => {
             durationMinutes: outageDurationMinutes,
         };
     }
+    return uptimeDto;
+};
+
+/** Returns uptime metrics for a given representative. */
+export const getRepresentativeUptime = async (req, res): Promise<void> => {
+    const parts = req.url.split('/');
+    const repAddress = parts[parts.length - 1];
+    const repPings: RepPingMapData = await getRepDoc(repAddress);
+    const yearPings = repPings.year;
+
+    if (!yearPings || yearPings.length === 0) {
+        res.status(500).send({ error: `No uptime data for representative: ${repAddress}` });
+        return Promise.resolve();
+    }
+
+    const dto = calculateUptimeStatistics(repAddress, repPings);
     res.send(dto);
     return Promise.resolve();
 };
