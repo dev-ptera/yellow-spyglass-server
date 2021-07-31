@@ -87,8 +87,8 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
             return Promise.reject(LOG_ERR('getAccountInsights.confirmedTransactionPromise', err, { address }));
         });
 
-/** Given an account address, it looks will return chart datapoints that represent that account's balance over time.
- * It will also return account statistics for top balance, most common sender, etc.
+/** Given an account address, it will return chart datapoints that represent that account's balance over time,
+ *  as well as account-specific stats for most all-time balance, most common sender, etc.
  */
 export const getAccountInsights = async (req, res): Promise<void> => {
     const parts = req.url.split('/');
