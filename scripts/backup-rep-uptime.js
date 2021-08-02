@@ -25,7 +25,7 @@ const backupUptimeJson = () => {
     });
 
     dir.on('exit', function (code) {
-        console.log("Backup complete; will attempt next backup in one day.");
+        console.log("Backup complete; will attempt next backup in 7 days.");
     });
 }
 
