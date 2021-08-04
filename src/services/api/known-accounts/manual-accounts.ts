@@ -1,4 +1,6 @@
-export const MANUAL_ACCOUNTS = [
+import {KnownAccountDto} from "@app/types";
+
+export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     {
         address: 'ban_3a1dokzzuc334kpsedakxz5hw4cauexjori8spcf7pninujry43dxkbam4o6',
         alias: 'BNswap',
@@ -259,7 +261,7 @@ export const MANUAL_ACCOUNTS = [
     },
     {
         address: 'ban_1gt4ti4gnzjre341pqakzme8z94atcyuuawoso8gqwdx5m4a77wu1mxxighh',
-        alias: 'Malkaroy',
+        alias: 'bagend.notellem.win',
         type: 'Representative',
     },
     {
@@ -291,5 +293,36 @@ export const MANUAL_ACCOUNTS = [
         address: 'ban_1hentaiqzbhasuyg5tcyhso79ma3wuiektphbnjcekifmawuugdri93trt8f',
         alias: 'Hentai',
         type: 'Representative'
-    }
+    },
+    {
+        address: 'ban_3nnfzzxp84zj7e7zrbsf65hngs51b76gda179bc4dxr7fkjtbtxq744w6gcx',
+        alias: 'Woodrisian',
+        type: 'Representative'
+    },
+    {
+        address: 'ban_3rz8d5n7iodhmyjk8xpc68x87iw96a14fdfazwrfefucmhggw6i1a9nxi9yy',
+        alias: 'banano-pixels',
+        type: 'Representative'
+    },
+    {
+        address: 'ban_1kirby19w89i35yenyesnz7zqdyguzdb3e819dxrhdegdnsaphzeug39ntxj',
+        alias: 'Kirby',
+        type: 'Citizen'
+    },
+    {
+        address: 'ban_1yekta1xn94qdnbmmj1tqg76zk3apcfd31pjmuy6d879e3mr469a4o4sdhd4',
+        alias: 'Yekta',
+        type: 'Citizen'
+    },
+    {
+        address: 'ban_3fudcakefr9jyw7b4kfafrgaekmd37ez7q4pmzuo1fd7wo9jo8gsha7z7e1c',
+        alias: 'Fudcake',
+        type: 'Citizen'
+    },
+    {
+        address: 'ban_19bantanopcajd8ptfg9aedn8osgrzyrbupte5j4p1je69e5diz8qtc4dopf',
+        alias: 'Bantano',
+        type: 'Citizen'
+    },
+
 ];
