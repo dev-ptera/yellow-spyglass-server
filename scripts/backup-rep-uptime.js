@@ -1,6 +1,7 @@
 const { exec } = require("child_process");
 
-const dayMs = 1000 * 60 * 60 * 24;
+// Run every 7 days.
+const dayMs = 1000 * 60 * 60 * 24 * 7;
 
 const backupUptimeJson = () => {
     const today = new Date();
@@ -24,7 +25,7 @@ const backupUptimeJson = () => {
     });
 
     dir.on('exit', function (code) {
-        console.log("Backup complete; will attempt next backup in one day.");
+        console.log("Backup complete; will attempt next backup in 7 days.");
     });
 }
 
