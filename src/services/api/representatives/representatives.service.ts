@@ -1,11 +1,10 @@
-import { Ping, RepresentativeDto, RepresentativesResponseDto } from '@app/types';
+import { RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
 import {
     LOG_ERR,
     getMonitoredReps,
     writeRepStatistics,
     LOG_INFO,
-    calculateUptimePercentage,
     calculateUptimeStatistics,
 } from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
@@ -14,6 +13,7 @@ import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
 
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 const OFFLINE_AFTER_PINGS = 4;
+
 /** Using the AppCache, will mark a rep as offline if it has been unresponsive for [OFFLINE_AFTER_PINGS] pings. */
 export const isRepOnline = (repAddress: string): boolean =>
     AppCache.repPings.map.get(repAddress) !== undefined &&

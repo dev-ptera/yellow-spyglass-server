@@ -36,4 +36,5 @@ export const MANUAL_PEER_MONITOR_IPS = [
     'banano.nifni.net',
     '192.210.243.189', // hentai
     'bagend.notellem.win',
+    'node.jungletv.live'
 ];
