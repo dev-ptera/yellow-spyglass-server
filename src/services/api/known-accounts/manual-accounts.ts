@@ -324,5 +324,10 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         alias: 'Bantano',
         type: 'Citizen'
     },
+    {
+        address: 'ban_19potasho7ozny8r1drz3u3hb3r97fw4ndm4hegdsdzzns1c3nobdastcgaa',
+        alias: 'node.jungletv.live',
+        type: 'representative',
+    }
 
 ];
