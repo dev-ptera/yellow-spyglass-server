@@ -3,6 +3,9 @@ const { exec } = require("child_process");
 // Run every 7 days.
 const dayMs = 1000 * 60 * 60 * 24 * 7;
 
+console.log('Started script at time: ');
+console.log(new Date().toLocaleTimeString());
+
 const backupUptimeJson = () => {
     const today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
