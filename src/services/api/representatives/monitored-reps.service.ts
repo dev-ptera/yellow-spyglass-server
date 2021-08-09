@@ -1,8 +1,10 @@
 import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
-import { LOG_ERR, populateDelegatorsCount } from '@app/services';
-import { MANUAL_PEER_MONITOR_IPS } from '@app/config';
+import { isRepOnline, LOG_ERR, populateDelegatorsCount } from '@app/services';
+import { MANUAL_PEER_MONITOR_IPS, NANO_CLIENT } from '@app/config';
+import * as RPC from '@dev-ptera/nano-node-rpc';
+import { on } from 'cluster';
 
 // Given peer IP, queries banano node monitor stats.
 const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
@@ -28,8 +30,22 @@ const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
 const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepDto[]> => {
     const groomedDetails: MonitoredRepDto[] = [];
     const delegatorsCountMap = new Map<string, { delegatorsCount: number }>();
+
+    // Get all online reps from nano rpc.
+    const onlineReps = (await NANO_CLIENT.representatives_online()) as RPC.RepresentativesOnlineResponse;
+    const onlineSet = new Set<string>();
+    for (const rep of onlineReps.representatives) {
+        onlineSet.add(rep);
+    }
+
     for (const peerStats of allPeerStats) {
-        if (peerStats && peerStats.nanoNodeAccount) {
+        if (
+            peerStats &&
+            peerStats.nanoNodeAccount &&
+            // Only show monitors that are actually online;
+            // isRepOnline won't return correct results on initial load due to race condition, so we use reps_online rpc call too as a failsafe.
+            (isRepOnline(peerStats.nanoNodeAccount) || onlineSet.has(peerStats.nanoNodeAccount))
+        ) {
             delegatorsCountMap.set(peerStats.nanoNodeAccount, { delegatorsCount: 0 });
             groomedDetails.push({
                 address: peerStats.nanoNodeAccount,
