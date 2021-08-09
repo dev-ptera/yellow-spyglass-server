@@ -6,7 +6,7 @@ export const sendRpc = async (wallet: string, source: string, destination: strin
         wallet: wallet,
         source: source,
         destination: destination,
-        amount
+        amount,
     })
         .then((response: any) => Promise.resolve(response))
         .catch((err) => Promise.reject(err));

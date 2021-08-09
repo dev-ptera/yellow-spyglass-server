@@ -1,4 +1,4 @@
-import {KnownAccountDto} from "@app/types";
+import { KnownAccountDto } from '@app/types';
 
 export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     {
@@ -292,42 +292,41 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     {
         address: 'ban_1hentaiqzbhasuyg5tcyhso79ma3wuiektphbnjcekifmawuugdri93trt8f',
         alias: 'Hentai',
-        type: 'Representative'
+        type: 'Representative',
     },
     {
         address: 'ban_3nnfzzxp84zj7e7zrbsf65hngs51b76gda179bc4dxr7fkjtbtxq744w6gcx',
         alias: 'Woodrisian',
-        type: 'Representative'
+        type: 'Representative',
     },
     {
         address: 'ban_3rz8d5n7iodhmyjk8xpc68x87iw96a14fdfazwrfefucmhggw6i1a9nxi9yy',
         alias: 'banano-pixels',
-        type: 'Representative'
+        type: 'Representative',
     },
     {
         address: 'ban_1kirby19w89i35yenyesnz7zqdyguzdb3e819dxrhdegdnsaphzeug39ntxj',
         alias: 'Kirby',
-        type: 'Citizen'
+        type: 'Citizen',
     },
     {
         address: 'ban_1yekta1xn94qdnbmmj1tqg76zk3apcfd31pjmuy6d879e3mr469a4o4sdhd4',
         alias: 'Yekta',
-        type: 'Citizen'
+        type: 'Citizen',
     },
     {
         address: 'ban_3fudcakefr9jyw7b4kfafrgaekmd37ez7q4pmzuo1fd7wo9jo8gsha7z7e1c',
         alias: 'Fudcake',
-        type: 'Citizen'
+        type: 'Citizen',
     },
     {
         address: 'ban_19bantanopcajd8ptfg9aedn8osgrzyrbupte5j4p1je69e5diz8qtc4dopf',
         alias: 'Bantano',
-        type: 'Citizen'
+        type: 'Citizen',
     },
     {
         address: 'ban_19potasho7ozny8r1drz3u3hb3r97fw4ndm4hegdsdzzns1c3nobdastcgaa',
         alias: 'node.jungletv.live',
         type: 'Representative',
-    }
-
+    },
 ];

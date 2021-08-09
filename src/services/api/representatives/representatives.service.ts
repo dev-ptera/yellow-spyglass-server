@@ -1,12 +1,6 @@
 import { RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
-import {
-    LOG_ERR,
-    getMonitoredReps,
-    writeRepStatistics,
-    LOG_INFO,
-    calculateUptimeStatistics,
-} from '@app/services';
+import { LOG_ERR, getMonitoredReps, writeRepStatistics, LOG_INFO, calculateUptimeStatistics } from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
