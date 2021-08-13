@@ -30,7 +30,8 @@ export type AppCache = {
     /** An object used to keep track of whether a representative has fallen offline.
      *  Since the `representatives_online` nano RPC call is unreliable (sometimes it returns far fewer reps than expected),
      *  this object tracks representatives and the last time they were successfully pinged.
-     *  If a rep is unreachable for a certain amount of pings, it will be marked as offline. */
+     *  If a rep is unreachable for a certain amount of pings, it will be marked as offline.
+     *  This object includes all representatives regardless of delegated reps; small reps included. */
     repPings: {
         currPing: number;
         map: Map<string, number>;
@@ -39,8 +40,9 @@ export type AppCache = {
     /** Top BANANO holders, sorted by balance. */
     richList: AccountBalanceDto[];
 
-    /** Representatives that either run the node monitor software or have a weight greater than min threshold. */
-    trackedReps: RepresentativesResponseDto;
+    /** Representative Cache which updates every 5 minutes.
+     *  Stores online weight, monitored, large, and micro representatives. */
+    representatives: RepresentativesResponseDto;
 };
 
 export const AppCache: AppCache = {
@@ -62,9 +64,10 @@ export const AppCache: AppCache = {
         map: new Map<string, number>(),
     },
     richList: [],
-    trackedReps: {
+    representatives: {
         thresholdReps: [],
         monitoredReps: [],
+        microReps: [],
         onlineWeight: 0,
     },
 };

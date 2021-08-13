@@ -37,7 +37,7 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
     }
 
     // Mark reps as online using AppCache.  Network stats must respect AppCache online status.
-    for (const trackedRep of AppCache.trackedReps.thresholdReps) {
+    for (const trackedRep of AppCache.representatives.thresholdReps) {
         if (trackedRep.online) {
             const weightedRep = weightedReps.get(trackedRep.address);
             if (weightedRep) {

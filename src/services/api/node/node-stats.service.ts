@@ -4,8 +4,8 @@ import { AppCache } from '@app/config';
 
 /** Returns statistics of this explorer's node. */
 export const getNodeStats = (req, res): void => {
-    if (AppCache.trackedReps) {
-        for (const dto of AppCache.trackedReps.monitoredReps) {
+    if (AppCache.representatives) {
+        for (const dto of AppCache.representatives.monitoredReps) {
             if (dto.name === 'batman') {
                 return res.send({
                     ...dto,

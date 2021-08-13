@@ -96,7 +96,7 @@ app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) =>
 app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, 'knownAccounts'));
 app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, cacheNetworkStats, 'networkStats'));
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, 'priceData'));
-app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, 'trackedReps'));
+app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, 'representatives'));
 
 const port: number = Number(process.env.PORT || 3000);
 const server = http.createServer(app);

@@ -4,11 +4,14 @@ import { LOG_ERR, getMonitoredReps, writeRepStatistics, LOG_INFO, calculateUptim
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
+import {MicroRepresentativeDto} from "@app/types";
 
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 const OFFLINE_AFTER_PINGS = 4;
 
-/** Using the AppCache, will mark a rep as offline if it has been unresponsive for [OFFLINE_AFTER_PINGS] pings. */
+/**
+ * The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
+*/
 export const isRepOnline = (repAddress: string): boolean =>
     AppCache.repPings.map.get(repAddress) !== undefined &&
     AppCache.repPings.map.get(repAddress) !== 0 &&
@@ -47,26 +50,26 @@ export const populateDelegatorsCount = async (
  * Gets the top 150 representatives & filters out smaller ones.
  * Then to the remaining, adds delegator count, marks each as online/offline, and stores ping data in JSON files.
  */
-const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
+const getLargeReps = async (): Promise<RepresentativeDto[]> => {
     const rpcData = await NANO_CLIENT.representatives(150, true);
-    const trackedReps = new Map<string, Partial<RepresentativeDto>>();
+    const largeRepMap = new Map<string, Partial<RepresentativeDto>>();
 
     // Add all reps with high-enough delegated weight to a map.
     for (const address in rpcData.representatives) {
         const raw = rpcData.representatives[address];
         const weight = Math.round(Number(rawToBan(raw)));
         if (weight >= MIN_WEIGHT_TO_BE_COUNTED) {
-            trackedReps.set(address, { weight });
+            largeRepMap.set(address, { weight });
         } else {
             break;
         }
     }
 
     // Adds delegatorsCount to each weightedRep.
-    await populateDelegatorsCount(trackedReps);
+    await populateDelegatorsCount(largeRepMap);
 
     // Get all online reps from nano rpc.
-    const onlineReps = (await NANO_CLIENT.representatives_online()) as RPC.RepresentativesOnlineResponse;
+    const onlineReps = (await NANO_CLIENT.representatives_online(false)) as RPC.RepresentativesOnlineResponse;
 
     // Update online pings
     AppCache.repPings.currPing++;
@@ -75,22 +78,20 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
         AppCache.repPings.map.set(address, AppCache.repPings.currPing);
     }
 
-    // The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
     // Save representative online/offline status in local database
-    for (const address of trackedReps.keys()) {
-        const rep = trackedReps.get(address);
+    for (const address of largeRepMap.keys()) {
+        const rep = largeRepMap.get(address);
         rep.online = isRepOnline(address);
         await writeRepStatistics(address, rep.online);
     }
 
-    // Construct response array
-    const reps: RepresentativeDto[] = [];
-    for (const address of trackedReps.keys()) {
-        const rep = trackedReps.get(address);
+    // Construct large rep response dto
+    const largeReps: RepresentativeDto[] = [];
+    for (const address of largeRepMap.keys()) {
+        const rep = largeRepMap.get(address);
         const repPings = AppCache.dbRepPings.get(address);
         const uptimeStats = calculateUptimeStatistics(address, repPings);
-
-        reps.push({
+        largeReps.push({
             address,
             weight: rep.weight,
             online: Boolean(rep.online),
@@ -106,8 +107,44 @@ const getAllRepresentatives = async (): Promise<RepresentativeDto[]> => {
             creationUnixTimestamp: uptimeStats.creationUnixTimestamp,
         });
     }
-    return reps;
+
+    return largeReps;
 };
+
+/** Using the representatives_online RPC call, returns any online rep that has < MIN_WEIGHT_TO_BE_COUNTED weight.  */
+const getMicroReps = async (): Promise<MicroRepresentativeDto[]> => {
+
+    // Get all online reps from nano rpc, then filter out the larger reps.
+    const onlineReps = (await NANO_CLIENT.representatives_online(true)) as RPC.RepresentativesOnlineWeightResponse;
+    const microRepMap = new Map<string, Partial<MicroRepresentativeDto>>();
+    for (const address in onlineReps.representatives) {
+        const weight = Math.round(Number(rawToBan(onlineReps.representatives[address].weight)));
+        if (weight < MIN_WEIGHT_TO_BE_COUNTED) {
+            microRepMap.set(address, { weight });
+        }
+    }
+
+    // Adds delegatorsCount to each micro rep.
+    await populateDelegatorsCount(microRepMap);
+
+    // Construct micro rep response dto
+    const microReps: MicroRepresentativeDto[] = [];
+    for (const address of microRepMap.keys()) {
+        const rep = microRepMap.get(address);
+        microReps.push({
+            address,
+            weight: rep.weight,
+            online: true,
+            delegatorsCount: rep.delegatorsCount,
+        });
+    }
+
+    // Sort by weight, descending
+    microReps.sort(function (a, b) {
+        return a.weight < b.weight ? 1 : -1
+    });
+    return microReps;
+}
 
 /** Get online voting weight (BAN) */
 const getOnlineWeight = (): Promise<number> =>
@@ -119,12 +156,14 @@ const getOnlineWeight = (): Promise<number> =>
 
 /** Representatives Promise aggregate; makes all calls required to populate the rep data in AppCache. */
 const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
-    Promise.all([getAllRepresentatives(), getMonitoredReps(), getOnlineWeight()])
-        .then((data) => {
+    Promise.all([getLargeReps(), getMonitoredReps(), getOnlineWeight(), getMicroReps()])
+        .then(async (data) => {
             const response = {
-                thresholdReps: data[0],
+                thresholdReps: data[0], //aka largeReps
                 monitoredReps: data[1],
                 onlineWeight: data[2],
+                microReps: data[3]
+
             };
             return Promise.resolve(response);
         })
@@ -136,7 +175,7 @@ export const cacheRepresentatives = async (): Promise<void> => {
         const start = LOG_INFO('Refreshing Representatives');
         getRepresentativesDto()
             .then((data: RepresentativesResponseDto) => {
-                AppCache.trackedReps = data;
+                AppCache.representatives = data;
                 resolve(LOG_INFO('Representatives Updated', start));
             })
             .catch((err) => {

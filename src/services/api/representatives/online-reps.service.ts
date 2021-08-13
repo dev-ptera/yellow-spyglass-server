@@ -3,15 +3,15 @@ import * as RPC from '@dev-ptera/nano-node-rpc';
 import { RepresentativeDto } from '@app/types';
 
 /** Returns the list of online representatives.
- *  Whenever invoked, checks if a previously-offline tracked (100K+) rep has gone online & updates the AppCache accordingly.
+ *  Whenever invoked, checks if a previously-offline large (tracked) (100K+) rep has gone online & updates the AppCache accordingly.
  *  This extra step is intended to give representatives the benefit of the doubt as to
  *  not mark their representative as offline when it actually isn't. */
 export const getOnlineReps = async (req, res): Promise<void> => {
     const allOnlineReps = new Set<string>();
-    const rpcOnlineReps = (await NANO_CLIENT.representatives_online()) as RPC.RepresentativesOnlineResponse;
-
+    const rpcOnlineReps = (await NANO_CLIENT.representatives_online(false)) as RPC.RepresentativesOnlineResponse;
     const offlineTrackedReps = new Map<string, RepresentativeDto>();
-    AppCache.trackedReps?.thresholdReps.map((rep) => {
+
+    AppCache.representatives?.thresholdReps.map((rep) => {
         rep.online ? allOnlineReps.add(rep.address) : offlineTrackedReps.set(rep.address, rep);
     });
 
