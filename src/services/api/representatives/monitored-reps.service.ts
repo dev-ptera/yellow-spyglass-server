@@ -4,9 +4,8 @@ import { peersRpc, Peers } from '@app/rpc';
 import { isRepOnline, LOG_ERR, populateDelegatorsCount } from '@app/services';
 import { MANUAL_PEER_MONITOR_IPS, NANO_CLIENT } from '@app/config';
 import * as RPC from '@dev-ptera/nano-node-rpc';
-import { on } from 'cluster';
 
-// Given peer IP, queries banano node monitor stats.
+/** Given a peer IP, queries node monitor stats. */
 const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
     axios
         .request<PeerMonitorStats>({
@@ -26,7 +25,11 @@ const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
         })
         .catch(() => Promise.resolve(undefined));
 
-// Prunes/Grooms data that is returned to client.
+/** Prunes/Grooms data that is returned to client.
+ *  Only monitors with an online representative will be returned to the client.
+ *  This is because some peers may be online but with a misconfigured node.
+ *  Imagine a monitor with an incorrect address displayed.
+ * */
 const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepDto[]> => {
     const groomedDetails: MonitoredRepDto[] = [];
     const delegatorsCountMap = new Map<string, { delegatorsCount: number }>();
@@ -76,10 +79,10 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
     return Promise.resolve(groomedDetails);
 };
 
-// Sample: [::ffff:178.128.46.252]:7071
+/** Sample: [::ffff:178.128.46.252]:7071 */
 const extractIpAddress = (dirtyIp: string): string => dirtyIp.replace('::ffff:', '').match(/(?<=\[).+?(?=\])/)[0];
 
-// Fetches banano peer details, then sends groomed response.
+/** Fetches banano peer details, then sends groomed response. */
 const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
     const peerMonitorStatsPromises: Array<Promise<PeerMonitorStats>> = [];
     const duplicateIpSet = new Set<string>();
@@ -109,7 +112,7 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
         .catch((err) => Promise.reject(LOG_ERR('getMonitoredReps.getRepDetails', err)));
 };
 
-// banano creeper does not have a api.php.
+// banano creeper does not have a api.php.  Let's add it to the list of monitored representatives at some point.
 export const getPeers = (req, res): void => {
     peersRpc()
         .then((peers: Peers) => {

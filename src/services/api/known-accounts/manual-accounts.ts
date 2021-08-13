@@ -329,4 +329,9 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         alias: 'node.jungletv.live',
         type: 'Representative',
     },
+    {
+        address: 'ban_1nunu9z3puk3dehuoh3djesa4psro1mcqoi48pr64jxzf6osm6iqkmjupwfh',
+        alias: 'Nunu',
+        type: 'Representative'
+    }
 ];
