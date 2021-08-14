@@ -22,24 +22,16 @@ export const getNodeStats = (req, res): void => {
     }
 
     // Calculate ledger size.
-    try {
-        getSize(LEDGER_LOCATION, (err, size) => {
-            if (err) {
-                throw err;
-            }
-            const ledgerSizeMb = Number((size / 1024 / 1024).toFixed(2));
-            return res.send({
-                ...hostNode,
-                ledgerSizeMb,
-            } as HostNodeStatsDto);
-        });
-    } catch (err) {
-        LOG_ERR('getNodeStats.getLedgerSize', err);
-        const fileReadError: ErrorResponse = {
-            error: 'Could not read the ledger size.',
-        };
-        res.status(500).send(fileReadError);
-    }
+    getSize(LEDGER_LOCATION, (err, size) => {
+        if (err) {
+            LOG_ERR('getNodeStats.getLedgerSize', err);
+        }
+        const ledgerSizeMb = Number((size / 1024 / 1024).toFixed(2));
+        return res.send({
+            ...hostNode,
+            ledgerSizeMb,
+        } as HostNodeStatsDto);
+    });
 };
 
 const sendRepresentativesNotLoadedError = (res): void => {
