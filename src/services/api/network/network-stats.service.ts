@@ -25,6 +25,7 @@ export const cacheNetworkStats = async (): Promise<void> => {
                     nakamotoCoefficient,
                     peerVersions,
                     principalRepMinBan: Math.round(quorum.onlineStakeTotal * 0.001),
+                    openedAccounts: AppCache.networkStats.openedAccounts,
                 };
                 resolve(LOG_INFO('Network Stats Updated', start));
             })

@@ -38,3 +38,6 @@ export const MANUAL_PEER_MONITOR_IPS = [
     'bagend.notellem.win',
     'node.jungletv.live',
 ];
+
+export const LEDGER_LOCATION = '/home/batman/BananoData/data.ldb';
+export const HOST_NODE_NAME = 'batman';
