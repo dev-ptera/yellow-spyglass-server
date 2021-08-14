@@ -48,5 +48,8 @@ export const MANUAL_PEER_MONITOR_IPS = [
 
 ];
 
+/** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
 export const LEDGER_LOCATION = '/home/batman/BananoData/data.ldb';
+
+/** Name of the node running YellowSpyglass server; this is used in the Node service to gather node stats. */
 export const HOST_NODE_NAME = 'batman';
