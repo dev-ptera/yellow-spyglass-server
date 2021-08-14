@@ -24,20 +24,12 @@ export const getNodeStats = (req, res): void => {
 
     // Calculate ledger size.
     let ledgerSizeMb = 0;
-    try {
-        getSize(LEDGER_LOCATION, (err, size) => {
-            if (err) {
-                throw err;
-            }
-            ledgerSizeMb = Number((size / 1024 / 1024).toFixed(2));
-        });
-    } catch (err) {
-        LOG_ERR('getNodeStats.getLedgerSize', err);
-        const fileReadError: ErrorResponse = {
-            error: 'Could not read the ledger size.',
-        };
-        return res.status(500).send(fileReadError);
-    }
+    getSize(LEDGER_LOCATION, (err, size) => {
+        if (err) {
+            LOG_ERR('getNodeStats.getLedgerSize', err);
+        }
+        ledgerSizeMb = Number((size / 1024 / 1024).toFixed(2));
+    });
 
     // Calculate free space on host machine
     spawn.exec('node scripts/calc-avail-diskspace', (err, stdout, stderr) => {
@@ -51,16 +43,6 @@ export const getNodeStats = (req, res): void => {
             ...hostNode,
             ledgerSizeMb,
             availableDiskSpaceGb,
-        } as HostNodeStatsDto);
-    });
-    getSize(LEDGER_LOCATION, (err, size) => {
-        if (err) {
-            LOG_ERR('getNodeStats.getLedgerSize', err);
-        }
-        const ledgerSizeMb = Number((size / 1024 / 1024).toFixed(2));
-        return res.send({
-            ...hostNode,
-            ledgerSizeMb,
         } as HostNodeStatsDto);
     });
 };
