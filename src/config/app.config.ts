@@ -36,8 +36,20 @@ export const MANUAL_PEER_MONITOR_IPS = [
     'banano.nifni.net',
     '192.210.243.189', // hentai
     'bagend.notellem.win',
-    'node.jungletv.live',
+    'node.jungletv.live', // Jungle TV
+    '142.93.243.3', // Nunu
+    '103.169.35.129', // Baanodeee,
+    '194.163.139.46', // Banano Pixels
+    '167.99.176.22', // unofficial binance rep
+    '37.191.205.25', // bananOslo
+    '176.10.199.150', //bananode.eu
+    'banano.exchange', //banano.exchange
+    '95.216.138.47', // banano italiano
+
 ];
 
+/** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
 export const LEDGER_LOCATION = '/home/batman/BananoData/data.ldb';
+
+/** Name of the node running YellowSpyglass server; this is used in the Node service to gather node stats. */
 export const HOST_NODE_NAME = 'batman';
