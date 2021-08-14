@@ -85,22 +85,22 @@ const extractIpAddress = (dirtyIp: string): string => dirtyIp.replace('::ffff:',
 /** Fetches banano peer details, then sends groomed response. */
 const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
     const peerMonitorStatsPromises: Array<Promise<PeerMonitorStats>> = [];
-    const duplicateIpSet = new Set<string>();
+    const peerIpAddresses = new Set<string>();
 
-    // This service includes the ability to manually hard-code peer monitor ips.
+    // This service includes the ability to manually hard-code peer monitor ips or host names.
     // Even if this node isn't directly connected to these monitors as a peer, we can still display their node stats.
     MANUAL_PEER_MONITOR_IPS.map((ip: string) => {
+        peerIpAddresses.add(ip);
         peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
-        duplicateIpSet.add(ip);
     });
 
     // Add all peer ips to the list of ips to fetch
     for (const dirtyIp in rpcData.peers) {
         const ip = extractIpAddress(dirtyIp);
         const rpcDetails = rpcData.peers[dirtyIp];
-        if (ip && rpcDetails && !duplicateIpSet.has(ip)) {
+        if (ip && rpcDetails && !peerIpAddresses.has(ip)) {
+            peerIpAddresses.add(ip);
             peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
-            duplicateIpSet.add(ip);
         }
     }
     return Promise.all(peerMonitorStatsPromises)
