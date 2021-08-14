@@ -10,11 +10,13 @@ export const getNodeStats = (req, res): void => {
             if (dto.name === 'batman') {
                 const myFolder = 'C:\\Windows\\Containers\\serviced';
                 getSize(myFolder, (err, size) => {
-                    if (err) { throw err; }
+                    if (err) {
+                        throw err;
+                    }
                     const ledgerSizeMb = (size / 1024 / 1024).toFixed(2);
                     return res.send({
                         ...dto,
-                        ledgerSizeMb
+                        ledgerSizeMb,
                     });
                 });
             }

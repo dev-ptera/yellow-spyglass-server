@@ -1,4 +1,3 @@
-
 export type MicroRepresentativeDto = {
     address: string;
     weight: number;

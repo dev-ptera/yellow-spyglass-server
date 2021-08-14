@@ -1,6 +1,6 @@
 import { RepresentativeDto } from './RepresentativeDto';
 import { MonitoredRepDto } from './MonitoredRepDto';
-import {MicroRepresentativeDto} from "./MicroRepresentativeDto";
+import { MicroRepresentativeDto } from './MicroRepresentativeDto';
 
 export type RepresentativesResponseDto = {
     /** Aggregate voting weight from online reps.  Populated by nano RPC. */

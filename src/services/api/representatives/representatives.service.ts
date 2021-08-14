@@ -4,14 +4,14 @@ import { LOG_ERR, getMonitoredReps, writeRepStatistics, LOG_INFO, calculateUptim
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
-import {MicroRepresentativeDto} from "@app/types";
+import { MicroRepresentativeDto } from '@app/types';
 
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
 const OFFLINE_AFTER_PINGS = 4;
 
 /**
  * The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
-*/
+ */
 export const isRepOnline = (repAddress: string): boolean =>
     AppCache.repPings.map.get(repAddress) !== undefined &&
     AppCache.repPings.map.get(repAddress) !== 0 &&
@@ -113,7 +113,6 @@ const getLargeReps = async (): Promise<RepresentativeDto[]> => {
 
 /** Using the representatives_online RPC call, returns any online rep that has < MIN_WEIGHT_TO_BE_COUNTED weight.  */
 const getMicroReps = async (): Promise<MicroRepresentativeDto[]> => {
-
     // Get all online reps from nano rpc, then filter out the larger reps.
     const onlineReps = (await NANO_CLIENT.representatives_online(true)) as RPC.RepresentativesOnlineWeightResponse;
     const microRepMap = new Map<string, Partial<MicroRepresentativeDto>>();
@@ -141,10 +140,10 @@ const getMicroReps = async (): Promise<MicroRepresentativeDto[]> => {
 
     // Sort by weight, descending
     microReps.sort(function (a, b) {
-        return a.weight < b.weight ? 1 : -1
+        return a.weight < b.weight ? 1 : -1;
     });
     return microReps;
-}
+};
 
 /** Get online voting weight (BAN) */
 const getOnlineWeight = (): Promise<number> =>
@@ -162,8 +161,7 @@ const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
                 thresholdReps: data[0], //aka largeReps
                 monitoredReps: data[1],
                 onlineWeight: data[2],
-                microReps: data[3]
-
+                microReps: data[3],
             };
             return Promise.resolve(response);
         })

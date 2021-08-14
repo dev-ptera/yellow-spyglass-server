@@ -332,6 +332,6 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     {
         address: 'ban_1nunu9z3puk3dehuoh3djesa4psro1mcqoi48pr64jxzf6osm6iqkmjupwfh',
         alias: 'Nunu',
-        type: 'Representative'
-    }
+        type: 'Representative',
+    },
 ];
