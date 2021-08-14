@@ -10,5 +10,5 @@ export type NetworkStatsDto = {
     nakamotoCoefficient: number;
     peerVersions: PeerVersionsDto[];
     principalRepMinBan: number;
-    // repWeights: number[];
+    openedAccounts: number;
 };

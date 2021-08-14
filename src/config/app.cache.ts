@@ -57,6 +57,7 @@ export const AppCache: AppCache = {
         nakamotoCoefficient: undefined,
         peerVersions: undefined,
         principalRepMinBan: undefined,
+        openedAccounts: 0
     },
     priceData: undefined,
     repPings: {

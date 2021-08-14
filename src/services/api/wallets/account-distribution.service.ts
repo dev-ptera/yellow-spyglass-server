@@ -41,7 +41,9 @@ export const getFrontiersData = async (): Promise<{
         try {
             const balanceResponse = await accountBalanceRpc(address);
             const accountRep = await accountRepresentativeRpc(address);
+            AppCache.networkStats.openedAccounts = 0;
             if (balanceResponse.balance !== '0') {
+                AppCache.networkStats.openedAccounts++;
                 const ban = Number(Number(rawToBan(balanceResponse.balance)).toFixed(3));
                 // Add to address list
                 if (ban > 0.001) {
