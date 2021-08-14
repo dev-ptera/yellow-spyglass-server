@@ -22,7 +22,7 @@ const sendFunds = (wallet: string, source: string, destination: string, amount: 
             });
     });
 
-/** Sends selected accounts messages. */
+/** Sends messages to selected accounts. */
 export const useMegaphone = async (req, res) => {
     const hasLargeRep: string[] = req.body.hasLargeRep || [];
     const hasOfflineRep: string[] = req.body.hasOfflineRep || [];
@@ -30,21 +30,23 @@ export const useMegaphone = async (req, res) => {
     console.log(hasLargeRep);
     console.log(hasOfflineRep);
 
-    const picka = megaphoneAccounts.picka;
-    const small = megaphoneAccounts.small;
-    const repboi = megaphoneAccounts.repboi;
+    const readme = megaphoneAccounts.readme;
+    const pick = megaphoneAccounts.pickkk;
+    const small = megaphoneAccounts.smalll;
+    const rep = megaphoneAccounts.repppp;
 
     for (const address of hasLargeRep) {
-        await sendFunds(picka.wallet, picka.address, address, '1000000000000000000000000000');
-        await sleep(2000);
+        await sendFunds(readme.wallet, readme.address, address, '19000000000000000000000000000');
+        await sleep(500);
+        await sendFunds(pick.wallet, pick.address, address, '3000000000000000000000000000');
+        await sleep(500);
         await sendFunds(small.wallet, small.address, address, '2000000000000000000000000000');
-        await sleep(2000);
-        await sendFunds(repboi.wallet, repboi.address, address, '3000000000000000000000000000');
+        await sleep(500);
+        await sendFunds(rep.wallet, rep.address, address, '1000000000000000000000000000');
     }
 
-    const offlineRep = megaphoneAccounts.hasOfflineRepMessage;
     for (const address of hasOfflineRep) {
-        await sendFunds(offlineRep.wallet, offlineRep.address, address, '1000000000000000000000000000');
+        // ha.
     }
 
     res.status(200).send(JSON.stringify({ success: true }));
