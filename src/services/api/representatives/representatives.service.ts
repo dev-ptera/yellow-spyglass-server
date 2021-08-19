@@ -1,6 +1,13 @@
 import { RepresentativeDto, RepresentativesResponseDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
-import { LOG_ERR, getMonitoredReps, writeRepStatistics, LOG_INFO, calculateUptimeStatistics } from '@app/services';
+import {
+    LOG_ERR,
+    getMonitoredReps,
+    writeRepStatistics,
+    LOG_INFO,
+    calculateUptimeStatistics,
+    getOnlineRepsPromise,
+} from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
@@ -69,12 +76,12 @@ const getLargeReps = async (): Promise<RepresentativeDto[]> => {
     await populateDelegatorsCount(largeRepMap);
 
     // Get all online reps from nano rpc.
-    const onlineReps = (await NANO_CLIENT.representatives_online(false)) as RPC.RepresentativesOnlineResponse;
+    const onlineReps = await getOnlineRepsPromise();
 
     // Update online pings
     AppCache.repPings.currPing++;
     // The following representatives get to increase their last-known ping since they were included in representatives_online result.
-    for (const address of onlineReps.representatives) {
+    for (const address of onlineReps) {
         AppCache.repPings.map.set(address, AppCache.repPings.currPing);
     }
 

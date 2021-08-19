@@ -45,7 +45,6 @@ export const MANUAL_PEER_MONITOR_IPS = [
     '176.10.199.150', //bananode.eu
     'banano.exchange', //banano.exchange
     '95.216.138.47', // banano italiano
-
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
@@ -53,3 +52,6 @@ export const LEDGER_LOCATION = '/home/batman/BananoData/data.ldb';
 
 /** Name of the node running YellowSpyglass server; this is used in the Node service to gather node stats. */
 export const HOST_NODE_NAME = 'batman';
+
+/** These nodes are currently only used for the `representatives_online` rpc call to help ensure more accurate results. */
+export const BACKUP_NODES = ['https://banano-api.mynano.ninja/rpc', 'https://api-beta.banano.cc/'];
