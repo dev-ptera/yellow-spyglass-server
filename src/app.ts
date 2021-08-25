@@ -12,6 +12,9 @@ dotenv.config();
 const http = require('http');
 const app = express();
 const bodyParser = require('body-parser');
+const morgan = require('morgan')
+app.use(morgan('combined'))
+
 
 app.use(bodyParser.json()); //utilizes the body-parser package
 
