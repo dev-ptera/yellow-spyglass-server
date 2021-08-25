@@ -23,6 +23,8 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                 mostCommonSenderAddress: undefined,
                 mostCommonRecipientTxCount: 0,
                 mostCommonSenderTxCount: 0,
+                totalAmountReceivedBan: 0,
+                totalAmountSentBan: 0,
             };
 
             let balance = 0;
@@ -35,6 +37,7 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     const addr = transaction.account;
                     if (transaction['subtype'] === 'receive') {
                         balance += ban;
+                        insightsDto.totalAmountReceivedBan += ban;
                         accountReceivedMap.has(addr)
                             ? accountReceivedMap.set(addr, accountReceivedMap.get(addr) + 1)
                             : accountReceivedMap.set(addr, 1);
@@ -44,6 +47,7 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                         }
                     } else if (transaction['subtype'] === 'send') {
                         balance -= ban;
+                        insightsDto.totalAmountSentBan += ban;
                         accountSentMap.has(addr)
                             ? accountSentMap.set(addr, accountSentMap.get(addr) + 1)
                             : accountSentMap.set(addr, 1);
@@ -79,6 +83,7 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     accountMaxReceivedCount = accountReceivedMap.get(key);
                     insightsDto.mostCommonSenderAddress = key;
                     insightsDto.mostCommonSenderTxCount = accountMaxReceivedCount;
+
                 }
             }
             return Promise.resolve(insightsDto);

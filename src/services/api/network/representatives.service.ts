@@ -1,5 +1,6 @@
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { AppCache, NANO_CLIENT } from '@app/config';
+
 import { rawToBan } from 'banano-unit-converter';
 import { BasicRepDetails } from '@app/types';
 import { LOG_ERR } from '@app/services';
@@ -26,6 +27,7 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
     }
 
     // Get all online reps from nano rpc (includes non-tracked reps) & mark included weighted reps as online.
+    // TODO: Use the representatives_online Promise call from the representatives folder.
     const onlineReps = (await NANO_CLIENT.representatives_online().catch((err) =>
         Promise.reject(LOG_ERR('getAllReps.representatives_online', err))
     )) as RPC.RepresentativesOnlineResponse;
