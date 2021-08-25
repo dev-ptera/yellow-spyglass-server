@@ -83,7 +83,6 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     accountMaxReceivedCount = accountReceivedMap.get(key);
                     insightsDto.mostCommonSenderAddress = key;
                     insightsDto.mostCommonSenderTxCount = accountMaxReceivedCount;
-
                 }
             }
             return Promise.resolve(insightsDto);
