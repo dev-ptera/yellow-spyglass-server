@@ -23,6 +23,6 @@ exec(`df -k --output=avail`,
         }
 
         /** Returns GB available */
-        process.stdout.write(`${availableBytes / 1024 / 1024}`);
+        process.stdout.write(`${availableBytes / 1000 / 1000}`);
     });
 

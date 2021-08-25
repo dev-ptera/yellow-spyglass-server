@@ -28,7 +28,7 @@ export const getNodeStats = (req, res): void => {
         if (err) {
             LOG_ERR('getNodeStats.getLedgerSize', err);
         }
-        ledgerSizeMb = Number((size / 1024 / 1024).toFixed(2));
+        ledgerSizeMb = Number((size / 1000 / 1000).toFixed(2));
     });
 
     // Calculate free space on host machine
