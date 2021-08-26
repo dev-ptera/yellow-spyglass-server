@@ -13,6 +13,8 @@ const http = require('http');
 const app = express();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+process.env.UV_THREADPOOL_SIZE=String(16);
+
 app.use(morgan('dev'));
 
 app.use(bodyParser.json()); //utilizes the body-parser package
