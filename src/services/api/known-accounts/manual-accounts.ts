@@ -334,4 +334,14 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         alias: 'Nunu',
         type: 'Representative',
     },
+    {
+        address: 'ban_3uo1cafr4p5qkyjn57jjuqbmsddds86j6g6tzi4q16ek3xfjumprpb51pmuz',
+        alias: 'Volcano Burn Pool',
+        type: 'Burn',
+    },
+    {
+        address: 'ban_1ban116su1fur16uo1cano16su1fur16161616161616161616166a1sf7xw',
+        alias: 'Volcano Burn Wallet',
+        type: 'Burn',
+    },
 ];
