@@ -17,7 +17,7 @@ export const cacheNetworkStats = async (): Promise<void> => {
                 const quorum = response[2];
                 const peerVersions = response[3];
                 const consensus = calcConsensusStats(reps, supply.totalAmount, quorum);
-                const nakamotoCoefficient = calcNakamotoCoefficient(reps, quorum, consensus);
+                const nakamotoCoefficient = calcNakamotoCoefficient(reps, quorum);
                 AppCache.networkStats = {
                     supply: supply,
                     consensus,

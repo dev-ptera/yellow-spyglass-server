@@ -7,17 +7,17 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     },
     {
         address: 'ban_1bananobh5rat99qfgt1ptpieie5swmoth87thi74qgbfrij7dcgjiij94xr',
-        alias: 'Official Rep - Genesis',
+        alias: 'Genesis',
         type: 'Representative',
     },
     {
         address: 'ban_1cake36ua5aqcq1c5i3dg7k8xtosw7r9r7qbbf5j15sk75csp9okesz87nfn',
-        alias: 'Official Rep - Cake',
+        alias: 'Cake',
         type: 'Representative',
     },
     {
         address: 'ban_1fomoz167m7o38gw4rzt7hz67oq6itejpt4yocrfywujbpatd711cjew8gjj',
-        alias: 'Official Rep - FOMO',
+        alias: 'FOMO',
         type: 'Representative',
     },
     {
@@ -48,7 +48,7 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     },
     {
         address: 'ban_1ka1ium4pfue3uxtntqsrib8mumxgazsjf58gidh1xeo5te3whsq8z476goo',
-        alias: 'Official Rep - Kalium',
+        alias: 'Kalium',
         type: 'Representative',
     },
     {
