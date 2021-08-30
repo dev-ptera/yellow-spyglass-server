@@ -58,6 +58,7 @@ export const populateDelegatorsCount = async (
  * Then to the remaining, adds delegator count, marks each as online/offline, and stores ping data in JSON files.
  */
 const getLargeReps = async (): Promise<RepresentativeDto[]> => {
+    const start = LOG_INFO('Refreshing Large Reps');
     const rpcData = await NANO_CLIENT.representatives(150, true);
     const largeRepMap = new Map<string, Partial<RepresentativeDto>>();
 
@@ -115,11 +116,14 @@ const getLargeReps = async (): Promise<RepresentativeDto[]> => {
         });
     }
 
+    LOG_INFO('Large Reps Updated', start);
     return largeReps;
 };
 
 /** Using the representatives_online RPC call, returns any online rep that has < MIN_WEIGHT_TO_BE_COUNTED weight.  */
 const getMicroReps = async (): Promise<MicroRepresentativeDto[]> => {
+    const start = LOG_INFO('Refreshing Micro Reps');
+    // TODO: SHOULD I CACHE ONLINE REPS RESULTS?
     // Get all online reps from nano rpc, then filter out the larger reps.
     const onlineReps = (await NANO_CLIENT.representatives_online(true)) as RPC.RepresentativesOnlineWeightResponse;
     const microRepMap = new Map<string, Partial<MicroRepresentativeDto>>();
@@ -149,6 +153,7 @@ const getMicroReps = async (): Promise<MicroRepresentativeDto[]> => {
     microReps.sort(function (a, b) {
         return a.weight < b.weight ? 1 : -1;
     });
+    LOG_INFO('Micro Reps Updated', start);
     return microReps;
 };
 
@@ -161,18 +166,18 @@ const getOnlineWeight = (): Promise<number> =>
         .catch((err) => Promise.reject(LOG_ERR('cacheRepresentatives.getOnlineWeight', err)));
 
 /** Representatives Promise aggregate; makes all calls required to populate the rep data in AppCache. */
-const getRepresentativesDto = (): Promise<RepresentativesResponseDto> =>
-    Promise.all([getLargeReps(), getMonitoredReps(), getOnlineWeight(), getMicroReps()])
-        .then(async (data) => {
-            const response = {
-                thresholdReps: data[0], //aka largeReps
-                monitoredReps: data[1],
-                onlineWeight: data[2],
-                microReps: data[3],
-            };
-            return Promise.resolve(response);
-        })
-        .catch((err) => Promise.reject(LOG_ERR('cacheRepresentatives.getRepresentativesDto', err)));
+const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
+    const largeReps = await getLargeReps();
+    const monitoredReps = await getMonitoredReps();
+    const onlineWeight = await getOnlineWeight();
+    const microReps = await getMicroReps();
+    return {
+        thresholdReps: largeReps,
+        monitoredReps,
+        onlineWeight,
+        microReps
+    };
+}
 
 /** This is called to update the representatives list in the AppCache */
 export const cacheRepresentatives = async (): Promise<void> => {

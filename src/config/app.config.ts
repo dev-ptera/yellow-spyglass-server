@@ -30,7 +30,7 @@ export const PRICE_DATA_REFRESH_INTERVAL_MS = calcMinutes(IS_PRODUCTION ? 15 : 1
 export const NETWORK_STATS_REFRESH_INTERVAL_MS = calcMinutes(5);
 
 /** List of monitored representatives to counter-act low peer count. */
-export const MANUAL_PEER_MONITOR_IPS = [
+export const MANUAL_PEER_MONITOR_URLS = [
     '108.39.249.5', //batman
     '45.77.190.142', // Cabbit
     'banano.nifni.net',
@@ -45,6 +45,7 @@ export const MANUAL_PEER_MONITOR_IPS = [
     '176.10.199.150', //bananode.eu
     'banano.exchange', //banano.exchange
     '95.216.138.47', // banano italiano
+    'https://node.nanners.cc/api.php' // void
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
@@ -52,6 +53,9 @@ export const LEDGER_LOCATION = '/home/batman/BananoData/data.ldb';
 
 /** Name of the node running YellowSpyglass server; this is used in the Node service to gather node stats. */
 export const HOST_NODE_NAME = 'batman';
+
+/** Nano Node Monitor page of the node running this explorer. */
+export const HOST_NODE_MONITOR_URL = '108.39.249.5';
 
 /** These nodes are currently only used for the `representatives_online` rpc call to help ensure more accurate results. */
 export const BACKUP_NODES = ['https://banano-api.mynano.ninja/rpc', 'https://api-beta.banano.cc/'];

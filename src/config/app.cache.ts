@@ -31,7 +31,7 @@ export type AppCache = {
      *  Since the `representatives_online` nano RPC call is unreliable (sometimes it returns far fewer reps than expected),
      *  this object tracks representatives and the last time they were successfully pinged.
      *  If a rep is unreachable for a certain amount of pings, it will be marked as offline.
-     *  This object includes all representatives regardless of delegated reps; small reps included. */
+     *  This object includes all representatives regardless of delegated weight; small reps included. */
     repPings: {
         currPing: number;
         map: Map<string, number>;

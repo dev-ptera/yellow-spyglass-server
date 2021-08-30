@@ -1,20 +1,31 @@
 import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
-import { isRepOnline, LOG_ERR, populateDelegatorsCount } from '@app/services';
-import { MANUAL_PEER_MONITOR_IPS, NANO_CLIENT } from '@app/config';
-import * as RPC from '@dev-ptera/nano-node-rpc';
+import {getOnlineRepsPromise, isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount} from '@app/services';
+import {AppCache, MANUAL_PEER_MONITOR_URLS, NANO_CLIENT} from '@app/config';
 
-/** Given a peer IP, queries node monitor stats. */
-const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
+/** Given either an IP or HTTP address of a node monitor, returns the address used to lookup node stats. */
+export const getMonitoredUrl = (address: string): string => {
+    const stats = `api.php`;
+    if (address.includes('https')) {
+        return `${address}/${stats}`;
+    }
+    if (address.includes('http')) {
+        return `${address}/${stats}`;
+    }
+    return `http://${address}/${stats}`;
+}
+
+/** Given a peer IP or HTTP address, queries node monitor stats. */
+const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
     axios
         .request<PeerMonitorStats>({
             method: 'get',
-            timeout: 4000,
-            url: `http://${ip}/api.php`,
+            timeout: 5000,
+            url: getMonitoredUrl(url)
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
-            response.data.ip = ip;
+            response.data.ip = url;
 
             /* Remove non-banano representatives from the peers list. */
             if (!response.data.repAccount.includes('ban_')) {
@@ -25,57 +36,61 @@ const getPeerMonitorStats = (ip: string): Promise<PeerMonitorStats> =>
         })
         .catch(() => Promise.resolve(undefined));
 
-/** Prunes/Grooms data that is returned to client.
+/** Prunes & grooms data that is returned to client.
  *  Only monitors with an online representative will be returned to the client.
- *  This is because some peers may be online but with a misconfigured node.
- *  Imagine a monitor with an incorrect address displayed.
+ *  This is because some peers may be online but with a misconfigured node. (e.g. a monitor with an incorrect address displayed.)
  * */
 const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepDto[]> => {
     const groomedDetails: MonitoredRepDto[] = [];
     const delegatorsCountMap = new Map<string, { delegatorsCount: number }>();
 
-    // Get all online reps from nano rpc.
-    const onlineReps = (await NANO_CLIENT.representatives_online()) as RPC.RepresentativesOnlineResponse;
-    const onlineSet = new Set<string>();
-    for (const rep of onlineReps.representatives) {
-        onlineSet.add(rep);
-    }
-
-    for (const peerStats of allPeerStats) {
-        if (
-            peerStats &&
-            peerStats.nanoNodeAccount &&
-            // Only show monitors that are actually online;
-            // isRepOnline won't return correct results on initial load due to race condition, so we use reps_online rpc call too as a failsafe.
-            (isRepOnline(peerStats.nanoNodeAccount) || onlineSet.has(peerStats.nanoNodeAccount))
-        ) {
-            delegatorsCountMap.set(peerStats.nanoNodeAccount, { delegatorsCount: 0 });
-            groomedDetails.push({
-                address: peerStats.nanoNodeAccount,
-                representative: peerStats.repAccount,
-                weight: peerStats.votingWeight,
-                delegatorsCount: 0,
-                name: peerStats.nanoNodeName,
-                peers: Number(peerStats.numPeers),
-                online: true,
-                cementedBlocks: peerStats.cementedBlocks,
-                confirmationInfo: peerStats.confirmationInfo,
-                ip: peerStats.ip,
-                version: peerStats.version,
-                location: peerStats.nodeLocation,
-                nodeUptimeStartup: peerStats.nodeUptimeStartup,
-                confirmedBlocks: Number(peerStats.confirmedBlocks),
-                uncheckedBlocks: Number(peerStats.uncheckedBlocks),
-                currentBlock: Number(peerStats.currentBlock),
-                systemLoad: peerStats.systemLoad,
-                totalMem: peerStats.totalMem,
-                usedMem: peerStats.usedMem,
-            });
+    // Prune duplicate monitors by address
+    const uniqueMonitors = new Set<PeerMonitorStats>();
+    const addresses = new Set<string>();
+    for (const rep of allPeerStats) {
+        if (rep && !addresses.has(rep.nanoNodeAccount)) {
+            addresses.add(rep.nanoNodeAccount);
+            uniqueMonitors.add(rep);
         }
     }
 
+    // Only show monitors that are actually online;
+    for (const rep of uniqueMonitors.values()) {
+
+        // The AppCache rep pings should always be >0 by the time the monitored reps are loaded since the timeout for rep monitors is so large.
+        // In the event that the AppCache isn't updated yet, just display all monitors even if they are offline.  This only happens whenever the server restarts.
+        if (AppCache.repPings.currPing > 0 && !isRepOnline(rep.nanoNodeAccount)) {
+            continue;
+        }
+
+        delegatorsCountMap.set(rep.nanoNodeAccount, { delegatorsCount: 0 });
+        groomedDetails.push({
+            address: rep.nanoNodeAccount,
+            representative: rep.repAccount,
+            weight: rep.votingWeight,
+            delegatorsCount: 0,
+            name: rep.nanoNodeName,
+            peers: Number(rep.numPeers),
+            online: true,
+            cementedBlocks: rep.cementedBlocks,
+            confirmationInfo: rep.confirmationInfo,
+            ip: rep.ip,
+            version: rep.version,
+            location: rep.nodeLocation,
+            nodeUptimeStartup: rep.nodeUptimeStartup,
+            confirmedBlocks: Number(rep.confirmedBlocks),
+            uncheckedBlocks: Number(rep.uncheckedBlocks),
+            currentBlock: Number(rep.currentBlock),
+            systemLoad: rep.systemLoad,
+            totalMem: rep.totalMem,
+            usedMem: rep.usedMem,
+        });
+    }
+
+    // Populate the delegators count to each rep.
     await populateDelegatorsCount(delegatorsCountMap).catch((err) => Promise.reject(err));
     groomedDetails.map((dto) => (dto.delegatorsCount = delegatorsCountMap.get(dto.address).delegatorsCount));
+
     return Promise.resolve(groomedDetails);
 };
 
@@ -89,9 +104,9 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
 
     // This service includes the ability to manually hard-code peer monitor ips or host names.
     // Even if this node isn't directly connected to these monitors as a peer, we can still display their node stats.
-    MANUAL_PEER_MONITOR_IPS.map((ip: string) => {
-        peerIpAddresses.add(ip);
-        peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
+    MANUAL_PEER_MONITOR_URLS.map((url: string) => {
+        peerIpAddresses.add(url);
+        peerMonitorStatsPromises.push(getPeerMonitorStats(url));
     });
 
     // Add all peer ips to the list of ips to fetch
@@ -130,8 +145,9 @@ export const getPeers = (req, res): void => {
 };
 
 /** Using a combination of hard-coded ips & the peers RPC command, returns a list of representatives running the Nano Node Monitor software. */
-export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> =>
-    new Promise((resolve, reject) => {
+export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> => {
+    const start = LOG_INFO('Refreshing Monitored Reps');
+    return new Promise((resolve, reject) => {
         peersRpc()
             .then((peers: Peers) => {
                 getRepDetails(peers)
@@ -141,9 +157,11 @@ export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> =>
                             const textB = b.name.toUpperCase();
                             return textA < textB ? -1 : textA > textB ? 1 : 0;
                         });
+                        LOG_INFO('Monitored Reps Updated', start);
                         resolve(details);
                     })
                     .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
             })
             .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
-    });
+    })
+};
