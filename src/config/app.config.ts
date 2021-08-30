@@ -45,7 +45,7 @@ export const MANUAL_PEER_MONITOR_URLS = [
     '176.10.199.150', //bananode.eu
     'banano.exchange', //banano.exchange
     '95.216.138.47', // banano italiano
-    'https://node.nanners.cc/api.php' // void
+    'https://node.nanners.cc/api.php', // void
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */

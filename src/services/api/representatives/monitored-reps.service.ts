@@ -1,8 +1,8 @@
 import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
-import {getOnlineRepsPromise, isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount} from '@app/services';
-import {AppCache, MANUAL_PEER_MONITOR_URLS, NANO_CLIENT} from '@app/config';
+import { getOnlineRepsPromise, isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount } from '@app/services';
+import { AppCache, MANUAL_PEER_MONITOR_URLS, NANO_CLIENT } from '@app/config';
 
 /** Given either an IP or HTTP address of a node monitor, returns the address used to lookup node stats. */
 export const getMonitoredUrl = (address: string): string => {
@@ -14,7 +14,7 @@ export const getMonitoredUrl = (address: string): string => {
         return `${address}/${stats}`;
     }
     return `http://${address}/${stats}`;
-}
+};
 
 /** Given a peer IP or HTTP address, queries node monitor stats. */
 const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
@@ -22,7 +22,7 @@ const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
         .request<PeerMonitorStats>({
             method: 'get',
             timeout: 5000,
-            url: getMonitoredUrl(url)
+            url: getMonitoredUrl(url),
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
             response.data.ip = url;
@@ -56,7 +56,6 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
 
     // Only show monitors that are actually online;
     for (const rep of uniqueMonitors.values()) {
-
         // The AppCache rep pings should always be >0 by the time the monitored reps are loaded since the timeout for rep monitors is so large.
         // In the event that the AppCache isn't updated yet, just display all monitors even if they are offline.  This only happens whenever the server restarts.
         if (AppCache.repPings.currPing > 0 && !isRepOnline(rep.nanoNodeAccount)) {
@@ -163,5 +162,5 @@ export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> => {
                     .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
             })
             .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
-    })
+    });
 };

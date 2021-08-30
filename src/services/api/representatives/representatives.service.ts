@@ -175,9 +175,9 @@ const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
         thresholdReps: largeReps,
         monitoredReps,
         onlineWeight,
-        microReps
+        microReps,
     };
-}
+};
 
 /** This is called to update the representatives list in the AppCache */
 export const cacheRepresentatives = async (): Promise<void> => {
