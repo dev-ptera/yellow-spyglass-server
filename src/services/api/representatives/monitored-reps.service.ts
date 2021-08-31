@@ -4,6 +4,19 @@ import { peersRpc, Peers } from '@app/rpc';
 import { getOnlineRepsPromise, isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount } from '@app/services';
 import { AppCache, MANUAL_PEER_MONITOR_URLS, NANO_CLIENT } from '@app/config';
 
+/** Some monitored representatives will require their representative page to not link redirectly to the statistics page.
+ *  Resolve these custom reps here.
+ * */
+const setCustomMonitorPageUrl = (rep: PeerMonitorStats): string => {
+    if (!rep || !rep.ip) {
+        return undefined;
+    }
+    if (rep.ip.includes('node.nanners.cc')) {
+        return 'https://node.nanners.cc/';
+    }
+    // TODO: Creeper
+}
+
 /** Given either an IP or HTTP address of a node monitor, returns the address used to lookup node stats. */
 export const getMonitoredUrl = (address: string): string => {
     const stats = `api.php`;
@@ -26,12 +39,10 @@ const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
             response.data.ip = url;
-
             /* Remove non-banano representatives from the peers list. */
             if (!response.data.repAccount.includes('ban_')) {
                 return Promise.resolve(undefined);
             }
-
             return Promise.resolve(response.data);
         })
         .catch(() => Promise.resolve(undefined));
@@ -74,6 +85,7 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
             cementedBlocks: rep.cementedBlocks,
             confirmationInfo: rep.confirmationInfo,
             ip: rep.ip,
+            customMonitorPageUrl: setCustomMonitorPageUrl(rep),
             version: rep.version,
             location: rep.nodeLocation,
             nodeUptimeStartup: rep.nodeUptimeStartup,
