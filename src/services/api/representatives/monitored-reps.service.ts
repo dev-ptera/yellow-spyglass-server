@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
-import { getOnlineRepsPromise, isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount } from '@app/services';
+import { isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount } from '@app/services';
 import { AppCache, MANUAL_PEER_MONITOR_URLS, NANO_CLIENT } from '@app/config';
 
 /** Some monitored representatives will require their representative page to not link redirectly to the statistics page.
@@ -34,7 +34,7 @@ const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
     axios
         .request<PeerMonitorStats>({
             method: 'get',
-            timeout: 5000,
+            timeout: 10000,
             url: getMonitoredUrl(url),
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
