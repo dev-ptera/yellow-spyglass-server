@@ -7,6 +7,7 @@ import {
     LOG_INFO,
     calculateUptimeStatistics,
     getOnlineRepsPromise,
+    isRepOnline,
 } from '@app/services';
 import * as RPC from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
@@ -14,15 +15,6 @@ import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
 import { MicroRepresentativeDto } from '@app/types';
 
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
-const OFFLINE_AFTER_PINGS = 4;
-
-/**
- * The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
- */
-export const isRepOnline = (repAddress: string): boolean =>
-    AppCache.repPings.map.get(repAddress) !== undefined &&
-    AppCache.repPings.map.get(repAddress) !== 0 &&
-    AppCache.repPings.map.get(repAddress) + OFFLINE_AFTER_PINGS >= AppCache.repPings.currPing;
 
 /** Iterates through weighted reps to populate delegators count. */
 export const populateDelegatorsCount = async (
@@ -76,16 +68,6 @@ const getLargeReps = async (): Promise<RepresentativeDto[]> => {
     // Adds delegatorsCount to each weightedRep.
     await populateDelegatorsCount(largeRepMap);
 
-    // Get all online reps from nano rpc.
-    const onlineReps = await getOnlineRepsPromise();
-
-    // Update online pings
-    AppCache.repPings.currPing++;
-    // The following representatives get to increase their last-known ping since they were included in representatives_online result.
-    for (const address of onlineReps) {
-        AppCache.repPings.map.set(address, AppCache.repPings.currPing);
-    }
-
     // Save representative online/offline status in local database
     for (const address of largeRepMap.keys()) {
         const rep = largeRepMap.get(address);
@@ -123,7 +105,6 @@ const getLargeReps = async (): Promise<RepresentativeDto[]> => {
 /** Using the representatives_online RPC call, returns any online rep that has < MIN_WEIGHT_TO_BE_COUNTED weight.  */
 const getMicroReps = async (): Promise<MicroRepresentativeDto[]> => {
     const start = LOG_INFO('Refreshing Micro Reps');
-    // TODO: SHOULD I CACHE ONLINE REPS RESULTS?
     // Get all online reps from nano rpc, then filter out the larger reps.
     const onlineReps = (await NANO_CLIENT.representatives_online(true)) as RPC.RepresentativesOnlineWeightResponse;
     const microRepMap = new Map<string, Partial<MicroRepresentativeDto>>();
@@ -167,6 +148,7 @@ const getOnlineWeight = (): Promise<number> =>
 
 /** Representatives Promise aggregate; makes all calls required to populate the rep data in AppCache. */
 const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
+    const onlineReps = await getOnlineRepsPromise();
     const largeReps = await getLargeReps();
     const monitoredReps = await getMonitoredReps();
     const onlineWeight = await getOnlineWeight();
@@ -176,6 +158,7 @@ const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
         monitoredReps,
         onlineWeight,
         microReps,
+        onlineReps,
     };
 };
 

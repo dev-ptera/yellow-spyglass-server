@@ -70,5 +70,6 @@ export const AppCache: AppCache = {
         monitoredReps: [],
         microReps: [],
         onlineWeight: 0,
+        onlineReps: [],
     },
 };

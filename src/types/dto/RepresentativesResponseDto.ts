@@ -12,4 +12,6 @@ export type RepresentativesResponseDto = {
     monitoredReps: MonitoredRepDto[];
     /** Small representatives that are online but under the 100K threshold. */
     microReps: MicroRepresentativeDto[];
+    /** List of online reps. */
+    onlineReps: string[];
 };
