@@ -348,5 +348,10 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         address: 'ban_3yip4x7tccmayjim1h6mjof46hhjfgukn86gs8ic87b8ig6r9jtptogp8skc',
         alias: 'Gypsy',
         type: 'Representative'
+    },
+    {
+        address: 'ban_3airtunegymgr6b8t9b8muh7upg39bcheahxqwkbtu96ux69pzn1idcu34wz',
+        alias: 'Airtune',
+        type: 'Citizen'
     }
 ];
