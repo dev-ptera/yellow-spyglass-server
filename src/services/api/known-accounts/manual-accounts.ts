@@ -344,4 +344,9 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         alias: 'Volcano Burn Wallet',
         type: 'Burn',
     },
+    {
+        address: 'ban_3yip4x7tccmayjim1h6mjof46hhjfgukn86gs8ic87b8ig6r9jtptogp8skc',
+        alias: 'Gypsy',
+        type: 'Representative'
+    }
 ];

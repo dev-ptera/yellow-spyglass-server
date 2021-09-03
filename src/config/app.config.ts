@@ -31,6 +31,7 @@ export const NETWORK_STATS_REFRESH_INTERVAL_MS = calcMinutes(5);
 
 /** List of monitored representatives to counter-act low peer count. */
 export const MANUAL_PEER_MONITOR_URLS = [
+    /** DOMAIN | IP */
     '108.39.249.5', //batman
     '45.77.190.142', // Cabbit
     'banano.nifni.net',
@@ -45,7 +46,10 @@ export const MANUAL_PEER_MONITOR_URLS = [
     '176.10.199.150', //bananode.eu
     'banano.exchange', //banano.exchange
     '95.216.138.47', // banano italiano
+
+    /** HTTPS */
     'https://node.nanners.cc/api.php', // void
+ //    'https://banode.cygantech.com/api.php', // gypsy //TODO: Figure out why this node is always offline.
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
