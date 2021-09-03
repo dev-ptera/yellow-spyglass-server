@@ -1,25 +1,26 @@
 import { ErrorResponse } from '@dev-ptera/nano-node-rpc';
-import { LOG_ERR } from '@app/services';
+import {getMonitoredReps, LOG_ERR} from '@app/services';
 import { AppCache, HOST_NODE_NAME, LEDGER_LOCATION } from '@app/config';
 import { HostNodeStatsDto, MonitoredRepDto } from '@app/types';
 const getSize = require('get-folder-size');
 const spawn = require('child_process');
 
 /** Returns statistics of this explorer's host node. */
-export const getNodeStats = (req, res): void => {
+export const getNodeStats = async (req, res): Promise<void> => {
     if (!AppCache.representatives) {
         return sendRepresentativesNotLoadedError(res);
     }
 
     // Find the host node in the list of cached reps.
-    let hostNode: MonitoredRepDto = undefined;
-    for (const dto of AppCache.representatives.monitoredReps) {
-        if (dto.name === HOST_NODE_NAME) {
-            hostNode = dto;
-        }
-    }
+    let hostNode = findYellowSpyglassHost();
     if (!hostNode) {
-        return sendRepresentativesNotLoadedError(res);
+        // Go fetch the monitored reps again; this is not right.
+        const monitoredReps = await getMonitoredReps();
+        AppCache.representatives.monitoredReps = monitoredReps;
+        hostNode = findYellowSpyglassHost();
+        if (!hostNode) {
+            return sendRepresentativesNotLoadedError(res);
+        }
     }
 
     // Calculate ledger size.
@@ -54,3 +55,13 @@ const sendRepresentativesNotLoadedError = (res): void => {
     LOG_ERR('getNodeStats', err);
     return res.status(500).send(err);
 };
+
+const findYellowSpyglassHost = (): MonitoredRepDto => {
+    let hostNode: MonitoredRepDto = undefined;
+    for (const dto of AppCache.representatives.monitoredReps) {
+        if (dto.name === HOST_NODE_NAME) {
+            hostNode = dto;
+        }
+    }
+    return hostNode;
+}
