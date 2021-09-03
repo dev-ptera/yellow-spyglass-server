@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
 import { isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount } from '@app/services';
-import { AppCache, MANUAL_PEER_MONITOR_URLS, NANO_CLIENT } from '@app/config';
+import { AppCache, MANUAL_PEER_MONITOR_URLS } from '@app/config';
 
 /** Some monitored representatives will require their representative page to not link redirectly to the statistics page.
  *  Resolve these custom reps here.
@@ -15,7 +15,7 @@ const setCustomMonitorPageUrl = (rep: PeerMonitorStats): string => {
         return 'https://node.nanners.cc/';
     }
     // TODO: Creeper
-}
+};
 
 /** Given either an IP or HTTP address of a node monitor, returns the address used to lookup node stats. */
 export const getMonitoredUrl = (address: string): string => {
@@ -34,7 +34,7 @@ const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
     axios
         .request<PeerMonitorStats>({
             method: 'get',
-            timeout: 10000,
+            timeout: 8000,
             url: getMonitoredUrl(url),
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
@@ -67,12 +67,9 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
 
     // Only show monitors that are actually online;
     for (const rep of uniqueMonitors.values()) {
-        // The AppCache rep pings should always be >0 by the time the monitored reps are loaded since the timeout for rep monitors is so large.
-        // In the event that the AppCache isn't updated yet, just display all monitors even if they are offline.  This only happens whenever the server restarts.
-        if (AppCache.repPings.currPing > 0 && !isRepOnline(rep.nanoNodeAccount)) {
+        if (!isRepOnline(rep.nanoNodeAccount)) {
             continue;
         }
-
         delegatorsCountMap.set(rep.nanoNodeAccount, { delegatorsCount: 0 });
         groomedDetails.push({
             address: rep.nanoNodeAccount,
