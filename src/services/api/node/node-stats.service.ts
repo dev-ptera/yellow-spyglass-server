@@ -1,5 +1,5 @@
 import { ErrorResponse } from '@dev-ptera/nano-node-rpc';
-import {getMonitoredReps, LOG_ERR} from '@app/services';
+import { getMonitoredReps, LOG_ERR } from '@app/services';
 import { AppCache, HOST_NODE_NAME, LEDGER_LOCATION } from '@app/config';
 import { HostNodeStatsDto, MonitoredRepDto } from '@app/types';
 const getSize = require('get-folder-size');
@@ -64,4 +64,4 @@ const findYellowSpyglassHost = (): MonitoredRepDto => {
         }
     }
     return hostNode;
-}
+};

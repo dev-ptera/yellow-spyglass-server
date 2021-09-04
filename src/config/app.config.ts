@@ -49,7 +49,7 @@ export const MANUAL_PEER_MONITOR_URLS = [
 
     /** HTTPS */
     'https://node.nanners.cc/api.php', // void
- //    'https://banode.cygantech.com/api.php', // gypsy //TODO: Figure out why this node is always offline.
+    //    'https://banode.cygantech.com/api.php', // gypsy //TODO: Figure out why this node is always offline.
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */

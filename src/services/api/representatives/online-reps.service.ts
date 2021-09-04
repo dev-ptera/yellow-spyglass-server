@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from 'axios';
 import { LOG_ERR } from '../../log/error.service';
 import { LOG_INFO } from '../../log/info.service';
 
-const OFFLINE_AFTER_PINGS = 4;
+const OFFLINE_AFTER_PINGS = 3;
 
 /**
  * The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.

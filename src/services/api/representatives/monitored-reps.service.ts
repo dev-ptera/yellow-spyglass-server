@@ -152,6 +152,21 @@ export const getPeers = (req, res): void => {
         });
 };
 
+/** Given a list of currently online monitored reps & Monitored Reps from the AppCache, return an aggregate list of 'online' monitored reps.
+ *  Reps are marked as online until unresponsive for OFFLINE_AFTER_PINGS pings. */
+const includeCachedOnlineMonitoredReps = (currentReps: MonitoredRepDto[]): MonitoredRepDto[] => {
+    const allMonitoredReps = new Map<string, MonitoredRepDto>();
+    AppCache.representatives.monitoredReps.map((rep) => allMonitoredReps.set(rep.address, rep));
+    currentReps.map((rep) => allMonitoredReps.set(rep.address, rep));
+    const onlineMonitoredReps: MonitoredRepDto[] = [];
+    for (const address of allMonitoredReps.keys()) {
+        if (isRepOnline(address)) {
+            onlineMonitoredReps.push(allMonitoredReps.get(address));
+        }
+    }
+    return onlineMonitoredReps;
+};
+
 /** Using a combination of hard-coded ips & the peers RPC command, returns a list of representatives running the Nano Node Monitor software. */
 export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> => {
     const start = LOG_INFO('Refreshing Monitored Reps');
@@ -159,14 +174,15 @@ export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> => {
         peersRpc()
             .then((peers: Peers) => {
                 getRepDetails(peers)
-                    .then((details: MonitoredRepDto[]) => {
-                        details.sort(function (a, b) {
+                    .then((repDetails: MonitoredRepDto[]) => {
+                        const onlineReps = includeCachedOnlineMonitoredReps(repDetails);
+                        onlineReps.sort(function (a, b) {
                             const textA = a.name.toUpperCase();
                             const textB = b.name.toUpperCase();
                             return textA < textB ? -1 : textA > textB ? 1 : 0;
                         });
                         LOG_INFO('Monitored Reps Updated', start);
-                        resolve(details);
+                        resolve(onlineReps);
                     })
                     .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
             })
