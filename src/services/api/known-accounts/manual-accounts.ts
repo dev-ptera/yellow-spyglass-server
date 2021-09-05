@@ -354,4 +354,9 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         alias: 'Airtune',
         type: 'Citizen',
     },
+    {
+        address: 'ban_3cutenodsyi4mtgjyin91zp9k4i3cbkemj8cxfaigskibz4ow68u3yeao8bs',
+        alias: 'boopowo',
+        type: 'Representative'
+    }
 ];
