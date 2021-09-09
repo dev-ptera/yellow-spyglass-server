@@ -9,6 +9,7 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
 
     accountHistoryRpc(address, 0, -1, true)
         .then((accountHistory: AccountHistoryResponse) => {
+            /* Map of <recipient address, balance> for each account a given `address` has interacted with. */
             const accountSentMap = new Map<string, number>();
             const accountReceivedMap = new Map<string, number>();
             const insightsDto: InsightsDto = {
@@ -25,6 +26,8 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                 mostCommonSenderTxCount: 0,
                 totalAmountReceivedBan: 0,
                 totalAmountSentBan: 0,
+                lastSentUnixTimestamp: 0,
+                lastReceivedUnixTimestamp: 0,
             };
 
             let balance = 0;
@@ -38,6 +41,7 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     if (transaction['subtype'] === 'receive') {
                         balance += ban;
                         insightsDto.totalAmountReceivedBan += ban;
+                        insightsDto.lastReceivedUnixTimestamp = Number(transaction.local_timestamp);
                         accountReceivedMap.has(addr)
                             ? accountReceivedMap.set(addr, accountReceivedMap.get(addr) + 1)
                             : accountReceivedMap.set(addr, 1);
@@ -48,6 +52,7 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     } else if (transaction['subtype'] === 'send') {
                         balance -= ban;
                         insightsDto.totalAmountSentBan += ban;
+                        insightsDto.lastSentUnixTimestamp = Number(transaction.local_timestamp);
                         accountSentMap.has(addr)
                             ? accountSentMap.set(addr, accountSentMap.get(addr) + 1)
                             : accountSentMap.set(addr, 1);
