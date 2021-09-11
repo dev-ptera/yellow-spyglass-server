@@ -110,7 +110,6 @@ server.listen(port, () => {
     LOG_INFO(`Production mode enabled? : ${IS_PRODUCTION}`);
     // importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
 
-
     /* Updating the network metrics are now staggered so that each reset interval not all calls are fired at once. */
     void cacheNetworkStats().then(() => {
         setInterval(() => {
@@ -138,8 +137,8 @@ server.listen(port, () => {
                             void cacheAccountDistribution();
                         }, WALLETS_REFRESH_INTERVAL_MS);
                     }
-                })
-            })
-        })
-    })
+                });
+            });
+        });
+    });
 });

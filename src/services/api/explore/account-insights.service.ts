@@ -55,7 +55,6 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                         insightsDto.lastInTxHash = transaction.hash;
                         insightsDto.lastInTxUnixTimestamp = Number(transaction.local_timestamp);
 
-
                         insightsDto.totalTxReceived += 1;
                         insightsDto.totalAmountReceivedBan += ban;
                         accountReceivedMap.has(addr)

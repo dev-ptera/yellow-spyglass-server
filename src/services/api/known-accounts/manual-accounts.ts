@@ -357,11 +357,11 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     {
         address: 'ban_3cutenodsyi4mtgjyin91zp9k4i3cbkemj8cxfaigskibz4ow68u3yeao8bs',
         alias: 'boopowo',
-        type: 'Representative'
+        type: 'Representative',
     },
     {
         address: 'ban_3unityd1rqwde1p33ax61aan6tqa1f6xm9epjkhmsfktr3rdwg4z5td5ua3n',
-        alias: 'Unity\'s Node',
+        alias: "Unity's Node",
         type: 'Representative',
-    }
+    },
 ];
