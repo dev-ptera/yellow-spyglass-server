@@ -110,33 +110,36 @@ server.listen(port, () => {
     LOG_INFO(`Production mode enabled? : ${IS_PRODUCTION}`);
     // importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
 
-    void cacheKnownAccounts();
-    setInterval(() => {
-        void cacheKnownAccounts();
-    }, KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS);
 
-    void cacheRepresentatives();
-    setInterval(() => {
-        void cacheRepresentatives();
-    }, REPRESENTATIVES_REFRESH_INTERVAL_MS);
-
-    /*  I've disabled this operation when developing since I don't develop on the same machine
-        that runs the node and inter-network calls are too slow for this run every hour.
-    */
-    if (IS_PRODUCTION) {
-        void cacheAccountDistribution();
+    /* Updating the network metrics are now staggered so that each reset interval not all calls are fired at once. */
+    void cacheNetworkStats().then(() => {
         setInterval(() => {
-            void cacheAccountDistribution();
-        }, WALLETS_REFRESH_INTERVAL_MS);
-    }
+            void cacheNetworkStats();
+        }, NETWORK_STATS_REFRESH_INTERVAL_MS);
+        void cachePriceData().then(() => {
+            setInterval(() => {
+                void cachePriceData();
+            }, PRICE_DATA_REFRESH_INTERVAL_MS);
+            void cacheKnownAccounts().then(() => {
+                setInterval(() => {
+                    void cacheKnownAccounts();
+                }, KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS);
+                void cacheRepresentatives().then(() => {
+                    setInterval(() => {
+                        void cacheRepresentatives();
+                    }, REPRESENTATIVES_REFRESH_INTERVAL_MS);
 
-    void cachePriceData();
-    setInterval(() => {
-        void cachePriceData();
-    }, PRICE_DATA_REFRESH_INTERVAL_MS);
-
-    void cacheNetworkStats();
-    setInterval(() => {
-        void cacheNetworkStats();
-    }, NETWORK_STATS_REFRESH_INTERVAL_MS);
+                    /*  I've disabled this operation when developing since I don't develop on the same machine
+                        that runs the node and inter-network calls are too slow for this run every hour.
+                    */
+                    if (IS_PRODUCTION) {
+                        void cacheAccountDistribution();
+                        setInterval(() => {
+                            void cacheAccountDistribution();
+                        }, WALLETS_REFRESH_INTERVAL_MS);
+                    }
+                })
+            })
+        })
+    })
 });
