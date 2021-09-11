@@ -26,8 +26,16 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                 mostCommonSenderTxCount: 0,
                 totalAmountReceivedBan: 0,
                 totalAmountSentBan: 0,
-                lastSentUnixTimestamp: 0,
-                lastReceivedUnixTimestamp: 0,
+                totalTxSent: 0,
+                totalTxReceived: 0,
+                firstInTxUnixTimestamp: undefined,
+                firstInTxHash: undefined,
+                firstOutTxUnixTimestamp: undefined,
+                firstOutTxHash: undefined,
+                lastInTxUnixTimestamp: undefined,
+                lastInTxHash: undefined,
+                lastOutTxUnixTimestamp: undefined,
+                lastOutTxHash: undefined,
             };
 
             let balance = 0;
@@ -40,8 +48,16 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     const addr = transaction.account;
                     if (transaction['subtype'] === 'receive') {
                         balance += ban;
+                        if (!insightsDto.firstInTxHash) {
+                            insightsDto.firstInTxHash = transaction.hash;
+                            insightsDto.firstInTxUnixTimestamp = Number(transaction.local_timestamp);
+                        }
+                        insightsDto.lastInTxHash = transaction.hash;
+                        insightsDto.lastInTxUnixTimestamp = Number(transaction.local_timestamp);
+
+
+                        insightsDto.totalTxReceived += 1;
                         insightsDto.totalAmountReceivedBan += ban;
-                        insightsDto.lastReceivedUnixTimestamp = Number(transaction.local_timestamp);
                         accountReceivedMap.has(addr)
                             ? accountReceivedMap.set(addr, accountReceivedMap.get(addr) + 1)
                             : accountReceivedMap.set(addr, 1);
@@ -52,7 +68,13 @@ const confirmedTransactionsPromise = (address: string): Promise<InsightsDto> =>
                     } else if (transaction['subtype'] === 'send') {
                         balance -= ban;
                         insightsDto.totalAmountSentBan += ban;
-                        insightsDto.lastSentUnixTimestamp = Number(transaction.local_timestamp);
+                        if (!insightsDto.firstOutTxHash) {
+                            insightsDto.firstOutTxHash = transaction.hash;
+                            insightsDto.firstOutTxUnixTimestamp = Number(transaction.local_timestamp);
+                        }
+                        insightsDto.lastOutTxHash = transaction.hash;
+                        insightsDto.lastOutTxUnixTimestamp = Number(transaction.local_timestamp);
+                        insightsDto.totalTxSent += 1;
                         accountSentMap.has(addr)
                             ? accountSentMap.set(addr, accountSentMap.get(addr) + 1)
                             : accountSentMap.set(addr, 1);
