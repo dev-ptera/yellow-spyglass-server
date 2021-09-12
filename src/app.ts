@@ -54,6 +54,7 @@ import {
     useMegaphone,
     getAliases,
     getRepresentativeUptime,
+    sleep,
 } from '@app/services';
 
 const corsOptions = {
@@ -105,40 +106,47 @@ app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepr
 const port: number = Number(process.env.PORT || 3000);
 const server = http.createServer(app);
 
+export const staggerServerUpdates = async (cacheFns: Array<{ method: Function; interval: number }>) => {
+    for (const fn of cacheFns) {
+        await fn.method();
+        setInterval(() => fn.method(), fn.interval);
+        await sleep(2000);
+    }
+};
+
 server.listen(port, () => {
     LOG_INFO(`Running yellow-spyglass server on port ${port}.`);
     LOG_INFO(`Production mode enabled? : ${IS_PRODUCTION}`);
     // importHistoricHashTimestamps(); // TODO: Prune timestamps after March 18, 2021
 
-    /* Updating the network metrics are now staggered so that each reset interval not all calls are fired at once. */
-    void cacheNetworkStats().then(() => {
-        setInterval(() => {
-            void cacheNetworkStats();
-        }, NETWORK_STATS_REFRESH_INTERVAL_MS);
-        void cachePriceData().then(() => {
-            setInterval(() => {
-                void cachePriceData();
-            }, PRICE_DATA_REFRESH_INTERVAL_MS);
-            void cacheKnownAccounts().then(() => {
-                setInterval(() => {
-                    void cacheKnownAccounts();
-                }, KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS);
-                void cacheRepresentatives().then(() => {
-                    setInterval(() => {
-                        void cacheRepresentatives();
-                    }, REPRESENTATIVES_REFRESH_INTERVAL_MS);
+    const networkStats = {
+        method: cacheNetworkStats,
+        interval: NETWORK_STATS_REFRESH_INTERVAL_MS,
+    };
 
-                    /*  I've disabled this operation when developing since I don't develop on the same machine
-                        that runs the node and inter-network calls are too slow for this run every hour.
-                    */
-                    if (IS_PRODUCTION) {
-                        void cacheAccountDistribution();
-                        setInterval(() => {
-                            void cacheAccountDistribution();
-                        }, WALLETS_REFRESH_INTERVAL_MS);
-                    }
-                });
-            });
-        });
-    });
+    const priceData = {
+        method: cachePriceData,
+        interval: PRICE_DATA_REFRESH_INTERVAL_MS,
+    };
+
+    const representatives = {
+        method: cacheRepresentatives,
+        interval: REPRESENTATIVES_REFRESH_INTERVAL_MS,
+    };
+
+    const knownAccounts = {
+        method: cacheKnownAccounts,
+        interval: KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS,
+    };
+
+    /*  I've disabled this operation when developing since I don't develop on the same machine
+        that runs the node and inter-network calls are too slow for this run every hour.
+    */
+    const accountDistribution = {
+        method: IS_PRODUCTION ? cacheAccountDistribution : () => {},
+        interval: WALLETS_REFRESH_INTERVAL_MS,
+    };
+
+    /* Updating the network metrics are now staggered so that each reset interval not all calls are fired at once. */
+    void staggerServerUpdates([networkStats, knownAccounts, priceData, representatives, accountDistribution]);
 });

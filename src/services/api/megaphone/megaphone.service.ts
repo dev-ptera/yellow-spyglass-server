@@ -1,12 +1,6 @@
 import { sendRpc } from '@app/rpc';
-import { LOG_ERR, LOG_INFO } from '@app/services';
+import {LOG_ERR, LOG_INFO, sleep} from '@app/services';
 import { megaphoneAccounts } from '../../../config/megaphone-accounts';
-
-/** Wait interval in milliseconds. */
-export const sleep = (ms) =>
-    new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
 
 const sendFunds = (wallet: string, source: string, destination: string, amount: string): Promise<any> =>
     new Promise((resolve) => {
