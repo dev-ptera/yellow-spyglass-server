@@ -19,7 +19,7 @@ const getOnlineRepsFromExternalApi = (url: string): Promise<RPC.RepresentativesO
     axios
         .request<RPC.RepresentativesOnlineResponse>({
             method: 'post',
-            timeout: 4000,
+            timeout: 10000,
             url,
             data: {
                 action: 'representatives_online',
@@ -28,11 +28,12 @@ const getOnlineRepsFromExternalApi = (url: string): Promise<RPC.RepresentativesO
         .then((response: AxiosResponse<RPC.RepresentativesOnlineResponse>) => {
             return Promise.resolve(response.data);
         })
-        .catch(() =>
-            Promise.resolve({
+        .catch((err) => {
+            LOG_ERR('getOnlineRepsFromExternalApi', err);
+            return Promise.resolve({
                 representatives: [],
-            })
-        );
+            });
+        });
 
 /** Makes a handful of async calls to various nodes & fetches a string array of online representatives. */
 export const getOnlineRepsPromise = (): Promise<string[]> => {
@@ -47,6 +48,10 @@ export const getOnlineRepsPromise = (): Promise<string[]> => {
 
         Promise.all([NANO_CLIENT.representatives_online(false), ...externalCalls])
             .then((data: Array<RPC.RepresentativesOnlineResponse>) => {
+                // Update online pings
+                AppCache.repPings.currPing++;
+                console.log(AppCache.repPings.currPing);
+
                 // Iterate through the results, add all unique reps to a set.
                 for (const resultSet of data) {
                     if (resultSet && resultSet.representatives) {
@@ -59,8 +64,6 @@ export const getOnlineRepsPromise = (): Promise<string[]> => {
                         });
                     }
 
-                    // Update online pings
-                    AppCache.repPings.currPing++;
                     // The following representatives get to increase their last-known ping since they were included in representatives_online result.
                     for (const address of Array.from(onlineRepSet)) {
                         AppCache.repPings.map.set(address, AppCache.repPings.currPing);

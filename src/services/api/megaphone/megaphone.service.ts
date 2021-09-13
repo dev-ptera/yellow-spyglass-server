@@ -1,5 +1,5 @@
 import { sendRpc } from '@app/rpc';
-import {LOG_ERR, LOG_INFO, sleep} from '@app/services';
+import { LOG_ERR, LOG_INFO, sleep } from '@app/services';
 import { megaphoneAccounts } from '../../../config/megaphone-accounts';
 
 const sendFunds = (wallet: string, source: string, destination: string, amount: string): Promise<any> =>
