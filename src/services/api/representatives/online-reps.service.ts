@@ -44,7 +44,7 @@ export const getOnlineRepsPromise = (): Promise<string[]> => {
     }
 
     return new Promise((resolve) => {
-        const onlineRepSet = new Set<string>();
+        const currentPingOnlineReps = new Set<string>();
 
         Promise.all([NANO_CLIENT.representatives_online(false), ...externalCalls])
             .then((data: Array<RPC.RepresentativesOnlineResponse>) => {
@@ -55,7 +55,7 @@ export const getOnlineRepsPromise = (): Promise<string[]> => {
                 // Iterate through the results, add all unique reps to a set.
                 for (const resultSet of data) {
                     if (resultSet && resultSet.representatives) {
-                        resultSet.representatives.map((rep) => onlineRepSet.add(rep));
+                        resultSet.representatives.map((rep) => currentPingOnlineReps.add(rep));
                     } else {
                         LOG_ERR('getOnlineRepsPromise', {
                             error: `Malformed response for representatives_online RPC: ${JSON.stringify(
@@ -63,27 +63,28 @@ export const getOnlineRepsPromise = (): Promise<string[]> => {
                             )}`,
                         });
                     }
+                }
 
-                    // The following representatives get to increase their last-known ping since they were included in representatives_online result.
-                    for (const address of Array.from(onlineRepSet)) {
-                        AppCache.repPings.map.set(address, AppCache.repPings.currPing);
-                    }
+                // The following representatives get to increase their last-known ping since they were included in representatives_online result.
+                for (const address of Array.from(currentPingOnlineReps)) {
+                    AppCache.repPings.map.set(address, AppCache.repPings.currPing);
+                }
 
-                    // Use the pings to update the AppCache online reps.
-                    // TODO: Since I've updated this service to reach out to multiple nodes to check for rep online status, allowing 4 offline-pings might be overkill now.
-                    AppCache.representatives.onlineReps = [];
-                    for (const rep of AppCache.repPings.map.keys()) {
-                        if (isRepOnline(rep)) {
-                            AppCache.representatives.onlineReps.push(rep);
-                        }
+                // Use the pings to update the AppCache online reps.
+                // TODO: Since I've updated this service to reach out to multiple nodes to check for rep online status, allowing 4 offline-pings might be overkill now.
+                const onlineReps = new Set<string>();
+                for (const rep of AppCache.repPings.map.keys()) {
+                    if (isRepOnline(rep)) {
+                        onlineReps.add(rep);
                     }
                 }
+
                 LOG_INFO('Online Reps Updated', start);
-                resolve(Array.from(onlineRepSet));
+                resolve(Array.from(onlineReps));
             })
             .catch((err) => {
-                resolve(LOG_ERR('getOnlineRepsPromise', err));
-                resolve(Array.from(onlineRepSet));
+                LOG_ERR('getOnlineRepsPromise', err);
+                resolve([]);
             });
     });
 };
