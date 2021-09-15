@@ -50,7 +50,8 @@ export const MANUAL_PEER_MONITOR_URLS = [
     /** HTTPS */
     'https://node.nanners.cc/api.php', // void
     'https://node.boopowo.com/api.php', // boopowo
-    //    'https://banode.cygantech.com/api.php', // gypsy //TODO: Figure out why this node is always offline.
+    'https://banode.cygantech.com/api.php', // gypsy //TODO: Figure out why this node is always offline.
+    'https://banano.nifni.net/api.php' // nano.nifni.net // TODO: Figure out why this node does not show up in list.
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
