@@ -14,9 +14,17 @@ export const LOG_INFO = (msg: string, startTime?: number): any => {
     const hasGear = msg.includes('Refreshing');
     const hasCheck = msg.includes('Updated');
     if (startTime) {
-        console.log(`[INFO]:\t ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\t${hasCheck ? '✔ ' : ''}${msg}, took ${calcTimeDifference(now, startTime)}`);
+        console.log(
+            `[INFO]:\t ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\t${
+                hasCheck ? '✔ ' : ''
+            }${msg}, took ${calcTimeDifference(now, startTime)}`
+        );
     } else {
-        console.log(`[INFO]:\t ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\t${hasGear ? '⚙ ' : ''}${msg}`);
+        console.log(
+            `[INFO]:\t ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\t${
+                hasGear ? '⚙ ' : ''
+            }${msg}`
+        );
     }
     return now;
 };
