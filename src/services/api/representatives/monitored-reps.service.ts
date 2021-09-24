@@ -66,14 +66,14 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
     }
 
     let i = 1;
+    let offlineCount = 0;
     // Only show monitors that are actually online;
     for (const rep of uniqueMonitors.values()) {
         console.log(
-            `${i++} \t ${isRepOnline(rep.nanoNodeAccount) ? '✔' : '☹'} \t  ${rep.nanoNodeAccount} \t ${
-                rep.nanoNodeName
-            }`
+            `${i++} \t ${isRepOnline(rep.nanoNodeAccount) ? '✔' : '❌'} \t ${rep.nanoNodeAccount} ${rep.nanoNodeName.padStart(42, ' ')} \t ${setCustomMonitorPageUrl(rep) || 'http://'+rep.ip}`
         );
         if (!isRepOnline(rep.nanoNodeAccount)) {
+            offlineCount++;
             continue;
         }
         delegatorsCountMap.set(rep.nanoNodeAccount, { delegatorsCount: 0 });
@@ -104,7 +104,7 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
     // Populate the delegators count to each rep.
     await populateDelegatorsCount(delegatorsCountMap).catch((err) => Promise.reject(err));
     groomedDetails.map((dto) => (dto.delegatorsCount = delegatorsCountMap.get(dto.address).delegatorsCount));
-
+    console.log(`${i-offlineCount}/${i} monitored reps considered online`);
     return Promise.resolve(groomedDetails);
 };
 
