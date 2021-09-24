@@ -18,15 +18,15 @@ const setCustomMonitorPageUrl = (rep: PeerMonitorStats): string => {
 };
 
 /** Given either an IP or HTTP address of a node monitor, returns the address used to lookup node stats. */
-export const getMonitoredUrl = (address: string): string => {
+export const getMonitoredUrl = (url: string): string => {
     const stats = `api.php`;
-    if (address.includes('https')) {
-        return `${address}/${stats}`;
+    if (url.includes('https')) {
+        return `${url}/${stats}`;
     }
-    if (address.includes('http')) {
-        return `${address}/${stats}`;
+    if (url.includes('http')) {
+        return `${url}/${stats}`;
     }
-    return `http://${address}/${stats}`;
+    return `http://${url}/${stats}`;
 };
 
 /** Given a peer IP or HTTP address, queries node monitor stats. */
@@ -65,8 +65,14 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
         }
     }
 
+    let i = 1;
     // Only show monitors that are actually online;
     for (const rep of uniqueMonitors.values()) {
+        console.log(
+            `${i++} \t ${isRepOnline(rep.nanoNodeAccount) ? '✔' : '☹'} \t  ${rep.nanoNodeAccount} \t ${
+                rep.nanoNodeName
+            }`
+        );
         if (!isRepOnline(rep.nanoNodeAccount)) {
             continue;
         }

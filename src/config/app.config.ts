@@ -47,12 +47,15 @@ export const MANUAL_PEER_MONITOR_URLS = [
     'banano.exchange', //banano.exchange
     '95.216.138.47', // banano italiano
 
+    /** HTTP */
+    'http://pinode.sytes.net', // NodePi
+
     /** HTTPS */
-    'https://node.nanners.cc/api.php', // void
-    'https://node.boopowo.com/api.php', // boopowo
-    'https://banode.cygantech.com/api.php', // gypsy //TODO: Figure out why this node is always offline.
-    'https://banano.nifni.net/api.php', // nano.nifni.net // TODO: Figure out why this node does not show up in list.
-    'https://bananonode.lightcord.org/api.php' // crpay
+    'https://node.nanners.cc', // void
+    'https://node.boopowo.com', // boopowo
+    'https://banode.cygantech.com', // gypsy | Banode01
+    'https://banano.nifni.net', // nano.nifni.net // TODO: Figure out why this node does not show up in list.
+    'https://bananonode.lightcord.org', // crpay | 'bunker',
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
