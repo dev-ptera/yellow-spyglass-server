@@ -47,6 +47,13 @@ const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
         })
         .catch(() => Promise.resolve(undefined));
 
+const formatMonitorUrl = (ip: string): string => {
+    if (ip && (ip.includes('http') || ip.includes('https'))) {
+        return ip;
+    }
+    return `http://${ip}`;
+}
+
 /** Prunes & grooms data that is returned to client.
  *  Only monitors with an online representative will be returned to the client.
  *  This is because some peers may be online but with a misconfigured node. (e.g. a monitor with an incorrect address displayed.)
@@ -70,7 +77,7 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
     // Only show monitors that are actually online;
     for (const rep of uniqueMonitors.values()) {
         console.log(
-            `${i++} \t ${isRepOnline(rep.nanoNodeAccount) ? '✔' : '❌'} \t ${rep.nanoNodeAccount} ${rep.nanoNodeName.padStart(42, ' ')} \t ${setCustomMonitorPageUrl(rep) || 'http://'+rep.ip}`
+            `${i++}\t${isRepOnline(rep.nanoNodeAccount) ? '✔' : '✗'} ${rep.nanoNodeAccount} ${rep.nanoNodeName.padStart(40, ' ')}  ${setCustomMonitorPageUrl(rep) || formatMonitorUrl(rep.ip)}`
         );
         if (!isRepOnline(rep.nanoNodeAccount)) {
             offlineCount++;
@@ -104,6 +111,7 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
     // Populate the delegators count to each rep.
     await populateDelegatorsCount(delegatorsCountMap).catch((err) => Promise.reject(err));
     groomedDetails.map((dto) => (dto.delegatorsCount = delegatorsCountMap.get(dto.address).delegatorsCount));
+     i--;
     console.log(`${i-offlineCount}/${i} monitored reps considered online`);
     return Promise.resolve(groomedDetails);
 };
