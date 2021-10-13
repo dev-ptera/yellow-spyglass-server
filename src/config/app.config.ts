@@ -68,4 +68,9 @@ export const HOST_NODE_NAME = 'batman';
 export const HOST_NODE_MONITOR_URL = '108.39.249.5';
 
 /** These nodes are currently only used for the `representatives_online` rpc call to help ensure more accurate results. */
-export const BACKUP_NODES = ['https://banano-api.mynano.ninja/rpc', 'https://api-beta.banano.cc/'];
+export const BACKUP_NODES = [
+    /*
+    'https://banano-api.mynano.ninja/rpc',
+    'https://api-beta.banano.cc/'
+     */
+];
