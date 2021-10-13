@@ -61,7 +61,7 @@ const processNodeResponse = async (data: RPC.RepresentativesResponse): Promise<B
 
 /** Gets a large amount of representatives so we can aggregate online voting weight stats. */
 export const getAllReps = (): Promise<BasicRepDetails[]> =>
-    NANO_CLIENT.representatives(2000, true)
+    NANO_CLIENT.representatives(5000, true)
         .then(processNodeResponse)
         .then((reps) => Promise.resolve(reps))
         .catch((err) => Promise.reject(err));
