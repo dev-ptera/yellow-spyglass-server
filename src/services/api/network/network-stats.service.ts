@@ -5,6 +5,9 @@ import { getAllReps } from './representatives.service';
 import { getSupplyPromise } from './supply.service';
 import { getQuorumPromise } from './quorum.service';
 import { calcConsensusStats, calcNakamotoCoefficient } from './network-calculations';
+import {rawToBan} from "banano-unit-converter";
+
+export const convertToBan = (raw: string): number => Math.round(Number(rawToBan(raw)));
 
 /** This is called to update the Network Stats in the AppCache. */
 export const cacheNetworkStats = async (): Promise<void> => {
@@ -16,7 +19,6 @@ export const cacheNetworkStats = async (): Promise<void> => {
                 const supply = response[1];
                 const quorum = response[2];
                 const peerVersions = response[3];
-                console.log('top level chain success');
                 const consensus = calcConsensusStats(reps, supply.totalAmount, quorum);
                 const nakamotoCoefficient = calcNakamotoCoefficient(reps, quorum);
                 AppCache.networkStats = {

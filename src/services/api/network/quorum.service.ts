@@ -1,8 +1,7 @@
-import { ConfirmationQuorumResponse, UnitConversionResponse } from '@dev-ptera/nano-node-rpc';
-import { QuorumDto } from '@app/types';
-import { NANO_CLIENT } from '@app/config';
-import { LOG_ERR } from '@app/services';
-import {rawToBan} from "banano-unit-converter";
+import {ConfirmationQuorumResponse} from '@dev-ptera/nano-node-rpc';
+import {QuorumDto} from '@app/types';
+import {NANO_CLIENT} from '@app/config';
+import {convertToBan, LOG_ERR} from '@app/services';
 
 export const getQuorumPromise = async (): Promise<QuorumDto> => {
     let rawQuorum: ConfirmationQuorumResponse;
@@ -12,12 +11,12 @@ export const getQuorumPromise = async (): Promise<QuorumDto> => {
         })
         .catch((err) => Promise.reject(err));
 
+
     return Promise.all([
-        Number(rawToBan(rawQuorum.quorum_delta)),
-        Number(rawToBan(rawQuorum.online_weight_minimum)),
-        Number(rawToBan(rawQuorum.online_stake_total)),
-        Number(rawToBan(rawQuorum.peers_stake_required)),
-        Number(rawToBan(rawQuorum.peers_stake_total)),
+        convertToBan(rawQuorum.quorum_delta),
+        convertToBan(rawQuorum.online_weight_minimum),
+        convertToBan(rawQuorum.online_stake_total),
+        convertToBan(rawQuorum.peers_stake_total),
     ])
         .then((conversions: number[]) => {
             return Promise.resolve({
@@ -25,8 +24,7 @@ export const getQuorumPromise = async (): Promise<QuorumDto> => {
                 quorumDelta: Number(conversions[0]),
                 onlineWeightMinimum: Number(conversions[1]),
                 onlineStakeTotal: Number(conversions[2]),
-                peersStakeRequired: Number(conversions[3]),
-                peersStakeTotal: Number(conversions[4]),
+                peersStakeTotal: Number(conversions[3]),
             });
         })
         .catch((err) => Promise.reject(err));
