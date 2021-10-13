@@ -2,6 +2,7 @@ import { ConfirmationQuorumResponse, UnitConversionResponse } from '@dev-ptera/n
 import { QuorumDto } from '@app/types';
 import { NANO_CLIENT } from '@app/config';
 import { LOG_ERR } from '@app/services';
+import {rawToBan} from "banano-unit-converter";
 
 export const getQuorumPromise = async (): Promise<QuorumDto> => {
     let rawQuorum: ConfirmationQuorumResponse;
@@ -12,20 +13,20 @@ export const getQuorumPromise = async (): Promise<QuorumDto> => {
         .catch((err) => Promise.reject(err));
 
     return Promise.all([
-        NANO_CLIENT.mrai_from_raw(rawQuorum.quorum_delta),
-        NANO_CLIENT.mrai_from_raw(rawQuorum.online_weight_minimum),
-        NANO_CLIENT.mrai_from_raw(rawQuorum.online_stake_total),
-        NANO_CLIENT.mrai_from_raw(rawQuorum.peers_stake_required),
-        NANO_CLIENT.mrai_from_raw(rawQuorum.peers_stake_total),
+        Number(rawToBan(rawQuorum.quorum_delta)),
+        Number(rawToBan(rawQuorum.online_weight_minimum)),
+        Number(rawToBan(rawQuorum.online_stake_total)),
+        Number(rawToBan(rawQuorum.peers_stake_required)),
+        Number(rawToBan(rawQuorum.peers_stake_total)),
     ])
-        .then((conversions: UnitConversionResponse[]) => {
+        .then((conversions: number[]) => {
             return Promise.resolve({
                 onlineWeightQuorumPercent: Number(rawQuorum.online_weight_quorum_percent),
-                quorumDelta: Number(conversions[0].amount),
-                onlineWeightMinimum: Number(conversions[1].amount),
-                onlineStakeTotal: Number(conversions[2].amount),
-                peersStakeRequired: Number(conversions[3].amount),
-                peersStakeTotal: Number(conversions[4].amount),
+                quorumDelta: Number(conversions[0]),
+                onlineWeightMinimum: Number(conversions[1]),
+                onlineStakeTotal: Number(conversions[2]),
+                peersStakeRequired: Number(conversions[3]),
+                peersStakeTotal: Number(conversions[4]),
             });
         })
         .catch((err) => Promise.reject(err));
