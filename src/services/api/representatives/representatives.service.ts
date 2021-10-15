@@ -152,6 +152,7 @@ const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
     const largeReps = await getLargeReps();
     const monitoredReps = await getMonitoredReps();
     const onlineWeight = await getOnlineWeight();
+    const offlineWeight = AppCache.networkStats.consensus.offlineAmount;
     const microReps = await getMicroReps();
     return {
         thresholdReps: largeReps,
@@ -159,6 +160,7 @@ const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
         onlineWeight,
         microReps,
         onlineReps,
+        offlineWeight
     };
 };
 

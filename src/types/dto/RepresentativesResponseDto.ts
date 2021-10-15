@@ -5,6 +5,8 @@ import { MicroRepresentativeDto } from './MicroRepresentativeDto';
 export type RepresentativesResponseDto = {
     /** Aggregate voting weight from online reps.  Populated by nano RPC. */
     onlineWeight: number;
+    /** Aggregate weight that is neither online or belongs to an open account. */
+    offlineWeight: number;
     /** These representatives are populated directly by the nano RPC and have at least 100,000 BAN voting weight */
     thresholdReps: RepresentativeDto[];
     /** These representatives are populated by querying the peers
