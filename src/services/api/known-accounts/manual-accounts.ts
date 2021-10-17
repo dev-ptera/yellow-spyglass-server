@@ -374,4 +374,14 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         alias: "Polygon Cold Wallet",
         type: 'Exchange',
     },
+    {
+        address: 'ban_151sj7ainc3379f37acp9e81qsy9kyfprkb7m6gn56aifeyy1hzdcmquy69b',
+        alias: "manhlicious",
+        type: 'Representative',
+    },
+    {
+        address: 'ban_3pa1m3g79i1h7uijugndjeytpmqbsg6hc19zm8m7foqygwos1mmcqmab91hh',
+        alias: "just_dmitry",
+        type: 'Representative',
+    },
 ];

@@ -56,7 +56,8 @@ export const MANUAL_PEER_MONITOR_URLS = [
     'https://banode.cygantech.com', // gypsy | Banode01
     'https://banano.nifni.net', // nano.nifni.net // TODO: Figure out why this node does not show up in list.
     'https://bananonode.lightcord.org', // crpay | 'bunker',
-    'https://palm.just-dmitry.ru/' // Dmitry
+    'https://palm.just-dmitry.ru', // Dmitry
+    'https://baaanodeee.com' // manhlicious
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
