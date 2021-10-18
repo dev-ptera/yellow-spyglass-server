@@ -384,4 +384,9 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         alias: "just_dmitry",
         type: 'Representative',
     },
+    {
+        address: 'ban_1jtprixunfus5mozkzj5gtfm79b54p3pwnje8snh9ugu998cfk13qceepwn5 ',
+        alias: "JungleTV Prize Distribution",
+        type: 'Distribution',
+    },
 ];
