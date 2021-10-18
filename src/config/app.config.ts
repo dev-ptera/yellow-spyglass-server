@@ -57,7 +57,8 @@ export const MANUAL_PEER_MONITOR_URLS = [
     'https://banano.nifni.net', // nano.nifni.net // TODO: Figure out why this node does not show up in list.
     'https://bananonode.lightcord.org', // crpay | 'bunker',
     'https://palm.just-dmitry.ru', // Dmitry
-    'https://baaanodeee.com' // manhlicious
+    'https://baaanodeee.com', // manhlicious,
+    'https://banano.gray.network', // gray
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
@@ -65,9 +66,6 @@ export const LEDGER_LOCATION = '/home/batman/BananoData/data.ldb';
 
 /** Name of the node running YellowSpyglass server; this is used in the Node service to gather node stats. */
 export const HOST_NODE_NAME = 'batman';
-
-/** Nano Node Monitor page of the node running this explorer. */
-export const HOST_NODE_MONITOR_URL = '108.39.249.5';
 
 /** These nodes are currently only used for the `representatives_online` rpc call to help ensure more accurate results. */
 export const BACKUP_NODES = [

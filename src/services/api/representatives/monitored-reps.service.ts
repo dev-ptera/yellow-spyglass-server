@@ -74,8 +74,25 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
 
     let i = 1;
     let offlineCount = 0;
+
+
+    // V22 changes make it so that non-PRs no longer appear in the representatives_online rpc call, since they do not rebroadcast votes.
+    // Unfortunately these reps will
+
+
     // Only show monitors that are actually online;
-    for (const rep of uniqueMonitors.values()) {
+    const sortedByStatus = Array.from(uniqueMonitors.values());
+    sortedByStatus.sort((a, b) => {
+        if (isRepOnline(a.nanoNodeAccount) && !isRepOnline(b.nanoNodeAccount)) {
+            return -1;
+        }
+        if (isRepOnline(b.nanoNodeAccount) && !isRepOnline(a.nanoNodeAccount)) {
+            return 1;
+        }
+        return 0;
+    });
+
+    for (const rep of sortedByStatus) {
         console.log(
             `${i++}\t${isRepOnline(rep.nanoNodeAccount) ? '✔' : '✗'} ${rep.nanoNodeAccount} ${rep.nanoNodeName.padStart(40, ' ')}  ${setCustomMonitorPageUrl(rep) || formatMonitorUrl(rep.ip)}`
         );
