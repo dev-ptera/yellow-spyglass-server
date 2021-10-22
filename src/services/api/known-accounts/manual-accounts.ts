@@ -391,7 +391,7 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     },
     {
         address: 'ban_1on1ybanskzzsqize1477wximtkdzrftmxqtajtwh4p4tg1w6awn1hq677cp',
-        alias: 'Only Bans',
+        alias: 'OnlyBans',
         type: 'Representative',
     },
     {
