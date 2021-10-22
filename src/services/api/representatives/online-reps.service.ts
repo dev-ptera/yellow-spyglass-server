@@ -3,8 +3,18 @@ import * as RPC from '@dev-ptera/nano-node-rpc';
 import axios, { AxiosResponse } from 'axios';
 import { LOG_ERR } from '../../log/error.service';
 import { LOG_INFO } from '../../log/info.service';
+import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
+import { rawToBan } from 'banano-unit-converter';
 
-const OFFLINE_AFTER_PINGS = 1;
+const OFFLINE_AFTER_PINGS = 2;
+
+/** Given an address, marks the representative as online in the AppCache. */
+export const markRepAsOnline = (address: string, writeToOnlineRepsList: boolean = false): void => {
+    AppCache.repPings.map.set(address, AppCache.repPings.currPing);
+    if (writeToOnlineRepsList && !AppCache.representatives.onlineReps.includes(address)) {
+        AppCache.representatives.onlineReps.push(address);
+    }
+};
 
 /**
  * The `representatives_online` RPC call is unreliable, so I mark reps as offline if they have been offline for OFFLINE_AFTER_PINGS pings.
@@ -38,6 +48,9 @@ const getOnlineRepsFromExternalApi = (url: string): Promise<RPC.RepresentativesO
 /** Makes a handful of async calls to various nodes & fetches a string array of online representatives. */
 export const getOnlineRepsPromise = (): Promise<string[]> => {
     const start = LOG_INFO('Updating Online Reps');
+
+    // Uses BACKUP_NODES public apis for getting a more complete list of online representatives.
+    // May not be applicable anymore in V22.
     const externalCalls: Promise<any>[] = [];
     for (const api of BACKUP_NODES) {
         externalCalls.push(getOnlineRepsFromExternalApi(api));
@@ -67,11 +80,10 @@ export const getOnlineRepsPromise = (): Promise<string[]> => {
 
                 // The following representatives get to increase their last-known ping since they were included in representatives_online result.
                 for (const address of Array.from(currentPingOnlineReps)) {
-                    AppCache.repPings.map.set(address, AppCache.repPings.currPing);
+                    markRepAsOnline(address);
                 }
 
                 // Use the pings to update the AppCache online reps.
-                // TODO: Since I've updated this service to reach out to multiple nodes to check for rep online status, allowing 4 offline-pings might be overkill now.
                 const onlineReps = new Set<string>();
                 for (const rep of AppCache.repPings.map.keys()) {
                     if (isRepOnline(rep)) {
@@ -88,6 +100,14 @@ export const getOnlineRepsPromise = (): Promise<string[]> => {
             });
     });
 };
+
+/** Get online voting weight (BAN) */
+export const getOnlineWeight = (): Promise<number> =>
+    NANO_CLIENT.confirmation_quorum()
+        .then((quorumResponse: ConfirmationQuorumResponse) =>
+            Promise.resolve(Number(rawToBan(quorumResponse.online_stake_total)))
+        )
+        .catch((err) => Promise.reject(LOG_ERR('cacheRepresentatives.getOnlineWeight', err)));
 
 /** Returns the list of online representatives from AppCache. */
 export const getOnlineReps = (req, res): void => {

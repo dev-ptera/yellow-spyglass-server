@@ -1,7 +1,7 @@
-import {ConfirmationQuorumResponse} from '@dev-ptera/nano-node-rpc';
-import {QuorumDto} from '@app/types';
-import {NANO_CLIENT} from '@app/config';
-import {convertToBan, LOG_ERR} from '@app/services';
+import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
+import { QuorumDto } from '@app/types';
+import { NANO_CLIENT } from '@app/config';
+import { convertToBan, LOG_ERR } from '@app/services';
 
 export const getQuorumPromise = async (): Promise<QuorumDto> => {
     let rawQuorum: ConfirmationQuorumResponse;
@@ -10,7 +10,6 @@ export const getQuorumPromise = async (): Promise<QuorumDto> => {
             rawQuorum = quorumResponse;
         })
         .catch((err) => Promise.reject(err));
-
 
     return Promise.all([
         convertToBan(rawQuorum.quorum_delta),

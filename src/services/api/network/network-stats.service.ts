@@ -5,7 +5,7 @@ import { getAllReps } from './representatives.service';
 import { getSupplyPromise } from './supply.service';
 import { getQuorumPromise } from './quorum.service';
 import { calcConsensusStats, calcNakamotoCoefficient } from './network-calculations';
-import {rawToBan} from "banano-unit-converter";
+import { rawToBan } from 'banano-unit-converter';
 
 export const convertToBan = (raw: string): number => Math.round(Number(rawToBan(raw)));
 

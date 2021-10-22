@@ -366,22 +366,32 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     },
     {
         address: 'ban_3po1yhotz68w6mogy6budr7g8y7gw5wjqhbgc5gt549emeoof9npf315xmn4',
-        alias: "Polygon Hot Wallet",
+        alias: 'Polygon Hot Wallet',
         type: 'Exchange',
     },
     {
         address: 'ban_1po1yco1cnoyymrm3xnf7h9iaway1bg5kqxq3cfb3za98gq73tfmjm4mp11n',
-        alias: "Polygon Cold Wallet",
+        alias: 'Polygon Cold Wallet',
         type: 'Exchange',
     },
     {
         address: 'ban_151sj7ainc3379f37acp9e81qsy9kyfprkb7m6gn56aifeyy1hzdcmquy69b',
-        alias: "manhlicious",
+        alias: 'manhlicious',
         type: 'Representative',
     },
     {
         address: 'ban_3pa1m3g79i1h7uijugndjeytpmqbsg6hc19zm8m7foqygwos1mmcqmab91hh',
-        alias: "just_dmitry",
+        alias: 'just_dmitry',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1kawandahui9bbj64a3qejbxayqzqgqgqnp3fefn7x7xuwmizy4ur6zy6n4a',
+        alias: 'kawanda',
+        type: 'Representative',
+    },
+    {
+        address: 'ban_1on1ybanskzzsqize1477wximtkdzrftmxqtajtwh4p4tg1w6awn1hq677cp',
+        alias: 'Only Bans',
         type: 'Representative',
     },
     {
