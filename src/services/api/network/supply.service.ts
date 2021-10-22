@@ -1,6 +1,6 @@
-import {NANO_CLIENT} from '@app/config';
-import {SupplyDto} from '@app/types';
-import {convertToBan, LOG_ERR} from '@app/services';
+import { NANO_CLIENT } from '@app/config';
+import { SupplyDto } from '@app/types';
+import { convertToBan, LOG_ERR } from '@app/services';
 
 export const getSupplyPromise = (): Promise<SupplyDto> => {
     const burnAddress1 = 'ban_1burnbabyburndiscoinferno111111111111111111111111111aj49sw3w';
@@ -14,7 +14,7 @@ export const getSupplyPromise = (): Promise<SupplyDto> => {
         NANO_CLIENT.account_balance(burnAddress1).then((data) => convertToBan(data.pending)),
         NANO_CLIENT.account_balance(burnAddress2).then((data) => convertToBan(data.pending)),
         NANO_CLIENT.account_balance(devFundAddress1).then((data) => convertToBan(data.balance)),
-        NANO_CLIENT.account_balance(devFundAddress2).then((data) => convertToBan(data.balance))
+        NANO_CLIENT.account_balance(devFundAddress2).then((data) => convertToBan(data.balance)),
     ])
         .then((results: number[]) => {
             const available = Number(results[0]);

@@ -1,18 +1,29 @@
 import axios, { AxiosResponse } from 'axios';
 import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
-import { isRepOnline, LOG_ERR, LOG_INFO, populateDelegatorsCount } from '@app/services';
+import { isRepOnline, LOG_ERR, LOG_INFO, markRepAsOnline } from '@app/services';
 import { AppCache, MANUAL_PEER_MONITOR_URLS } from '@app/config';
+import { isRepPrincipal, sortMonitoredRepsByName, sortMonitoredRepsByStatus } from './rep-utils';
+import { populateDelegatorsCount } from './large-reps.service';
+
+const logMonitoredRepStatus = (rep: PeerMonitorStats, repCount: number): void => {
+    console.log(
+        `${repCount}\t${isRepOnline(rep.nanoNodeAccount) ? '✔' : '✗'} ${
+            rep.nanoNodeAccount
+        } ${rep.nanoNodeName.padStart(40, ' ')}  ${setCustomMonitorPageUrl(rep) || formatMonitorUrl(rep.ip)}`
+    );
+};
 
 /** Some monitored representatives will require their representative page to not link redirectly to the statistics page.
  *  Resolve these custom reps here.
  * */
 const setCustomMonitorPageUrl = (rep: PeerMonitorStats): string => {
+    // TODO: This part of this service is just horribly unreadable.  Figure this out later.
     if (!rep || !rep.ip) {
         return undefined;
     }
     if (rep.ip.includes('node.nanners.cc')) {
-        return 'https://node.nanners.cc/';
+        return '' + ''; /// ??? Wtf am I doing here?
     }
     // TODO: Creeper
 };
@@ -34,7 +45,7 @@ const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
     axios
         .request<PeerMonitorStats>({
             method: 'get',
-            timeout: 8000,
+            timeout: 15000,
             url: getMonitoredUrl(url),
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
@@ -52,7 +63,7 @@ const formatMonitorUrl = (ip: string): string => {
         return ip;
     }
     return `http://${ip}`;
-}
+};
 
 /** Prunes & grooms data that is returned to client.
  *  Only monitors with an online representative will be returned to the client.
@@ -72,40 +83,28 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
         }
     }
 
-    let i = 1;
+    let repCount = 0;
     let offlineCount = 0;
-
-
-    // V22 changes make it so that non-PRs no longer appear in the representatives_online rpc call, since they do not rebroadcast votes.
-    // Unfortunately these reps will
-
-
-    // Only show monitors that are actually online;
-    const sortedByStatus = Array.from(uniqueMonitors.values());
-    sortedByStatus.sort((a, b) => {
-        if (isRepOnline(a.nanoNodeAccount) && !isRepOnline(b.nanoNodeAccount)) {
-            return -1;
-        }
-        if (isRepOnline(b.nanoNodeAccount) && !isRepOnline(a.nanoNodeAccount)) {
-            return 1;
-        }
-        return 0;
-    });
-
+    const sortedByStatus = sortMonitoredRepsByStatus(Array.from(uniqueMonitors.values()));
     for (const rep of sortedByStatus) {
-        console.log(
-            `${i++}\t${isRepOnline(rep.nanoNodeAccount) ? '✔' : '✗'} ${rep.nanoNodeAccount} ${rep.nanoNodeName.padStart(40, ' ')}  ${setCustomMonitorPageUrl(rep) || formatMonitorUrl(rep.ip)}`
-        );
-        if (!isRepOnline(rep.nanoNodeAccount)) {
+        // V22 changes make it so that non-PRs no longer appear in the representatives_online rpc call, since they do not rebroadcast votes.
+        // If a node-monitor is discovered for these smaller representatives, mark them as online; whenever they gain enough votes to be considered a PR, expect them to appear within the representatives_online rpc call.
+        if (!isRepPrincipal(rep.votingWeight)) {
+            markRepAsOnline(rep.nanoNodeAccount, true);
+        } else if (!isRepOnline(rep.nanoNodeAccount)) {
+            // Only show monitors that are actually online;
             offlineCount++;
+            logMonitoredRepStatus(rep, ++repCount);
             continue;
         }
+
+        logMonitoredRepStatus(rep, ++repCount);
         delegatorsCountMap.set(rep.nanoNodeAccount, { delegatorsCount: 0 });
         groomedDetails.push({
             address: rep.nanoNodeAccount,
             representative: rep.repAccount,
             weight: rep.votingWeight,
-            delegatorsCount: 0,
+            delegatorsCount: 0, // This is populated by an rpc command further down.
             name: rep.nanoNodeName,
             peers: Number(rep.numPeers),
             online: true,
@@ -128,8 +127,7 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
     // Populate the delegators count to each rep.
     await populateDelegatorsCount(delegatorsCountMap).catch((err) => Promise.reject(err));
     groomedDetails.map((dto) => (dto.delegatorsCount = delegatorsCountMap.get(dto.address).delegatorsCount));
-     i--;
-    console.log(`${i-offlineCount}/${i} monitored reps considered online`);
+    console.log(`${repCount - offlineCount}/${repCount} monitored reps considered online.`);
     return Promise.resolve(groomedDetails);
 };
 
@@ -198,6 +196,8 @@ const includeCachedOnlineMonitoredReps = (currentReps: MonitoredRepDto[]): Monit
     return onlineMonitoredReps;
 };
 
+/** Given a list of MonitoredRepDto, sorts by name. */
+
 /** Using a combination of hard-coded ips & the peers RPC command, returns a list of representatives running the Nano Node Monitor software. */
 export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> => {
     const start = LOG_INFO('Refreshing Monitored Reps');
@@ -206,14 +206,9 @@ export const getMonitoredReps = async (): Promise<MonitoredRepDto[]> => {
             .then((peers: Peers) => {
                 getRepDetails(peers)
                     .then((repDetails: MonitoredRepDto[]) => {
-                        const onlineReps = includeCachedOnlineMonitoredReps(repDetails);
-                        onlineReps.sort(function (a, b) {
-                            const textA = a.name.toUpperCase();
-                            const textB = b.name.toUpperCase();
-                            return textA < textB ? -1 : textA > textB ? 1 : 0;
-                        });
+                        const monitoredReps = sortMonitoredRepsByName(includeCachedOnlineMonitoredReps(repDetails));
                         LOG_INFO('Monitored Reps Updated', start);
-                        resolve(onlineReps);
+                        resolve(monitoredReps);
                     })
                     .catch((err) => reject(LOG_ERR('getMonitoredReps', err)));
             })
