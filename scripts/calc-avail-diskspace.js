@@ -1,6 +1,6 @@
 const { exec } = require("child_process");
 
-exec(`df -k --output=avail`,
+exec(`df / -k --output=avail`,
     (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
