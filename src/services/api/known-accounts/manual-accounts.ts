@@ -396,7 +396,7 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     },
     {
         address: 'ban_1jtprixunfus5mozkzj5gtfm79b54p3pwnje8snh9ugu998cfk13qceepwn5',
-        alias: "JungleTV Prize Distribution",
+        alias: 'JungleTV Prize Distribution',
         type: 'Distribution',
         owner: 'gbl08ma',
     },
