@@ -12,6 +12,10 @@ export const URL_WHITE_LIST = [
     'https://yellowspyglass.com',
     'https://www.yellowspyglass.com',
     'http://localhost:4200',
+    'https://banano-whales.web.app',
+    'https://www.banano-whales.web.app',
+    'https://yellow-spyglass-dev.web.app',
+    'https://www.yellow-spyglass-dev.web.app',
 ];
 
 /** Used to read data from the BANANO node */
@@ -59,7 +63,6 @@ export const MANUAL_PEER_MONITOR_URLS = [
     'https://palm.just-dmitry.ru', // Dmitry
     'https://baaanodeee.com', // manhlicious,
     'https://banano.gray.network', // gray
-    'https://node.eulentier.de/' // eulen
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
