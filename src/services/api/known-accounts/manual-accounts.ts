@@ -250,7 +250,7 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         type: 'Explorer',
     },
     {
-        address: 'ban_1hoot5p5jibm84pir458nmfnyt8jc3xfsbyfahk5fxwythz8ogkdcy3hdbka',
+        address: 'ban_1hootubxy68fhhrctjmaias148tz91tsse3pq1pgmfedsm3cubhobuihqnxd',
         alias: 'Eulen',
         type: 'Representative',
     },
