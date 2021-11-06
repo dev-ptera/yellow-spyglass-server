@@ -63,7 +63,7 @@ export const MANUAL_PEER_MONITOR_URLS = [
     'https://palm.just-dmitry.ru', // Dmitry
     'https://baaanodeee.com', // manhlicious,
     'https://banano.gray.network', // gray
-    'https://node.eulentier.de/' // eulen
+    'https://node.eulentier.de/', // eulen
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */

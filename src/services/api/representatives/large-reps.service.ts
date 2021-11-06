@@ -1,40 +1,10 @@
 import { MonitoredRepDto, RepresentativeDto } from '@app/types';
 import { AppCache, NANO_CLIENT } from '@app/config';
-import { calculateUptimeStatistics, isRepOnline, LOG_ERR, LOG_INFO, writeRepStatistics } from '@app/services';
-import * as RPC from '@dev-ptera/nano-node-rpc';
+import { calculateUptimeStatistics, isRepOnline, LOG_INFO, writeRepStatistics } from '@app/services';
 import { rawToBan } from 'banano-unit-converter';
-import { isRepPrincipal, sortRepByWeight } from './rep-utils';
+import { isRepPrincipal, populateDelegatorsCount, sortRepByWeight } from './rep-utils';
 
 const MIN_WEIGHT_TO_BE_COUNTED = 100000;
-
-/** Iterates through weighted reps to populate delegators count. */
-export const populateDelegatorsCount = async (
-    reps: Map<string, Partial<{ delegatorsCount: number }>>
-): Promise<void> => {
-    const delegatorCountPromises: Promise<{ address: string; delegatorsCount: number }>[] = [];
-
-    for (const address of reps.keys()) {
-        delegatorCountPromises.push(
-            NANO_CLIENT.delegators_count(address)
-                .then((data: RPC.DelegatorsCountResponse) =>
-                    Promise.resolve({
-                        address,
-                        delegatorsCount: Number(data.count),
-                    })
-                )
-                .catch((err) => {
-                    LOG_ERR('cacheRepresentatives.delegators_count', err, { address });
-                    return Promise.resolve({
-                        address,
-                        delegatorsCount: 0,
-                    });
-                })
-        );
-    }
-    await Promise.all(delegatorCountPromises).then((data) => {
-        data.map((pair) => (reps.get(pair.address).delegatorsCount = Number(pair.delegatorsCount)));
-    });
-};
 
 /**
  * Gets the top 150 representatives & filters out smaller ones.
@@ -46,6 +16,7 @@ export const getLargeReps = async (monitoredReps: MonitoredRepDto[]): Promise<Re
     const largeRepMap = new Map<string, Partial<RepresentativeDto>>();
 
     // Include large, non-PR reps from the monitored reps list. #v22
+    // HOPEFULLY this goes away in the future.
     for (const rep of monitoredReps) {
         if (!isRepPrincipal(rep.weight) && isRepOnline(rep.address) && rep.weight >= MIN_WEIGHT_TO_BE_COUNTED) {
             largeRepMap.set(rep.address, { weight: rep.weight });

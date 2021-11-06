@@ -10,6 +10,9 @@ const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
 
     // Subsequent functions may make additions to onlineReps.
     const monitoredReps = await getMonitoredReps();
+
+    // TODO: In V23, reevaluate if smaller representatives once again appear in the representatives_online call.
+    //  If so, monitored reps doesn't have to be passed into he getLargeReps call anymore.
     const largeReps = await getLargeReps(monitoredReps);
     const onlineWeight = await getOnlineWeight();
     const offlineWeight = AppCache.networkStats.consensus.offlineAmount;
@@ -23,7 +26,7 @@ const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
     };
 };
 
-/** This is called to update the representatives list in the AppCache */
+/** This is called to update the representatives list in the AppCache. */
 export const cacheRepresentatives = async (): Promise<void> => {
     return new Promise((resolve) => {
         const start = LOG_INFO('Refreshing Representatives');

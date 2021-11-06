@@ -45,7 +45,8 @@ const getOnlineRepsFromExternalApi = (url: string): Promise<RPC.RepresentativesO
             });
         });
 
-/** Makes a handful of async calls to various nodes & fetches a string array of online representatives. */
+/** Makes a handful of async calls to various nodes & fetches a string array of online representatives.
+ *  Responsible for populating the AppCache repPings object.  */
 export const getOnlineRepsPromise = (): Promise<string[]> => {
     const start = LOG_INFO('Updating Online Reps');
 

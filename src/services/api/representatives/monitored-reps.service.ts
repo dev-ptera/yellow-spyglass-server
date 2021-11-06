@@ -3,8 +3,12 @@ import { MonitoredRepDto, PeerMonitorStats } from '@app/types';
 import { peersRpc, Peers } from '@app/rpc';
 import { isRepOnline, LOG_ERR, LOG_INFO, markRepAsOnline } from '@app/services';
 import { AppCache, MANUAL_PEER_MONITOR_URLS } from '@app/config';
-import { isRepPrincipal, sortMonitoredRepsByName, sortMonitoredRepsByStatus } from './rep-utils';
-import { populateDelegatorsCount } from './large-reps.service';
+import {
+    isRepPrincipal,
+    populateDelegatorsCount,
+    sortMonitoredRepsByName,
+    sortMonitoredRepsByStatus,
+} from './rep-utils';
 
 const logMonitoredRepStatus = (rep: PeerMonitorStats, repCount: number): void => {
     console.log(
@@ -89,6 +93,7 @@ const groomDto = async (allPeerStats: PeerMonitorStats[]): Promise<MonitoredRepD
     for (const rep of sortedByStatus) {
         // V22 changes make it so that non-PRs no longer appear in the representatives_online rpc call, since they do not rebroadcast votes.
         // If a node-monitor is discovered for these smaller representatives, mark them as online; whenever they gain enough votes to be considered a PR, expect them to appear within the representatives_online rpc call.
+        // This might actually be fixed in v23
         if (!isRepPrincipal(rep.votingWeight)) {
             markRepAsOnline(rep.nanoNodeAccount, true);
         } else if (!isRepOnline(rep.nanoNodeAccount)) {
