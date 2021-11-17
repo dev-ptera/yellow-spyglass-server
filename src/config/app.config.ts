@@ -51,19 +51,14 @@ export const MANUAL_PEER_MONITOR_URLS = [
     'banano.exchange', //banano.exchange
     '95.216.138.47', // banano italiano
 
-    /** HTTP */
-    'http://pinode.sytes.net', // NodePi
-
     /** HTTPS */
-    'https://node.nanners.cc', // void
-    'https://node.boopowo.com', // boopowo
-    'https://banode.cygantech.com', // gypsy | Banode01
-    'https://banano.nifni.net', // nano.nifni.net // TODO: Figure out why this node does not show up in list.
-    'https://bananonode.lightcord.org', // crpay | 'bunker',
-    'https://palm.just-dmitry.ru', // Dmitry
-    'https://baaanodeee.com', // manhlicious,
-    'https://banano.gray.network', // gray
-    'https://node.eulentier.de/', // eulen
+    'https://node.nanners.cc/api.php', // void
+    'https://banode.cygantech.com/api.php', // gypsy | Banode01
+    'https://bananonode.lightcord.org/api.php', // crpay | 'bunker',
+    'https://palm.just-dmitry.ru/api.php', // Dmitry
+    'https://baaanodeee.com/api.php', // manhlicious,
+    'https://banano.gray.network/api.php', // gray,
+    'https://node.eulentier.de/api' // eulen
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */

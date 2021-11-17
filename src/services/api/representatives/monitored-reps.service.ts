@@ -11,10 +11,14 @@ import {
 } from './rep-utils';
 
 const logMonitoredRepStatus = (rep: PeerMonitorStats, repCount: number): void => {
+    if (rep.nanoNodeName === undefined) {
+        console.log(rep);
+        rep.nanoNodeName = '';
+    }
     console.log(
         `${repCount}\t${isRepOnline(rep.nanoNodeAccount) ? '✔' : '✗'} ${
             rep.nanoNodeAccount
-        } ${rep.nanoNodeName.padStart(40, ' ')}  ${setCustomMonitorPageUrl(rep) || formatMonitorUrl(rep.ip)}`
+        } ${rep.nanoNodeName.padStart(40, ' ')}  ${setCustomMonitorPageUrl(rep) || getMonitoredUrl(rep.ip)}`
     );
 };
 
@@ -23,6 +27,7 @@ const logMonitoredRepStatus = (rep: PeerMonitorStats, repCount: number): void =>
  * */
 const setCustomMonitorPageUrl = (rep: PeerMonitorStats): string => {
     // TODO: This part of this service is just horribly unreadable.  Figure this out later.
+    // NOTE: All this logic will be moved over the reusable api.  TODO!
     if (!rep || !rep.ip) {
         return undefined;
     }
@@ -34,14 +39,10 @@ const setCustomMonitorPageUrl = (rep: PeerMonitorStats): string => {
 
 /** Given either an IP or HTTP address of a node monitor, returns the address used to lookup node stats. */
 export const getMonitoredUrl = (url: string): string => {
-    const stats = `api.php`;
-    if (url.includes('https')) {
-        return `${url}/${stats}`;
+    if (url.includes('https') || url.includes('http')) {
+        return url;
     }
-    if (url.includes('http')) {
-        return `${url}/${stats}`;
-    }
-    return `http://${url}/${stats}`;
+    return `http://${url}/api.php`;
 };
 
 /** Given a peer IP or HTTP address, queries node monitor stats. */
@@ -54,20 +55,26 @@ const getPeerMonitorStats = (url: string): Promise<PeerMonitorStats> =>
         })
         .then((response: AxiosResponse<PeerMonitorStats>) => {
             response.data.ip = url;
+
+            // TODO: Add a step that accepts multiple schemas and converts them into the centrally understood, common schema
+            // @ts-ignore
+            if (response.data.node_account) {
+                // @ts-ignore
+                response.data.nanoNodeAccount = response.data.node_account;
+            }
+            // @ts-ignore
+            if (response.data.node_name) {
+                // @ts-ignore
+                response.data.nanoNodeName = response.data.node_name;
+            }
+
             /* Remove non-banano representatives from the peers list. */
-            if (!response.data.repAccount.includes('ban_')) {
+            if (!response.data.nanoNodeAccount.includes('ban_')) {
                 return Promise.resolve(undefined);
             }
             return Promise.resolve(response.data);
         })
         .catch(() => Promise.resolve(undefined));
-
-const formatMonitorUrl = (ip: string): string => {
-    if (ip && (ip.includes('http') || ip.includes('https'))) {
-        return ip;
-    }
-    return `http://${ip}`;
-};
 
 /** Prunes & grooms data that is returned to client.
  *  Only monitors with an online representative will be returned to the client.
@@ -160,6 +167,7 @@ const getRepDetails = (rpcData: Peers): Promise<MonitoredRepDto[]> => {
             peerMonitorStatsPromises.push(getPeerMonitorStats(ip));
         }
     }
+
     return Promise.all(peerMonitorStatsPromises)
         .then((data) =>
             groomDto(data)
