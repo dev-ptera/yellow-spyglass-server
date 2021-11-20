@@ -400,4 +400,10 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
         type: 'Distribution',
         owner: 'gbl08ma',
     },
+    {
+        address: 'ban_3h7xtjwkm65ufoedjei6z7xfmuyfgehq3t7zm5et4osdyha1qn9ewrisyncz',
+        alias: 'FutureNanners',
+        owner: 'futuremanhank#3843',
+        type: 'representative',
+    },
 ];
