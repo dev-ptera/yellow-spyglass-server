@@ -46,7 +46,7 @@ export const getFrontiersData = async (): Promise<{
                 AppCache.networkStats.openedAccounts++;
                 const ban = Number(Number(rawToBan(balanceResponse.balance)).toFixed(3));
                 // Add to address list
-                if (ban > 0.001) {
+                if (ban >= 0.001) {
                     richList.push({ addr: address, ban, representative: accountRep.representative });
                 } else {
                     continue;
@@ -76,7 +76,7 @@ export const getFrontiersData = async (): Promise<{
                     distributionStats.number0_1++;
                 } else if (ban > 0.01) {
                     distributionStats.number0_01++;
-                } else if (ban > 0.001) {
+                } else if (ban >= 0.001) {
                     distributionStats.number0_001++;
                 }
             }
