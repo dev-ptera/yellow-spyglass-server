@@ -77,6 +77,12 @@ const sendCached = (res, noCacheMethod: () => Promise<void>, cacheKey: keyof App
 
 app.use(cors(corsOptions));
 
+/* Set response headers to text-json */
+app.use((req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+});
+
 /* Real time results */
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
 app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res));
