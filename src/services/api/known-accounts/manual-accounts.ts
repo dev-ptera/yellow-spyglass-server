@@ -271,7 +271,7 @@ export const MANUAL_ACCOUNTS: KnownAccountDto[] = [
     },
     {
         address: 'ban_1nannerspntaoqyrtnzjj76joe6yqjcterj6ef3qkdc6kfgswqu3pfaaqphe',
-        alias: 'VOID',
+        alias: 'nanners.cc',
         type: 'Representative',
     },
     {
