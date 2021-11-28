@@ -58,7 +58,10 @@ export const MANUAL_PEER_MONITOR_URLS = [
     'https://palm.just-dmitry.ru/api.php', // Dmitry
     'https://baaanodeee.com/api.php', // manhlicious,
     'https://banano.gray.network/api.php', // gray,
-    'https://node.eulentier.de/api' // eulen
+    'https://node.eulentier.de/api', // eulen,
+
+    'https://banano.kga.earth/api.php', // kga earth,
+    'https://node.getbanano.cc/api.php' // getbanano.cc
 ];
 
 /** Ledger location, used to populate ledger size stats.  Must have read permission granted. */
