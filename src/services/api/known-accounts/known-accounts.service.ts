@@ -1,60 +1,31 @@
 import axios, { AxiosResponse } from 'axios';
 import { AppCache } from '@app/config';
 import { KnownAccountDto } from '@app/types';
-import { LOG_INFO, LOG_ERR } from '@app/services';
-import { MANUAL_ACCOUNTS } from './manual-accounts';
+import { LOG_ERR } from '@app/services';
 
-/** Makes API call to Kirby's API to fetch known accounts list. */
+/** Makes API to Spyglass API to get known accounts. */
 const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
-    new Promise<KnownAccountDto[]>((resolve, reject) => {
+    new Promise<KnownAccountDto[]>((resolve) => {
         axios
             .request({
-                method: 'GET',
-                url: 'https://kirby.eu.pythonanywhere.com/api/v1/resources/addresses/all',
+                method: 'POST',
+                url: 'https://api.spyglass.pw/banano/known/accounts',
+                data: {
+                    includeOwner: true,
+                    includeType: true,
+                },
             })
             .then((response: AxiosResponse<KnownAccountDto[]>) => resolve(response.data))
-            .catch(reject);
+            .catch((err) => {
+                LOG_ERR('getKnownAccountsPromise', err);
+                resolve([]);
+            });
     });
 
 /** Saves known accounts in the App Cache. */
-export const cacheKnownAccounts = (): Promise<void> => {
-    return new Promise((resolve) => {
-        const start = LOG_INFO('Refreshing Known Accounts');
-        getKnownAccountsPromise()
-            .then((apiAccounts: KnownAccountDto[]) => {
-                const knownAccounts = new Map<string, KnownAccountDto>();
-
-                /* Add API accounts to the map. */
-                for (const account of apiAccounts) {
-                    knownAccounts.set(account.address, account);
-                }
-
-                /* Use the manual list to override any API account aliases or add new entries */
-                for (const account of MANUAL_ACCOUNTS) {
-                    if (knownAccounts.has(account.address)) {
-                        knownAccounts.get(account.address).alias = account.alias;
-                    } else {
-                        knownAccounts.set(account.address, account);
-                    }
-                }
-
-                const dto: KnownAccountDto[] = [];
-                for (const address of knownAccounts.keys()) {
-                    dto.push({
-                        address,
-                        alias: knownAccounts.get(address).alias,
-                        illicit: knownAccounts.get(address).illicit,
-                        owner: knownAccounts.get(address).owner,
-                        type: knownAccounts.get(address).type,
-                    });
-                }
-
-                dto.sort((a, b) => (a.alias?.toUpperCase() > b.alias?.toUpperCase() ? 1 : -1));
-                AppCache.knownAccounts = dto;
-                resolve(LOG_INFO('Known Accounts Updated', start));
-            })
-            .catch((err) => {
-                resolve(LOG_ERR('cacheKnownAccounts', err));
-            });
-    });
+export const cacheKnownAccounts = async (): Promise<void> => {
+    const remoteAccounts = await getKnownAccountsPromise();
+    if (remoteAccounts.length > 0) {
+        AppCache.knownAccounts = await getKnownAccountsPromise();
+    }
 };
