@@ -47,9 +47,6 @@ import {
     getOnlineReps,
     cacheNetworkStats,
     LOG_INFO,
-    getQuorum,
-    getSupply,
-    getPeerVersions,
     parseRichListFromFile,
     useMegaphone,
     getAliases,
@@ -94,11 +91,8 @@ app.post(`/${PATH_ROOT}/megaphone`, (req, res) => useMegaphone(req, res));
 app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
 app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
 app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeers(req, res));
-app.get(`/${PATH_ROOT}/peer-versions`, (req, res) => getPeerVersions(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
 app.get(`/${PATH_ROOT}/representative-uptime/*`, (req, res) => getRepresentativeUptime(req, res));
-app.get(`/${PATH_ROOT}/quorum`, (req, res) => getQuorum(req, res));
-app.get(`/${PATH_ROOT}/supply`, (req, res) => getSupply(req, res));
 
 /* Cached Results */
 app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) =>

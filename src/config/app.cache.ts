@@ -54,6 +54,7 @@ export const AppCache: AppCache = {
         consensus: undefined,
         supply: undefined,
         quorum: undefined,
+        spyglassQuorum: undefined,
         nakamotoCoefficient: undefined,
         peerVersions: undefined,
         principalRepMinBan: undefined,

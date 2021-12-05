@@ -26,6 +26,6 @@ const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
 export const cacheKnownAccounts = async (): Promise<void> => {
     const remoteAccounts = await getKnownAccountsPromise();
     if (remoteAccounts.length > 0) {
-        AppCache.knownAccounts = await getKnownAccountsPromise();
+        AppCache.knownAccounts = remoteAccounts;
     }
 };

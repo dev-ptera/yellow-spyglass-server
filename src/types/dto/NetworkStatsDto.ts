@@ -1,6 +1,6 @@
 import { ConsensusStatsDto } from './ConsensusStatsDto';
 import { SupplyDto } from './SupplyDto';
-import { QuorumDto } from './QuorumDto';
+import { QuorumDto, SpyglassAPIQuorumDto } from './QuorumDto';
 import { PeerVersionsDto } from './PeerVersionsDto';
 
 export type NetworkStatsDto = {
@@ -9,6 +9,7 @@ export type NetworkStatsDto = {
     quorum: QuorumDto;
     nakamotoCoefficient: number;
     peerVersions: PeerVersionsDto[];
+    spyglassQuorum: SpyglassAPIQuorumDto;
     principalRepMinBan: number;
     /** This value is populated whenever the account distribution metrics are updated. */
     openedAccounts: number;
