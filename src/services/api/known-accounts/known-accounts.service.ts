@@ -3,7 +3,7 @@ import { AppCache } from '@app/config';
 import { KnownAccountDto } from '@app/types';
 import { LOG_ERR } from '@app/services';
 
-/** Makes API to Spyglass API to get known accounts. */
+/** Calls Spyglass API to get known accounts. */
 const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
     new Promise<KnownAccountDto[]>((resolve) => {
         axios

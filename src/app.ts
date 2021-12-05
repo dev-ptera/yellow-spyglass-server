@@ -47,11 +47,11 @@ import {
     getOnlineReps,
     cacheNetworkStats,
     LOG_INFO,
-    parseRichListFromFile,
     useMegaphone,
     getAliases,
     getRepresentativeUptime,
     sleep,
+    cacheRichList,
 } from '@app/services';
 
 const corsOptions = {
@@ -64,13 +64,7 @@ const corsOptions = {
     },
 };
 
-const sendCached = (res, noCacheMethod: () => Promise<void>, cacheKey: keyof AppCache): void => {
-    AppCache[cacheKey]
-        ? res.send(JSON.stringify(AppCache[cacheKey]))
-        : noCacheMethod()
-              .then(() => res.send(JSON.stringify(AppCache[cacheKey])))
-              .catch((err) => res.status(500).send(JSON.stringify(err)));
-};
+const sendCached = (res, cacheKey: keyof AppCache): void => res.send(JSON.stringify(AppCache[cacheKey]));
 
 app.use(cors(corsOptions));
 
@@ -81,7 +75,6 @@ app.use((req, res, next) => {
 });
 
 /* Real time results */
-app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
 app.get(`/${PATH_ROOT}/account-overview/*`, (req, res) => getAccountOverview(req, res));
 app.get(`/${PATH_ROOT}/aliases`, (req, res) => getAliases(req, res));
 app.get(`/${PATH_ROOT}/block/*`, (req, res) => getBlockInfo(req, res));
@@ -95,13 +88,12 @@ app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactio
 app.get(`/${PATH_ROOT}/representative-uptime/*`, (req, res) => getRepresentativeUptime(req, res));
 
 /* Cached Results */
-app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) =>
-    sendCached(res, parseRichListFromFile, 'accountDistributionStats')
-);
-app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, cacheKnownAccounts, 'knownAccounts'));
-app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, cacheNetworkStats, 'networkStats'));
-app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, cachePriceData, 'priceData'));
-app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, cacheRepresentatives, 'representatives'));
+app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) => sendCached(res, 'accountDistributionStats'));
+app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, 'knownAccounts'));
+app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, 'networkStats'));
+app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, 'priceData'));
+app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, 'representatives'));
+app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
 
 const port: number = Number(process.env.PORT || 3000);
 const server = http.createServer(app);
@@ -139,14 +131,16 @@ server.listen(port, () => {
         interval: KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS,
     };
 
-    /*  I've disabled this operation when developing since I don't develop on the same machine
-        that runs the node and inter-network calls are too slow for this run every hour.
-    */
     const accountDistribution = {
-        method: IS_PRODUCTION ? cacheAccountDistribution : () => {},
+        method: cacheAccountDistribution,
+        interval: WALLETS_REFRESH_INTERVAL_MS,
+    };
+
+    const richList = {
+        method: cacheRichList,
         interval: WALLETS_REFRESH_INTERVAL_MS,
     };
 
     /* Updating the network metrics are now staggered so that each reset interval not all calls are fired at once. */
-    void staggerServerUpdates([networkStats, knownAccounts, priceData, representatives, accountDistribution]);
+    void staggerServerUpdates([networkStats, knownAccounts, priceData, representatives, accountDistribution, richList]);
 });

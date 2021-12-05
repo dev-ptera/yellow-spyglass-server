@@ -1,13 +1,6 @@
 import { AppCache } from '@app/config';
 import { LOG_ERR, LOG_INFO } from '@app/services';
-import {
-    ConsensusStatsDto,
-    NakamotoCoefficientDto,
-    PeerVersionsDto,
-    QuorumDto,
-    SpyglassAPIQuorumDto,
-    SupplyDto,
-} from '@app/types';
+import { NakamotoCoefficientDto, PeerVersionsDto, SpyglassAPIQuorumDto, SupplyDto } from '@app/types';
 import axios, { AxiosResponse } from 'axios';
 
 /** Makes call to Spyglass API to get NC. */
@@ -67,32 +60,13 @@ export const cacheNetworkStats = async (): Promise<void> => {
                 const supply = response[0];
                 const peerVersions = response[1];
                 const nakamotoCoefficient = response[2].nakamotoCoefficient;
-                const remoteQuorum = response[3];
-
-                // TODO: Refactor the front-end to remove usage of quorum / consensus & only use spyglassQuorum.
-                const quorum: QuorumDto = {
-                    quorumDelta: remoteQuorum.quorumDelta,
-                    onlineWeightQuorumPercent: remoteQuorum.onlineWeightQuorumPercent,
-                    onlineWeightMinimum: remoteQuorum.onlineWeightMinimum,
-                    onlineStakeTotal: remoteQuorum.onlineWeight,
-                    peersStakeTotal: remoteQuorum.peersStakeWeight,
-                };
-                const consensus: ConsensusStatsDto = {
-                    onlineAmount: remoteQuorum.onlineWeight,
-                    onlinePercent: remoteQuorum.onlinePercent,
-                    offlineAmount: remoteQuorum.offlineWeight,
-                    offlinePercent: remoteQuorum.offlinePercent,
-                    noRepAmount: remoteQuorum.noRepWeight,
-                    noRepPercent: remoteQuorum.noRepPercent,
-                };
+                const spyglassQuorum = response[3];
                 AppCache.networkStats = {
                     supply,
-                    consensus,
-                    quorum,
                     nakamotoCoefficient,
-                    spyglassQuorum: remoteQuorum,
+                    spyglassQuorum,
                     peerVersions,
-                    principalRepMinBan: Math.round(quorum.onlineStakeTotal * 0.001),
+                    principalRepMinBan: Math.round(spyglassQuorum.onlineWeight * 0.001),
                     openedAccounts: AppCache.networkStats.openedAccounts,
                 };
                 resolve(LOG_INFO('Network Stats Updated', start));

@@ -51,9 +51,7 @@ export const AppCache: AppCache = {
     historicHash: new Map<string, string>(),
     knownAccounts: [],
     networkStats: {
-        consensus: undefined,
         supply: undefined,
-        quorum: undefined,
         spyglassQuorum: undefined,
         nakamotoCoefficient: undefined,
         peerVersions: undefined,
