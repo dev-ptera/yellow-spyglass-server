@@ -36,20 +36,16 @@ import {
     getBlockInfo,
     getPendingTransactions,
     cacheRepresentatives,
-    getPeers,
     getNodeStats,
     cacheAccountDistribution,
     getAccountInsights,
     cachePriceData,
-    importHistoricHashTimestamps,
     cacheKnownAccounts,
     getRichList,
-    getOnlineReps,
     cacheNetworkStats,
     LOG_INFO,
     useMegaphone,
     getAliases,
-    getRepresentativeUptime,
     sleep,
     cacheRichList,
 } from '@app/services';
@@ -82,10 +78,7 @@ app.get(`/${PATH_ROOT}/confirmed-transactions`, (req, res) => getConfirmedTransa
 app.get(`/${PATH_ROOT}/insights/*`, (req, res) => getAccountInsights(req, res));
 app.post(`/${PATH_ROOT}/megaphone`, (req, res) => useMegaphone(req, res));
 app.get(`/${PATH_ROOT}/node`, (req, res) => getNodeStats(req, res));
-app.get(`/${PATH_ROOT}/online-reps`, (req, res) => getOnlineReps(req, res));
-app.get(`/${PATH_ROOT}/peers`, (req, res) => getPeers(req, res));
 app.get(`/${PATH_ROOT}/pending-transactions`, (req, res) => getPendingTransactions(req, res));
-app.get(`/${PATH_ROOT}/representative-uptime/*`, (req, res) => getRepresentativeUptime(req, res));
 
 /* Cached Results */
 app.get(`/${PATH_ROOT}/accounts-distribution`, (req, res) => sendCached(res, 'accountDistributionStats'));

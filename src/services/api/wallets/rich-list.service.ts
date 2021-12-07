@@ -1,5 +1,5 @@
 import { AppCache } from '@app/config';
-import { LOG_ERR } from '@app/services';
+import { LOG_ERR, LOG_INFO } from '@app/services';
 import { AccountBalanceDto } from '@app/types';
 import axios, { AxiosResponse } from 'axios';
 
@@ -23,9 +23,11 @@ const getRichListPromise = (): Promise<AccountBalanceDto[]> =>
 
 /** Call this to repopulate the rich list in the AppCache. */
 export const cacheRichList = async (): Promise<void> => {
+    LOG_INFO('Updating Rich List Snapshot');
     const richList = await getRichListPromise();
     if (richList.length > 0) {
         AppCache.richList = richList;
+        LOG_INFO('Rich List Snapshot Updated');
     }
 };
 

@@ -1,5 +1,5 @@
 import { ErrorResponse } from '@dev-ptera/nano-node-rpc';
-import { getMonitoredReps, LOG_ERR } from '@app/services';
+import { LOG_ERR } from '@app/services';
 import { AppCache, HOST_NODE_NAME, LEDGER_LOCATION } from '@app/config';
 import { HostNodeStatsDto, MonitoredRepDto } from '@app/types';
 const getSize = require('get-folder-size');
@@ -13,15 +13,6 @@ export const getNodeStats = async (req, res): Promise<void> => {
 
     // Find the host node in the list of cached reps.
     let hostNode = findYellowSpyglassHost();
-    if (!hostNode) {
-        // Go fetch the monitored reps again; this is not right.
-        const monitoredReps = await getMonitoredReps();
-        AppCache.representatives.monitoredReps = monitoredReps;
-        hostNode = findYellowSpyglassHost();
-        if (!hostNode) {
-            return sendRepresentativesNotLoadedError(res);
-        }
-    }
 
     // Calculate ledger size.
     let ledgerSizeMb = 0;

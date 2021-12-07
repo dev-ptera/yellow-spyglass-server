@@ -7,10 +7,7 @@ export * from './api/explore/block-info.service';
 export * from './api/explore/confirmed-transactions.service';
 export * from './api/explore/pending-transactions.services';
 
-export * from './api/representatives/monitored-reps.service';
 export * from './api/representatives/representatives.service';
-export * from './api/representatives/online-reps.service';
-export * from './api/representatives/representative-uptime.service';
 
 export * from './api/node/node-stats.service';
 

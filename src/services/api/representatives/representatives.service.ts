@@ -1,28 +1,96 @@
-import { RepresentativesResponseDto } from '@app/types';
+import { MonitoredRepDto, RepresentativesResponseDto, SpyglassRepresentativeDto } from '@app/types';
 import { AppCache } from '@app/config';
-import { getMonitoredReps, getOnlineRepsPromise, getOnlineWeight, LOG_ERR, LOG_INFO } from '@app/services';
-import { getLargeReps } from './large-reps.service';
+import axios, { AxiosResponse } from 'axios';
+import { LOG_ERR } from '../../log/error.service';
+import { LOG_INFO } from '../../log/info.service';
+import { transformLargeRepsDto, transformMonitoredRepsDto } from './transform.service';
 
-/** Representatives Promise aggregate; makes all calls required to populate the rep data in AppCache. */
-const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
-    const onlineReps = await getOnlineRepsPromise();
+const getMonitoredRepresentativesRemote = (): Promise<MonitoredRepDto[]> =>
+    new Promise<MonitoredRepDto[]>((resolve) => {
+        axios
+            .request({
+                method: 'POST',
+                url: 'https://api.spyglass.pw/banano/representatives',
+                data: {
+                    minimumWeight: 1_000,
+                    isMonitored: true,
+                    isOnline: true,
+                    includeNodeMonitorStats: true,
+                    includeDelegatorCount: true,
+                },
+            })
+            .then((response: AxiosResponse<MonitoredRepDto[]>) => resolve(response.data))
+            .catch((err) => Promise.reject(LOG_ERR('getMonitoredRepresentativesRemote', err)));
+    });
+
+/** Makes call to Spyglass API to get Large Representatives. */
+const getLargeRepresentativesRemote = (): Promise<SpyglassRepresentativeDto[]> =>
+    new Promise<SpyglassRepresentativeDto[]>((resolve) => {
+        axios
+            .request({
+                method: 'POST',
+                url: 'https://api.spyglass.pw/banano/representatives',
+                data: {
+                    minimumWeight: 100_000,
+                    includeUptimeStats: true,
+                    includeDelegatorCount: true,
+                },
+            })
+            .then((response: AxiosResponse<SpyglassRepresentativeDto[]>) => resolve(response.data))
+            .catch((err) => Promise.reject(LOG_ERR('getLargeRepresentativesRemote', err)));
+    });
+
+/** Makes call to Spyglass API to get PR Weight. */
+const getPRWeight = (): Promise<number> =>
+    new Promise<number>((resolve) => {
+        axios
+            .request({
+                method: 'GET',
+                url: 'https://api.spyglass.pw/banano/representatives/pr-weight',
+            })
+            .then((response: AxiosResponse<{  weight: number }>) => resolve(response.data.weight))
+            .catch((err) => Promise.reject(LOG_ERR('getPRWeight', err)));
+    });
+
+/** Makes call to Spyglass API to get Online Reps. */
+const getOnlineRepsRemote = (): Promise<string[]> =>
+    new Promise<string[]>((resolve) => {
+        axios
+            .request({
+                method: 'GET',
+                url: 'https://api.spyglass.pw/banano/representatives/online',
+            })
+            .then((response: AxiosResponse<string[]>) => resolve(response.data))
+            .catch((err) => Promise.reject(LOG_ERR('getOnlineReps', err)));
+    });
+
+/** Makes call to Spyglass API to get Representative Data. */
+const getRepresentativesPromise = async (): Promise<RepresentativesResponseDto> => {
+    const { onlineReps, thresholdReps, monitoredReps } = await Promise.all([
+        getPRWeight(),
+        getOnlineRepsRemote(),
+        getLargeRepresentativesRemote(),
+        getMonitoredRepresentativesRemote(),
+    ]).then(([prWeight, online, large, monitored]) => {
+        return Promise.resolve({
+            onlineReps: online,
+            thresholdReps: transformLargeRepsDto(large, online, prWeight),
+            monitoredReps: transformMonitoredRepsDto(monitored),
+        });
+    }).catch((err) => Promise.reject(err));
+
     AppCache.representatives.onlineReps = onlineReps;
+    const quorum = AppCache.networkStats.spyglassQuorum;
+    const onlineWeight = quorum.onlineWeight;
+    const offlineWeight = quorum.offlineWeight;
 
-    // Subsequent functions may make additions to onlineReps.
-    const monitoredReps = await getMonitoredReps();
-
-    // TODO: In V23, reevaluate if smaller representatives once again appear in the representatives_online call.
-    //  If so, monitored reps doesn't have to be passed into he getLargeReps call anymore.
-    const largeReps = await getLargeReps(monitoredReps);
-    const onlineWeight = await getOnlineWeight();
-    const offlineWeight = AppCache.networkStats.spyglassQuorum.offlineWeight;
     return {
-        thresholdReps: largeReps,
+        thresholdReps,
         monitoredReps,
         onlineWeight,
         microReps: [],
         onlineReps,
-        offlineWeight,
+        offlineWeight
     };
 };
 
@@ -30,7 +98,7 @@ const getRepresentativesDto = async (): Promise<RepresentativesResponseDto> => {
 export const cacheRepresentatives = async (): Promise<void> => {
     return new Promise((resolve) => {
         const start = LOG_INFO('Refreshing Representatives');
-        getRepresentativesDto()
+        getRepresentativesPromise()
             .then((data: RepresentativesResponseDto) => {
                 AppCache.representatives = data;
                 resolve(LOG_INFO('Representatives Updated', start));
