@@ -87,6 +87,7 @@ app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, 'networkSta
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, 'priceData'));
 app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, 'representatives'));
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
+app.get(`/${PATH_ROOT}/online-reps`, (req, res) => res.send(AppCache.representatives.onlineReps));
 
 const port: number = Number(process.env.PORT || 3000);
 const server = http.createServer(app);
