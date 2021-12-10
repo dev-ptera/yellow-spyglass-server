@@ -51,6 +51,8 @@ export const transformMonitoredRepsDto = (monitoredReps: SpyglassRepresentativeD
             usedMem: rep.nodeMonitorStats.usedMem,
             totalMem: rep.nodeMonitorStats.totalMem,
             systemLoad: rep.nodeMonitorStats.systemLoad,
+            confirmationInfo: rep.nodeMonitorStats.confirmationInfo,
+            confirmedBlocks: 0,
             nodeUptimeStartup: rep.nodeMonitorStats.nodeUptimeStartup,
             location: rep.nodeMonitorStats.location,
             ip: rep.nodeMonitorStats.ip,
