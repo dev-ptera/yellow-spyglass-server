@@ -81,8 +81,8 @@ const getRepresentativesPromise = async (): Promise<RepresentativesResponseDto> 
 
     AppCache.representatives.onlineReps = onlineReps;
     const quorum = AppCache.networkStats.spyglassQuorum;
-    const onlineWeight = quorum.onlineWeight;
-    const offlineWeight = quorum.offlineWeight;
+    const onlineWeight = Math.round(quorum.onlineWeight);
+    const offlineWeight = Math.round(quorum.offlineWeight);
 
     return {
         thresholdReps,
