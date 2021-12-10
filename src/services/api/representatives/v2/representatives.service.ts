@@ -1,9 +1,8 @@
 import { MonitoredRepDto, RepresentativesResponseDto, SpyglassRepresentativeDto } from '@app/types';
 import { AppCache } from '@app/config';
 import axios, { AxiosResponse } from 'axios';
-import { LOG_ERR } from '../../log/error.service';
-import { LOG_INFO } from '../../log/info.service';
 import { transformLargeRepsDto, transformMonitoredRepsDto } from './transform.service';
+import {LOG_ERR, LOG_INFO} from "@app/services";
 
 const getMonitoredRepresentativesRemote = (): Promise<MonitoredRepDto[]> =>
     new Promise<MonitoredRepDto[]>((resolve) => {
@@ -95,12 +94,12 @@ const getRepresentativesPromise = async (): Promise<RepresentativesResponseDto> 
 };
 
 /** This is called to update the representatives list in the AppCache. */
-export const cacheRepresentatives = async (): Promise<void> => {
+export const cacheRepresentativesV2 = async (): Promise<void> => {
     return new Promise((resolve) => {
         const start = LOG_INFO('Refreshing Representatives');
         getRepresentativesPromise()
             .then((data: RepresentativesResponseDto) => {
-                AppCache.representatives = data;
+                AppCache.representativesV2 = data;
                 resolve(LOG_INFO('Representatives Updated', start));
             })
             .catch((err) => {

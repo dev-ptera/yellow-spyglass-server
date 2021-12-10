@@ -47,7 +47,7 @@ import {
     useMegaphone,
     getAliases,
     sleep,
-    cacheRichList,
+    cacheRichList, cacheRepresentativesV2,
 } from '@app/services';
 
 const corsOptions = {
@@ -86,6 +86,7 @@ app.get(`/${PATH_ROOT}/known-accounts`, (req, res) => sendCached(res, 'knownAcco
 app.get(`/${PATH_ROOT}/network-stats`, (req, res) => sendCached(res, 'networkStats'));
 app.get(`/${PATH_ROOT}/price`, (req, res) => sendCached(res, 'priceData'));
 app.get(`/${PATH_ROOT}/representatives`, (req, res) => sendCached(res, 'representatives'));
+app.get(`/${PATH_ROOT}/v2/representatives`, (req, res) => sendCached(res, 'representativesV2'));
 app.get(`/${PATH_ROOT}/accounts-balance`, (req, res) => getRichList(req, res));
 app.get(`/${PATH_ROOT}/online-reps`, (req, res) => res.send(AppCache.representatives.onlineReps));
 
@@ -119,6 +120,11 @@ server.listen(port, () => {
         interval: REPRESENTATIVES_REFRESH_INTERVAL_MS,
     };
 
+    const representativesV2 = {
+        method: cacheRepresentativesV2,
+        interval: REPRESENTATIVES_REFRESH_INTERVAL_MS,
+    };
+
     const knownAccounts = {
         method: cacheKnownAccounts,
         interval: KNOWN_ACCOUNTS_REFRESH_INTERVAL_MS,
@@ -135,5 +141,5 @@ server.listen(port, () => {
     };
 
     /* Updating the network metrics are now staggered so that each reset interval not all calls are fired at once. */
-    void staggerServerUpdates([networkStats, knownAccounts, priceData, representatives, accountDistribution, richList]);
+    void staggerServerUpdates([networkStats, knownAccounts, priceData, representativesV2, representatives, accountDistribution, richList]);
 });

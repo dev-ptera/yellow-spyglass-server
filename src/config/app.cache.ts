@@ -41,8 +41,16 @@ export type AppCache = {
     richList: AccountBalanceDto[];
 
     /** Representative Cache which updates every 5 minutes.
-     *  Stores online weight, monitored, large, and micro representatives. */
+     *  Stores online weight, monitored, large, and micro representatives.
+     *  Used by Kalium. DEPRECATED
+     *  */
     representatives: RepresentativesResponseDto;
+
+
+    /** Representative Cache which updates every 5 minutes.
+     *  Stores online weight, monitored, large, and micro representatives.
+     *  Used by YellowSpyglass. */
+    representativesV2: RepresentativesResponseDto;
 };
 
 export const AppCache: AppCache = {
@@ -65,6 +73,14 @@ export const AppCache: AppCache = {
     },
     richList: [],
     representatives: {
+        thresholdReps: [],
+        monitoredReps: [],
+        microReps: [],
+        onlineWeight: 0,
+        offlineWeight: 0,
+        onlineReps: [],
+    },
+    representativesV2: {
         thresholdReps: [],
         monitoredReps: [],
         microReps: [],
