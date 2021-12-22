@@ -9,7 +9,7 @@ const getMonitoredRepresentativesRemote = (): Promise<MonitoredRepDto[]> =>
         axios
             .request({
                 method: 'POST',
-                url: 'https://api.spyglass.pw/banano/representatives',
+                url: 'https://api.spyglass.pw/banano/v1/representatives',
                 data: {
                     minimumWeight: 1_000,
                     isMonitored: true,
@@ -28,7 +28,7 @@ const getLargeRepresentativesRemote = (): Promise<SpyglassRepresentativeDto[]> =
         axios
             .request({
                 method: 'POST',
-                url: 'https://api.spyglass.pw/banano/representatives',
+                url: 'https://api.spyglass.pw/banano/v1/representatives',
                 data: {
                     minimumWeight: 100_000,
                     includeUptimeStats: true,
@@ -45,7 +45,7 @@ const getPRWeight = (): Promise<number> =>
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/representatives/pr-weight',
+                url: 'https://api.spyglass.pw/banano/v1/representatives/pr-weight',
             })
             .then((response: AxiosResponse<{  weight: number }>) => resolve(response.data.weight))
             .catch((err) => Promise.reject(LOG_ERR('getPRWeight', err)));
@@ -57,7 +57,7 @@ const getOnlineRepsRemote = (): Promise<string[]> =>
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/representatives/online',
+                url: 'https://api.spyglass.pw/banano/v1/representatives/online',
             })
             .then((response: AxiosResponse<string[]>) => resolve(response.data))
             .catch((err) => Promise.reject(LOG_ERR('getOnlineReps', err)));

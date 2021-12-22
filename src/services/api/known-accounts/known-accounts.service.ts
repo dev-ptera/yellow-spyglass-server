@@ -9,7 +9,7 @@ const getKnownAccountsPromise = (): Promise<KnownAccountDto[]> =>
         axios
             .request({
                 method: 'POST',
-                url: 'https://api.spyglass.pw/banano/known/accounts',
+                url: 'https://api.spyglass.pw/banano/v1/known/accounts',
                 data: {
                     includeOwner: true,
                     includeType: true,

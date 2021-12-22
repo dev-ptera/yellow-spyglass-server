@@ -9,7 +9,7 @@ const getNakamotoCoefficientPromise = (): Promise<NakamotoCoefficientDto> =>
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/network/nakamoto-coefficient',
+                url: 'https://api.spyglass.pw/banano/v1/network/nakamoto-coefficient',
             })
             .then((response: AxiosResponse<NakamotoCoefficientDto>) => resolve(response.data))
             .catch((err) => Promise.reject(LOG_ERR('NakamotoCoefficientDto', err)));
@@ -21,7 +21,7 @@ const getPeerVersionsPromise = (): Promise<PeerVersionsDto[]> =>
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/network/peers',
+                url: 'https://api.spyglass.pw/banano/v1/network/peers',
             })
             .then((response: AxiosResponse<PeerVersionsDto[]>) => resolve(response.data))
             .catch((err) => Promise.reject(LOG_ERR('getSupplyPromise', err)));
@@ -33,7 +33,7 @@ const getSupplyPromise = (): Promise<SupplyDto> =>
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/distribution/supply',
+                url: 'https://api.spyglass.pw/banano/v1/distribution/supply',
             })
             .then((response: AxiosResponse<SupplyDto>) => resolve(response.data))
             .catch((err) => Promise.reject(LOG_ERR('getSupplyPromise', err)));
@@ -45,7 +45,7 @@ const getQuorumPromise = (): Promise<SpyglassAPIQuorumDto> =>
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/network/quorum',
+                url: 'https://api.spyglass.pw/banano/v1/network/quorum',
             })
             .then((response: AxiosResponse<SpyglassAPIQuorumDto>) => resolve(response.data))
             .catch((err) => Promise.reject(LOG_ERR('getQuorumPromise', err)));

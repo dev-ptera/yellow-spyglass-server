@@ -12,7 +12,7 @@ const getRichListPromise = (): Promise<AccountBalanceDto[]> =>
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/distribution/rich-list-snapshot',
+                url: 'https://api.spyglass.pw/banano/v1/distribution/rich-list-snapshot',
             })
             .then((response: AxiosResponse<AccountBalanceDto[]>) => resolve(response.data))
             .catch((err) => {

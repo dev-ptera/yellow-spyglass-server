@@ -9,7 +9,7 @@ const getAccountDistributionPromise = (): Promise<AccountDistributionStatsDto> =
         axios
             .request({
                 method: 'GET',
-                url: 'https://api.spyglass.pw/banano/distribution/buckets',
+                url: 'https://api.spyglass.pw/banano/v1/distribution/buckets',
             })
             .then((response: AxiosResponse<AccountDistributionStatsDto>) => resolve(response.data))
             .catch((err) => {
