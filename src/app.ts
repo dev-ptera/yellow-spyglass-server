@@ -47,7 +47,8 @@ import {
     useMegaphone,
     getAliases,
     sleep,
-    cacheRichList, cacheRepresentativesV2,
+    cacheRichList,
+    cacheRepresentativesV2,
 } from '@app/services';
 
 const corsOptions = {
@@ -141,5 +142,13 @@ server.listen(port, () => {
     };
 
     /* Updating the network metrics are now staggered so that each reset interval not all calls are fired at once. */
-    void staggerServerUpdates([networkStats, knownAccounts, priceData, representativesV2, representatives, accountDistribution, richList]);
+    void staggerServerUpdates([
+        networkStats,
+        knownAccounts,
+        priceData,
+        representativesV2,
+        representatives,
+        accountDistribution,
+        richList,
+    ]);
 });

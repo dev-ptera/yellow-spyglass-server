@@ -7,7 +7,6 @@ export * from './api/explore/block-info.service';
 export * from './api/explore/confirmed-transactions.service';
 export * from './api/explore/pending-transactions.services';
 
-
 export * from './api/representatives/v1/large-reps.service';
 export * from './api/representatives/v1/online-reps.service';
 export * from './api/representatives/v1/rep-utils';

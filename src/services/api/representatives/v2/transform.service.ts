@@ -1,16 +1,15 @@
-import {
-    MonitoredRepDto,
-    RepresentativeDto,
-    SpyglassRepresentativeDto,
-} from '@app/types';
+import { MonitoredRepDto, RepresentativeDto, SpyglassRepresentativeDto } from '@app/types';
 
 export const transformLargeRepsDto = (
     largeReps: SpyglassRepresentativeDto[],
     onlineReps: string[],
-    prWeight: number
+    prWeight: number,
+    scores: { address: string; score: number }[]
 ): RepresentativeDto[] => {
     const onlineSet = new Set(onlineReps);
     const dtos: RepresentativeDto[] = [];
+    const scoreMap: Map<string, number> = new Map();
+    scores.map((entry) => scoreMap.set(entry.address, entry.score));
     largeReps.map((rep) => {
         dtos.push({
             address: rep.address,
@@ -19,13 +18,14 @@ export const transformLargeRepsDto = (
             delegatorsCount: rep.delegatorsCount,
             principal: rep.weight >= prWeight,
             lastOutage: rep.uptimeStats.lastOutage,
-            uptimePercentDay:  Number(rep.uptimeStats.uptimePercentages.day.toFixed(1)),
-            uptimePercentWeek:  Number(rep.uptimeStats.uptimePercentages.week.toFixed(1)),
-            uptimePercentMonth:  Number(rep.uptimeStats.uptimePercentages.month.toFixed(1)),
+            uptimePercentDay: Number(rep.uptimeStats.uptimePercentages.day.toFixed(1)),
+            uptimePercentWeek: Number(rep.uptimeStats.uptimePercentages.week.toFixed(1)),
+            uptimePercentMonth: Number(rep.uptimeStats.uptimePercentages.month.toFixed(1)),
             uptimePercentSemiAnnual: Number(rep.uptimeStats.uptimePercentages.semiAnnual.toFixed(1)),
-            uptimePercentYear:  Number(rep.uptimeStats.uptimePercentages.year.toFixed(1)),
+            uptimePercentYear: Number(rep.uptimeStats.uptimePercentages.year.toFixed(1)),
             creationUnixTimestamp: rep.uptimeStats.trackingStartUnixTimestamp,
             creationDate: rep.uptimeStats.trackingStartDate,
+            score: scoreMap.get(rep.address),
         });
     });
     return dtos;
@@ -60,7 +60,6 @@ export const transformMonitoredRepsDto = (monitoredReps: SpyglassRepresentativeD
     });
     return sortMonitoredRepsByName(dtos);
 };
-
 
 export const sortMonitoredRepsByName = (onlineReps: MonitoredRepDto[]): MonitoredRepDto[] =>
     onlineReps.sort(function (a, b) {

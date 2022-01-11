@@ -46,7 +46,6 @@ export type AppCache = {
      *  */
     representatives: RepresentativesResponseDto;
 
-
     /** Representative Cache which updates every 5 minutes.
      *  Stores online weight, monitored, large, and micro representatives.
      *  Used by YellowSpyglass. */

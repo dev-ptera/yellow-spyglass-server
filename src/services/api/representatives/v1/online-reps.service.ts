@@ -3,7 +3,7 @@ import * as RPC from '@dev-ptera/nano-node-rpc';
 import axios, { AxiosResponse } from 'axios';
 import { ConfirmationQuorumResponse } from '@dev-ptera/nano-node-rpc';
 import { rawToBan } from 'banano-unit-converter';
-import {LOG_INFO, LOG_ERR } from "@app/services";
+import { LOG_INFO, LOG_ERR } from '@app/services';
 
 const OFFLINE_AFTER_PINGS = 2;
 
