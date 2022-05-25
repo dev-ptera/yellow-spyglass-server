@@ -1,4 +1,8 @@
-# Yellow Spyglass Server
+# Deprecation Notice
+
+This repo has been archived; see [Spyglass API](https://github.com/dev-ptera/spyglass-api) for an alternative.
+
+## Yellow Spyglass Server (Deprecated)
 
 https://www.yellowspyglass.com
 
